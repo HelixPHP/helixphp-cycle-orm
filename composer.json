@@ -7,7 +7,6 @@
     "authors": [
         {
             "name": "Caio Alberto Fernandes",
-            "email": "caio@express-php.dev",
             "homepage": "https://github.com/CAFernandes"
         }
     ],
@@ -62,6 +61,15 @@
         "analyse": "phpstan analyse",
         "lint": "php-cs-fixer fix --dry-run --diff",
         "fix": "php-cs-fixer fix",
+        "setup": [
+            "@composer install",
+            "@php install.php"
+        ],
+        "validate": [
+            "@lint",
+            "@analyse",
+            "@test"
+        ],
         "ci": [
             "@lint",
             "@analyse",
@@ -74,12 +82,17 @@
         "analyse": "Run PHPStan static analysis",
         "lint": "Check code style with PHP CS Fixer",
         "fix": "Fix code style issues",
+        "setup": "Setup development environment",
+        "validate": "Validate code quality",
         "ci": "Run complete CI pipeline"
     },
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true
+        }
     },
     "minimum-stability": "stable",
     "prefer-stable": true

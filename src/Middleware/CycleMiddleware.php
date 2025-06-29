@@ -21,69 +21,70 @@ class CycleMiddleware
      * CORREÇÃO: Signature correta para middleware do Express-PHP
      */
     public function handle(Request $req, Response $res, callable $next): void
-    {
-        try {
-            // CORREÇÃO: Verificar se serviços estão disponíveis
-            if (!$this->app->has('cycle.orm')) {
-                throw new \RuntimeException('Cycle ORM not properly registered');
+{
+    try {
+        // Verificar se serviços estão disponíveis
+        if (!$this->app->has('cycle.orm')) {
+            throw new \RuntimeException('Cycle ORM not properly registered');
+        }
+
+        // Injetar serviços principais
+        $req->orm = $this->app->make('cycle.orm');
+        $req->em = $this->app->make('cycle.em');
+        $req->db = $this->app->make('cycle.database');
+
+        // CORREÇÃO: Helper repository mais robusto
+        $req->repository = function (string $entityClass) use ($req) {
+            if (!class_exists($entityClass)) {
+                throw new \InvalidArgumentException("Entity class {$entityClass} does not exist");
+            }
+            return $req->orm->getRepository($entityClass);
+        };
+
+        // CORREÇÃO: Helper entity com validação aprimorada
+        $req->entity = function (string $entityClass, array $data = []) {
+            if (!class_exists($entityClass)) {
+                throw new \InvalidArgumentException("Entity class {$entityClass} does not exist");
             }
 
-            // Injetar serviços com verificação de disponibilidade
-            $req->orm = $this->app->make('cycle.orm');
-            $req->em = $this->app->make('cycle.em');
-            $req->db = $this->app->make('cycle.database');
+            $entity = new $entityClass();
 
-            // CORREÇÃO: Helper mais robusto para repositories
-            $req->repository = function (string $entityClass) use ($req) {
-                if (!class_exists($entityClass)) {
-                    throw new \InvalidArgumentException("Entity class {$entityClass} does not exist");
+            // Aplicar dados se fornecidos
+            foreach ($data as $property => $value) {
+                if (property_exists($entity, $property)) {
+                    $entity->$property = $value;
                 }
-                return $req->orm->getRepository($entityClass);
-            };
+            }
 
-            // CORREÇÃO: Helper para criação de entidades com validação
-            $req->entity = function (string $entityClass, array $data = []) {
-                if (!class_exists($entityClass)) {
-                    throw new \InvalidArgumentException("Entity class {$entityClass} does not exist");
-                }
+            return $entity;
+        };
 
-                // CORREÇÃO: Usar reflection para criar entidade corretamente
-                $reflection = new \ReflectionClass($entityClass);
-                if ($reflection->getConstructor()) {
-                    $constructor = $reflection->getConstructor();
-                    $params = [];
+        // CORREÇÃO: Helper find com validação
+        $req->find = function (string $entityClass, $id) use ($req) {
+            return $req->repository($entityClass)->findByPK($id);
+        };
 
-                    foreach ($constructor->getParameters() as $param) {
-                        $paramName = $param->getName();
-                        if (isset($data[$paramName])) {
-                            $params[] = $data[$paramName];
-                        } elseif (!$param->isOptional()) {
-                            throw new \InvalidArgumentException("Missing required parameter: {$paramName}");
-                        }
-                    }
+        // CORREÇÃO: Helper paginate
+        $req->paginate = function ($query, int $page = 1, int $perPage = 15) {
+            return \CAFernandes\ExpressPHP\CycleORM\Helpers\CycleHelpers::paginate($query, $page, $perPage);
+        };
 
-                    return $reflection->newInstanceArgs($params);
-                }
+        // CORREÇÃO: Helper validateEntity
+        $req->validateEntity = function ($entity) {
+            $middleware = new \CAFernandes\ExpressPHP\CycleORM\Middleware\EntityValidationMiddleware($this->app);
+            $reflection = new \ReflectionMethod($middleware, 'validateEntity');
+            $reflection->setAccessible(true);
+            return $reflection->invoke($middleware, $entity);
+        };
 
-                return new $entityClass();
-            };
+        $next();
 
-            // CORREÇÃO: Dispatch event para hooks
-            $this->app->fireAction('cycle.middleware.before', ['request' => $req]);
-
-            $next();
-
-            // CORREÇÃO: Dispatch event pós-processamento
-            $this->app->fireAction('cycle.middleware.after', ['request' => $req, 'response' => $res]);
-
-        } catch (\Exception $e) {
-            // CORREÇÃO: Log de erro e propagação
-            $this->app->logger()->error('Cycle middleware error', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            throw $e;
+    } catch (\Exception $e) {
+        // Log erro se logger disponível
+        if (method_exists($this->app, 'logger')) {
+            $this->app->logger()->error('Cycle middleware error: ' . $e->getMessage());
         }
+        throw $e;
     }
+}
 }
