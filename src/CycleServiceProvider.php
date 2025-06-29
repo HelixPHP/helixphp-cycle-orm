@@ -1,6 +1,7 @@
 <?php
 namespace CAFernandes\ExpressPHP\CycleORM;
 
+use Express\Core\ServiceProvider;
 use Cycle\Schema\Generator;
 use Cycle\ORM\EntityManager;
 use Cycle\ORM\Factory;
@@ -188,7 +189,7 @@ class CycleServiceProvider extends ServiceProvider
     {
         $compiler->addGenerator(new Generator\ResetTables());
         $compiler->addGenerator(new Generator\GenerateRelations());
-        $compiler->addGenerator\GenerateModifiers());
+        $compiler->addGenerator(new Generator\GenerateModifiers());
         $compiler->addGenerator(new Generator\ValidateEntities());
         $compiler->addGenerator(new Generator\RenderTables());
         $compiler->addGenerator(new Generator\RenderRelations());
