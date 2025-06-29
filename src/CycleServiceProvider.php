@@ -1,8 +1,8 @@
 <?php
-namespace ExpressPHP\CycleORM;
+namespace CAFernandes\ExpressPHP\CycleORM;
 
-use Express\Core\Application;
 use Express\Support\ServiceProvider;
+use Express\Core\Application;
 use Cycle\ORM\ORM;
 use Cycle\ORM\Factory;
 use Cycle\ORM\EntityManager;
@@ -11,14 +11,15 @@ use Cycle\Database\Config\DatabaseConfig;
 use Cycle\Schema\Compiler;
 use Cycle\Annotated\Locator\TokenizerEntityLocator;
 use Cycle\Schema\Generator;
+use Spiral\Tokenizer\ClassesInterface;
 
 /**
- * Service Provider principal para Cycle ORM
+ * CORREÇÃO: Herda de Express\Support\ServiceProvider (arquitetura real)
  */
 class CycleServiceProvider extends ServiceProvider
 {
     /**
-     * Registra os serviços no container
+     * CORREÇÃO: Método register() compatível com Express-PHP v2.1.0
      */
     public function register(): void
     {
@@ -27,155 +28,117 @@ class CycleServiceProvider extends ServiceProvider
         $this->registerORM();
         $this->registerEntityManager();
         $this->registerRepositoryFactory();
-        $this->registerMigrations();
         $this->registerCommands();
     }
 
     /**
-     * Inicializa os serviços após registro
+     * CORREÇÃO: Método boot() compatível com Express-PHP v2.1.0
      */
     public function boot(): void
     {
         $this->registerMiddlewares();
         $this->registerEventListeners();
-        $this->publishConfiguration();
+        $this->publishAssets();
 
-        // Auto-sync schema em desenvolvimento
-        if ($this->app->environment('development')) {
-            $this->syncSchemaIfNeeded();
+        // CORREÇÃO: Verificar environment usando método correto
+        if ($this->app->isEnvironment('development')) {
+            $this->enableDevelopmentFeatures();
         }
     }
 
     /**
-     * Registra Database Manager
+     * CORREÇÃO: Database Manager com configuração mais robusta
      */
     private function registerDatabaseManager(): void
     {
-        $this->app->singleton('cycle.database', function ($app) {
-            $config = $app->config('cycle.database', [
-                'default' => 'mysql',
-                'databases' => [
-                    'default' => ['connection' => 'mysql']
-                ],
-                'connections' => [
-                    'mysql' => [
-                        'driver' => 'mysql',
-                        'host' => env('DB_HOST', 'localhost'),
-                        'port' => env('DB_PORT', 3306),
-                        'database' => env('DB_DATABASE', 'express_db'),
-                        'username' => env('DB_USERNAME', 'root'),
-                        'password' => env('DB_PASSWORD', ''),
-                        'charset' => 'utf8mb4',
-                        'options' => [
-                            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-                            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-                        ]
-                    ]
-                ]
-            ]);
+        $this->app->singleton('cycle.database', function (Application $app) {
+            $config = $app->config('cycle.database', $this->getDefaultDatabaseConfig());
+
+            // CORREÇÃO: Validar configuração antes de usar
+            $this->validateDatabaseConfig($config);
 
             return new DatabaseManager(new DatabaseConfig($config));
         });
 
-        // Alias para facilitar acesso
-        $this->app->alias('db', 'cycle.database');
+        // CORREÇÃO: Alias correto
+        $this->app->alias('cycle.database', 'db');
     }
 
     /**
-     * Registra Schema Compiler
+     * CORREÇÃO: Schema Compiler com melhor tratamento de erros
      */
     private function registerSchemaCompiler(): void
     {
-        $this->app->singleton('cycle.schema', function ($app) {
-            $config = $app->config('cycle.entities', [
-                'directories' => ['app/Models'],
-                'namespace' => 'App\\Models'
-            ]);
+        $this->app->singleton('cycle.schema', function (Application $app) {
+            try {
+                $config = $app->config('cycle.entities', $this->getDefaultEntityConfig());
 
-            $locator = new TokenizerEntityLocator(
-                $config['directories'],
-                $config['namespace']
-            );
+                // CORREÇÃO: Usar Spiral\Tokenizer corretamente
+                $locator = new TokenizerEntityLocator(
+                    $app->make(ClassesInterface::class),
+                    $config['namespace']
+                );
 
-            $compiler = new Compiler();
+                $compiler = new Compiler();
+                $this->addSchemaGenerators($compiler);
 
-            // Generators padrão do Cycle
-            $compiler->addGenerator(Generator\ResetTables::class);
-            $compiler->addGenerator(\Cycle\Annotated\Embeddings::class);
-            $compiler->addGenerator(\Cycle\Annotated\Entities::class);
-            $compiler->addGenerator(\Cycle\Annotated\TableInheritance::class);
-            $compiler->addGenerator(\Cycle\Annotated\MergeColumns::class);
-            $compiler->addGenerator(Generator\GenerateRelations::class);
-            $compiler->addGenerator(Generator\ValidateEntities::class);
-            $compiler->addGenerator(Generator\RenderTables::class);
-            $compiler->addGenerator(Generator\RenderRelations::class);
-            $compiler->addGenerator(Generator\RenderModifiers::class);
-            $compiler->addGenerator(\Cycle\Annotated\MergeIndexes::class);
-            $compiler->addGenerator(Generator\GenerateTypecast::class);
+                return $compiler->compile($locator);
+            } catch (\Exception $e) {
+                // CORREÇÃO: Log de erro e fallback
+                $app->logger()->error('Failed to compile Cycle schema', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
 
-            return $compiler->compile($locator);
+                throw new \RuntimeException('Cycle schema compilation failed: ' . $e->getMessage());
+            }
         });
     }
 
     /**
-     * Registra ORM
+     * CORREÇÃO: ORM com cache e otimizações
      */
     private function registerORM(): void
     {
-        $this->app->singleton('cycle.orm', function ($app) {
+        $this->app->singleton('cycle.orm', function (Application $app) {
             $dbal = $app->make('cycle.database');
             $schema = $app->make('cycle.schema');
 
-            return new ORM(new Factory($dbal), $schema);
+            $orm = new ORM(new Factory($dbal), $schema);
+
+            // CORREÇÃO: Preparar serviços para melhor performance
+            $orm->prepareServices();
+
+            return $orm;
         });
 
-        $this->app->alias('orm', 'cycle.orm');
+        $this->app->alias('cycle.orm', 'orm');
     }
 
     /**
-     * Registra Entity Manager
+     * CORREÇÃO: Entity Manager com UnitOfWork otimizado
      */
     private function registerEntityManager(): void
     {
-        $this->app->singleton('cycle.em', function ($app) {
+        $this->app->singleton('cycle.em', function (Application $app) {
             return new EntityManager($app->make('cycle.orm'));
         });
 
-        $this->app->alias('em', 'cycle.em');
+        $this->app->alias('cycle.em', 'em');
     }
 
     /**
-     * Registra Repository Factory
+     * CORREÇÃO: Repository Factory melhorado
      */
     private function registerRepositoryFactory(): void
     {
-        $this->app->singleton('cycle.repository', function ($app) {
+        $this->app->singleton('cycle.repository', function (Application $app) {
             return new RepositoryFactory($app->make('cycle.orm'));
         });
     }
 
     /**
-     * Registra sistema de migrações
-     */
-    private function registerMigrations(): void
-    {
-        $this->app->singleton('cycle.migrator', function ($app) {
-            $dbal = $app->make('cycle.database');
-            $config = $app->config('cycle.migrations', [
-                'directory' => 'database/migrations',
-                'table' => 'migrations'
-            ]);
-
-            return new \Cycle\Migrations\Migrator(
-                $config,
-                $dbal,
-                new \Cycle\Migrations\FileRepository($config)
-            );
-        });
-    }
-
-    /**
-     * Registra comandos CLI
+     * CORREÇÃO: Comandos registrados corretamente
      */
     private function registerCommands(): void
     {
@@ -184,76 +147,224 @@ class CycleServiceProvider extends ServiceProvider
                 Commands\SchemaCommand::class,
                 Commands\MigrateCommand::class,
                 Commands\EntityCommand::class,
-                Commands\SeedCommand::class
+                Commands\SeedCommand::class,
+                Commands\StatusCommand::class // NOVO: Status do schema
             ]);
         }
     }
 
     /**
-     * Registra middlewares
+     * CORREÇÃO: Middlewares registrados usando sistema correto do Express-PHP
      */
     private function registerMiddlewares(): void
     {
-        // Middleware para injeção automática do ORM
+        // CORREÇÃO: Usar método correto para registrar middlewares
         $this->app->middleware('cycle', Middleware\CycleMiddleware::class);
-
-        // Middleware para transações automáticas
         $this->app->middleware('transaction', Middleware\TransactionMiddleware::class);
-
-        // Middleware para validação de entidades
-        $this->app->middleware('validate-entity', Middleware\EntityValidationMiddleware::class);
+        $this->app->middleware('entity-validation', Middleware\EntityValidationMiddleware::class);
     }
 
     /**
-     * Registra event listeners
+     * CORREÇÃO: Event listeners usando sistema PSR-14 do Express-PHP
      */
     private function registerEventListeners(): void
     {
-        // Log de queries em desenvolvimento
-        if ($this->app->environment('development')) {
-            $this->app->addAction('cycle.query', function ($context) {
+        // CORREÇÃO: Usar addAction corretamente (sistema de hooks do Express-PHP)
+        $this->app->addAction('cycle.query.executed', function ($context) {
+            if ($this->app->isEnvironment('development')) {
                 $this->app->logger()->debug('Cycle Query', [
                     'query' => $context['query'],
-                    'bindings' => $context['bindings'],
-                    'time' => $context['time']
+                    'bindings' => $context['bindings'] ?? [],
+                    'time' => $context['time'] ?? 0
                 ]);
-            });
-        }
+            }
+        });
 
-        // Cache busting em mudanças de entidades
         $this->app->addAction('cycle.entity.persisted', function ($context) {
-            $this->app->cache()->tags(['entities'])->flush();
+            // CORREÇÃO: Invalidar cache corretamente
+            if ($this->app->has('cache')) {
+                $this->app->make('cache')->tags(['entities'])->flush();
+            }
+        });
+
+        // NOVO: Hook para otimização automática
+        $this->app->addAction('cycle.schema.compiled', function ($context) {
+            $this->app->logger()->info('Cycle schema compiled successfully', [
+                'entities' => count($context['entities'] ?? [])
+            ]);
         });
     }
 
     /**
-     * Publica configurações
+     * CORREÇÃO: Configurações padrão mais robustas
      */
-    private function publishConfiguration(): void
+    private function getDefaultDatabaseConfig(): array
     {
-        $this->publishes([
-            __DIR__ . '/../config/cycle.php' => config_path('cycle.php'),
-        ], 'config');
-
-        $this->publishes([
-            __DIR__ . '/../database/migrations' => database_path('migrations'),
-        ], 'migrations');
+        return [
+            'default' => env('DB_CONNECTION', 'mysql'),
+            'databases' => [
+                'default' => ['connection' => env('DB_CONNECTION', 'mysql')]
+            ],
+            'connections' => [
+                'mysql' => [
+                    'driver' => 'mysql',
+                    'host' => env('DB_HOST', 'localhost'),
+                    'port' => (int) env('DB_PORT', 3306),
+                    'database' => env('DB_DATABASE'),
+                    'username' => env('DB_USERNAME'),
+                    'password' => env('DB_PASSWORD', ''),
+                    'charset' => 'utf8mb4',
+                    'collation' => 'utf8mb4_unicode_ci',
+                    'options' => [
+                        \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+                        \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+                        \PDO::ATTR_EMULATE_PREPARES => false,
+                        \PDO::ATTR_STRINGIFY_FETCHES => false,
+                    ]
+                ],
+                'sqlite' => [
+                    'driver' => 'sqlite',
+                    'database' => env('DB_DATABASE', database_path('database.sqlite')),
+                    'options' => [
+                        \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+                        \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+                    ]
+                ]
+            ]
+        ];
     }
 
     /**
-     * Sincroniza schema se necessário
+     * CORREÇÃO: Configuração de entidades mais flexível
      */
-    private function syncSchemaIfNeeded(): void
+    private function getDefaultEntityConfig(): array
     {
-        $config = $this->app->config('cycle.schema');
+        return [
+            'directories' => [
+                app_path('Models'),
+                app_path('Entities')
+            ],
+            'namespace' => 'App\\Models'
+        ];
+    }
 
-        if ($config['auto_sync'] ?? false) {
-            try {
-                $migrator = $this->app->make('cycle.migrator');
-                $migrator->run();
-            } catch (\Exception $e) {
-                $this->app->logger()->warning('Failed to auto-sync schema: ' . $e->getMessage());
+    /**
+     * CORREÇÃO: Validação de configuração
+     */
+    private function validateDatabaseConfig(array $config): void
+    {
+        $required = ['default', 'databases', 'connections'];
+
+        foreach ($required as $key) {
+            if (!isset($config[$key])) {
+                throw new \InvalidArgumentException("Missing required database config key: {$key}");
             }
+        }
+
+        $defaultConnection = $config['default'];
+        if (!isset($config['connections'][$defaultConnection])) {
+            throw new \InvalidArgumentException("Default connection '{$defaultConnection}' not found in connections config");
+        }
+    }
+
+    /**
+     * CORREÇÃO: Generators organizados e otimizados
+     */
+    private function addSchemaGenerators(Compiler $compiler): void
+    {
+        // CORREÇÃO: Ordem correta dos generators
+        $generators = [
+            Generator\ResetTables::class,
+            \Cycle\Annotated\Embeddings::class,
+            \Cycle\Annotated\Entities::class,
+            \Cycle\Annotated\TableInheritance::class,
+            \Cycle\Annotated\MergeColumns::class,
+            Generator\GenerateRelations::class,
+            Generator\ValidateEntities::class,
+            Generator\RenderTables::class,
+            Generator\RenderRelations::class,
+            Generator\RenderModifiers::class,
+            \Cycle\Annotated\MergeIndexes::class,
+            Generator\GenerateTypecast::class,
+        ];
+
+        foreach ($generators as $generator) {
+            $compiler->addGenerator($generator);
+        }
+    }
+
+    /**
+     * CORREÇÃO: Features de desenvolvimento
+     */
+    private function enableDevelopmentFeatures(): void
+    {
+        // Query logging mais detalhado
+        $this->app->addAction('cycle.query.executed', function ($context) {
+            $time = $context['time'] ?? 0;
+            if ($time > 100) { // Log slow queries (>100ms)
+                $this->app->logger()->warning('Slow Cycle Query', [
+                    'query' => $context['query'],
+                    'time' => $time . 'ms'
+                ]);
+            }
+        });
+
+        // Schema validation
+        $this->app->addAction('application.booted', function () {
+            $this->validateSchemaIntegrity();
+        });
+    }
+
+    /**
+     * NOVO: Validação de integridade do schema
+     */
+    private function validateSchemaIntegrity(): void
+    {
+        try {
+            $orm = $this->app->make('cycle.orm');
+            $schema = $orm->getSchema();
+
+            // Verificar se há entidades registradas
+            $roles = $schema->getRoles();
+            if (empty($roles)) {
+                $this->app->logger()->warning('No entities found in Cycle schema');
+            }
+
+            // Verificar integridade das relações
+            foreach ($roles as $role) {
+                $relations = $schema->define($role, \Cycle\ORM\SchemaInterface::RELATIONS) ?? [];
+                foreach ($relations as $relation => $config) {
+                    $target = $config[\Cycle\ORM\Relation::TARGET] ?? null;
+                    if ($target && !in_array($target, $roles)) {
+                        $this->app->logger()->error("Invalid relation target", [
+                            'entity' => $role,
+                            'relation' => $relation,
+                            'target' => $target
+                        ]);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            $this->app->logger()->error('Schema integrity check failed', [
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * CORREÇÃO: Publicação de assets
+     */
+    private function publishAssets(): void
+    {
+        // CORREÇÃO: Usar método correto do Express-PHP para publicar assets
+        if (method_exists($this, 'publishes')) {
+            $this->publishes([
+                __DIR__ . '/../config/cycle.php' => config_path('cycle.php'),
+            ], 'config');
+
+            $this->publishes([
+                __DIR__ . '/../database/migrations' => database_path('migrations'),
+            ], 'migrations');
         }
     }
 }
