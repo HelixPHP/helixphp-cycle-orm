@@ -1,4 +1,6 @@
 <?php
+namespace CAFernandes\ExpressPHP\CycleORM\Commands;
+
 /**
  * Comando para gerar entidades - Versão corrigida
  */

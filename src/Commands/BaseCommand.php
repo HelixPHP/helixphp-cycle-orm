@@ -1,5 +1,4 @@
 <?php
-
 namespace CAFernandes\ExpressPHP\CycleORM\Commands;
 
 /**
