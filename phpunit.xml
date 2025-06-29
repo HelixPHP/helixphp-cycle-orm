@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+    bootstrap="vendor/autoload.php"
+    colors="true"
+    verbose="true"
+    failOnWarning="false"
+    failOnRisky="false"
+    stopOnFailure="false"
+    cacheDirectory=".phpunit.cache"
+    executionOrder="depends,defects"
+    requireCoverageMetadata="true"
+    beStrictAboutCoverageMetadata="true"
+    beStrictAboutOutputDuringTests="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">./tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">./src</directory>
+        </include>
+        <exclude>
+            <directory suffix=".php">./src/Commands</directory>
+            <file>./src/CycleServiceProvider.php</file>
+        </exclude>
+        <report>
+            <html outputDirectory="coverage-html"/>
+            <clover outputFile="coverage.xml"/>
+        </report>
+    </coverage>
+
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
+        <env name="CYCLE_SCHEMA_CACHE" value="false"/>
+        <env name="CYCLE_AUTO_SYNC" value="false"/>
+    </php>
+
+    <logging>
+        <junit outputFile="junit.xml"/>
+    </logging>
+</phpunit>

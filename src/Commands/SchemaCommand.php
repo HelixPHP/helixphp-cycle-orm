@@ -1,16 +1,9 @@
 <?php
-namespace ExpressPHP\CycleORM\Commands;
-
-use Express\Console\Command;
-
 /**
- * Comando para sincronizar schema do banco
+ * Comando para schema - Versão corrigida
  */
-class SchemaCommand extends Command
+class SchemaCommand extends BaseCommand
 {
-    protected string $signature = 'cycle:schema {--sync : Sync schema to database}';
-    protected string $description = 'Manage Cycle ORM schema';
-
     public function handle(): int
     {
         if ($this->option('sync')) {
@@ -20,55 +13,66 @@ class SchemaCommand extends Command
         return $this->showSchema();
     }
 
-    /**
-     * Sincroniza schema com o banco
-     */
     private function syncSchema(): int
     {
         $this->info('Synchronizing database schema...');
 
         try {
-            $migrator = app('cycle.migrator');
+            // Verificar se função app() existe
+            if (function_exists('app')) {
+                $migrator = app('cycle.migrator');
+            } else {
+                $this->error('Application container not available');
+                return 1;
+            }
+
+            // Executar migrações
             $migration = $migrator->run();
 
             if ($migration) {
                 $this->info('Schema synchronized successfully!');
-                $this->table(['Migration', 'Status'], [
-                    [$migration->getState()->getName(), 'Executed']
-                ]);
             } else {
                 $this->info('Schema is already up to date.');
             }
 
-            return self::SUCCESS;
+            return 0;
+
         } catch (\Exception $e) {
             $this->error('Failed to sync schema: ' . $e->getMessage());
-            return self::FAILURE;
+            return 1;
         }
     }
 
-    /**
-     * Mostra informações do schema
-     */
     private function showSchema(): int
     {
         $this->info('Cycle ORM Schema Information');
 
-        $orm = app('cycle.orm');
-        $schema = $orm->getSchema();
+        try {
+            if (function_exists('app')) {
+                $orm = app('cycle.orm');
+                $schema = $orm->getSchema();
 
-        $entities = [];
-        foreach ($schema->getRoles() as $role) {
-            $entities[] = [
-                $role,
-                $schema->define($role, \Cycle\ORM\SchemaInterface::ENTITY),
-                $schema->define($role, \Cycle\ORM\SchemaInterface::TABLE),
-                $schema->define($role, \Cycle\ORM\SchemaInterface::DATABASE)
-            ];
+                $entities = [];
+                foreach ($schema->getRoles() as $role) {
+                    $entities[] = [
+                        $role,
+                        $schema->define($role, \Cycle\ORM\SchemaInterface::ENTITY),
+                        $schema->define($role, \Cycle\ORM\SchemaInterface::TABLE),
+                        $schema->define($role, \Cycle\ORM\SchemaInterface::DATABASE)
+                    ];
+                }
+
+                $this->table(['Role', 'Entity', 'Table', 'Database'], $entities);
+            } else {
+                $this->error('Application container not available');
+                return 1;
+            }
+
+            return 0;
+
+        } catch (\Exception $e) {
+            $this->error('Failed to show schema: ' . $e->getMessage());
+            return 1;
         }
-
-        $this->table(['Role', 'Entity', 'Table', 'Database'], $entities);
-
-        return self::SUCCESS;
     }
 }

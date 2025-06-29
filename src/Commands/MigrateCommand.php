@@ -1,16 +1,9 @@
 <?php
-namespace ExpressPHP\CycleORM\Commands;
-
-use Express\Console\Command;
-
 /**
- * Comando para executar migrações
+ * Comando para migrações - Versão corrigida
  */
-class MigrateCommand extends Command
+class MigrateCommand extends BaseCommand
 {
-    protected string $signature = 'cycle:migrate {--rollback : Rollback last migration}';
-    protected string $description = 'Run database migrations';
-
     public function handle(): int
     {
         if ($this->option('rollback')) {
@@ -20,20 +13,23 @@ class MigrateCommand extends Command
         return $this->migrate();
     }
 
-    /**
-     * Executa migrações pendentes
-     */
     private function migrate(): int
     {
         $this->info('Running migrations...');
 
         try {
-            $migrator = app('cycle.migrator');
+            if (function_exists('app')) {
+                $migrator = app('cycle.migrator');
+            } else {
+                $this->error('Application container not available');
+                return 1;
+            }
+
             $migrations = $migrator->run();
 
             if (empty($migrations)) {
                 $this->info('No pending migrations.');
-                return self::SUCCESS;
+                return 0;
             }
 
             $this->info('Executed migrations:');
@@ -41,22 +37,26 @@ class MigrateCommand extends Command
                 $this->line('- ' . $migration->getState()->getName());
             }
 
-            return self::SUCCESS;
+            return 0;
+
         } catch (\Exception $e) {
             $this->error('Migration failed: ' . $e->getMessage());
-            return self::FAILURE;
+            return 1;
         }
     }
 
-    /**
-     * Reverte última migração
-     */
     private function rollback(): int
     {
         $this->info('Rolling back last migration...');
 
         try {
-            $migrator = app('cycle.migrator');
+            if (function_exists('app')) {
+                $migrator = app('cycle.migrator');
+            } else {
+                $this->error('Application container not available');
+                return 1;
+            }
+
             $migration = $migrator->rollback();
 
             if ($migration) {
@@ -65,10 +65,11 @@ class MigrateCommand extends Command
                 $this->info('No migrations to rollback.');
             }
 
-            return self::SUCCESS;
+            return 0;
+
         } catch (\Exception $e) {
             $this->error('Rollback failed: ' . $e->getMessage());
-            return self::FAILURE;
+            return 1;
         }
     }
 }

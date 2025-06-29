@@ -1,46 +1,49 @@
 <?php
-namespace ExpressPHP\CycleORM\Commands;
-
-use Express\Console\Command;
-
 /**
- * Comando para gerar entidades
+ * Comando para gerar entidades - Versão corrigida
  */
-class EntityCommand extends Command
+class EntityCommand extends BaseCommand
 {
-    protected string $signature = 'make:entity {name : Entity name}';
-    protected string $description = 'Generate a new Cycle ORM entity';
-
     public function handle(): int
     {
         $name = $this->argument('name');
-        $className = ucfirst($name);
 
+        if (!$name) {
+            $this->error('Entity name is required');
+            return 1;
+        }
+
+        $className = ucfirst($name);
         $this->info("Creating entity: {$className}");
 
-        $content = $this->generateEntityContent($className);
-        $path = $this->getEntityPath($className);
+        try {
+            $content = $this->generateEntityContent($className);
+            $path = $this->getEntityPath($className);
 
-        if (file_exists($path)) {
-            $this->error("Entity {$className} already exists!");
-            return self::FAILURE;
+            if (file_exists($path)) {
+                $this->error("Entity {$className} already exists!");
+                return 1;
+            }
+
+            if (!is_dir(dirname($path))) {
+                mkdir(dirname($path), 0755, true);
+            }
+
+            file_put_contents($path, $content);
+            $this->info("Entity created: {$path}");
+
+            return 0;
+
+        } catch (\Exception $e) {
+            $this->error("Failed to create entity: " . $e->getMessage());
+            return 1;
         }
-
-        if (!is_dir(dirname($path))) {
-            mkdir(dirname($path), 0755, true);
-        }
-
-        file_put_contents($path, $content);
-
-        $this->info("Entity created: {$path}");
-        return self::SUCCESS;
     }
 
-    /**
-     * Gera conteúdo da entidade
-     */
     private function generateEntityContent(string $className): string
     {
+        $tableName = $this->getTableName($className);
+
         return <<<PHP
 <?php
 
@@ -49,7 +52,7 @@ namespace App\Models;
 use Cycle\Annotated\Annotation\Entity;
 use Cycle\Annotated\Annotation\Column;
 
-#[Entity(table: '{$this->getTableName($className)}')]
+#[Entity(table: '{$tableName}')]
 class {$className}
 {
     #[Column(type: 'primary')]
@@ -69,17 +72,17 @@ class {$className}
 PHP;
     }
 
-    /**
-     * Obtém caminho da entidade
-     */
     private function getEntityPath(string $className): string
     {
-        return app_path("Models/{$className}.php");
+        // Verificar se função app_path existe
+        if (function_exists('app_path')) {
+            return app_path("Models/{$className}.php");
+        }
+
+        // Fallback para estrutura padrão
+        return __DIR__ . "/../../../../app/Models/{$className}.php";
     }
 
-    /**
-     * Obtém nome da tabela
-     */
     private function getTableName(string $className): string
     {
         return strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $className));

@@ -1,0 +1,34 @@
+# Dependencies
+/vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+.phpunit.cache/
+coverage-html/
+coverage.xml
+junit.xml
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Build artifacts
+/build/
+/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.sqlite
+*.sqlite3

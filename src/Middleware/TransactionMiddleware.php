@@ -6,9 +6,6 @@ use Express\Http\Response;
 use Express\Core\Application;
 use Cycle\ORM\EntityManager;
 
-/**
- * CORREÇÃO: Transaction middleware com melhor controle de erro
- */
 class TransactionMiddleware
 {
     private Application $app;
@@ -20,80 +17,64 @@ class TransactionMiddleware
 
     public function handle(Request $req, Response $res, callable $next): void
     {
+        if (!$this->app->has('cycle.em')) {
+            // Se não tem EM, apenas prosseguir
+            $next();
+            return;
+        }
+
         /** @var EntityManager $em */
         $em = $this->app->make('cycle.em');
         $transactionStarted = false;
 
         try {
-            // CORREÇÃO: Marcar início de transação lógica
-            $this->app->fireAction('cycle.transaction.starting', ['request' => $req]);
+            // Marcar início de transação
             $transactionStarted = true;
+            $this->logDebug('Transaction started for route: ' . $this->getRouteInfo($req));
 
             $next();
 
-            // CORREÇÃO: Commit apenas se há mudanças pendentes
+            // Commit apenas se há mudanças
             if ($em->hasChanges()) {
-                $changes = $this->getEntityChanges($em);
-
                 $em->run();
-
-                // CORREÇÃO: Dispatch eventos detalhados
-                $this->app->fireAction('cycle.transaction.committed', [
-                    'request' => $req,
-                    'changes' => $changes
-                ]);
-
-                $this->app->logger()->debug('Transaction committed', [
-                    'entities_count' => count($changes),
-                    'route' => $req->getUri()
-                ]);
+                $this->logDebug('Transaction committed with changes');
+            } else {
+                $this->logDebug('Transaction completed without changes');
             }
 
         } catch (\Exception $e) {
             if ($transactionStarted) {
-                // CORREÇÃO: Rollback mais robusto
                 try {
                     $em->clean();
-
-                    $this->app->fireAction('cycle.transaction.rolled_back', [
-                        'request' => $req,
-                        'exception' => $e
-                    ]);
-
-                    $this->app->logger()->warning('Transaction rolled back', [
-                        'error' => $e->getMessage(),
-                        'route' => $req->getUri()
-                    ]);
-
+                    $this->logDebug('Transaction rolled back due to error: ' . $e->getMessage());
                 } catch (\Exception $rollbackException) {
-                    $this->app->logger()->error('Rollback failed', [
-                        'original_error' => $e->getMessage(),
-                        'rollback_error' => $rollbackException->getMessage()
-                    ]);
+                    $this->logError('Rollback failed: ' . $rollbackException->getMessage());
                 }
             }
-
             throw $e;
         }
     }
 
-    /**
-     * NOVO: Obter informações sobre mudanças de entidades
-     */
-    private function getEntityChanges(EntityManager $em): array
+    private function getRouteInfo(Request $req): string
     {
-        // CORREÇÃO: Usar reflection para acessar mudanças internas
-        $reflection = new \ReflectionObject($em);
+        $method = method_exists($req, 'getMethod') ? $req->getMethod() : 'Unknown';
+        $uri = method_exists($req, 'getUri') ? $req->getUri() : 'Unknown';
+        return "{$method} {$uri}";
+    }
 
-        try {
-            $heapProperty = $reflection->getProperty('heap');
-            $heapProperty->setAccessible(true);
-            $heap = $heapProperty->getValue($em);
+    private function logDebug(string $message): void
+    {
+        if (config('app.debug', false)) {
+            $this->logError($message); // Usar mesmo método para simplicidade
+        }
+    }
 
-            // Simplificado - em produção seria mais detalhado
-            return ['changes_detected' => $em->hasChanges()];
-        } catch (\Exception $e) {
-            return ['changes_detected' => true];
+    private function logError(string $message): void
+    {
+        if (method_exists($this->app, 'logger') && $this->app->has('logger')) {
+            $this->app->logger()->debug($message);
+        } else {
+            error_log($message);
         }
     }
 }

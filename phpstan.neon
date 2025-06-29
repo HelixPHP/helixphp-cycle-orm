@@ -1,0 +1,20 @@
+parameters:
+    level: 8
+    paths:
+        - src
+        - tests
+    excludePaths:
+        - tests/Fixtures
+    ignoreErrors:
+        - '#Call to an undefined method Express\\.*#'
+        - '#Access to an undefined property Express\\.*#'
+        - '#Class Express\\.*not found#'
+
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+
+    # Express-PHP specific ignores
+    universalObjectCratesClasses:
+        - Express\Http\Request
+        - Express\Http\Response
+        - Express\Core\Application
