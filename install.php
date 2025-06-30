@@ -7,236 +7,236 @@
 
 class ExpressCycleInstaller
 {
-    private string $projectRoot;
-    private array $createdFiles = [];
-    private array $errors = [];
+  private string $projectRoot;
+  private array $createdFiles = [];
+  private array $errors = [];
 
-    public function __construct()
-    {
-        $this->projectRoot = $this->findProjectRoot();
+  public function __construct()
+  {
+    $this->projectRoot = $this->findProjectRoot();
+  }
+
+  public function install(): int
+  {
+    $this->printHeader();
+
+    try {
+      $this->checkRequirements();
+      $this->createDirectories();
+      $this->createConfigFiles();
+      $this->createExampleEntity();
+      $this->updateGitIgnore();
+      $this->printSummary();
+
+      return 0;
+    } catch (\Exception $e) {
+      $this->printError("Installation failed: " . $e->getMessage());
+      return 1;
+    }
+  }
+
+  private function printHeader(): void
+  {
+    echo "\n";
+    echo "🚀 Express-PHP Cycle ORM Extension Installer\n";
+    echo "=============================================\n\n";
+  }
+
+  private function checkRequirements(): void
+  {
+    echo "📋 Checking requirements...\n";
+
+    // Verificar versão do PHP
+    if (version_compare(PHP_VERSION, '8.1.0', '<')) {
+      throw new \RuntimeException('PHP 8.1.0 or higher is required');
+    }
+    echo "  ✅ PHP " . PHP_VERSION . " (OK)\n";
+
+    // Verificar extensões necessárias
+    $requiredExtensions = ['pdo', 'json'];
+    foreach ($requiredExtensions as $ext) {
+      if (!extension_loaded($ext)) {
+        throw new \RuntimeException("Required extension '{$ext}' is not loaded");
+      }
+      echo "  ✅ Extension {$ext} (OK)\n";
     }
 
-    public function install(): int
-    {
-        $this->printHeader();
-
-        try {
-            $this->checkRequirements();
-            $this->createDirectories();
-            $this->createConfigFiles();
-            $this->createExampleEntity();
-            $this->updateGitIgnore();
-            $this->printSummary();
-
-            return 0;
-        } catch (\Exception $e) {
-            $this->printError("Installation failed: " . $e->getMessage());
-            return 1;
-        }
+    // Verificar se é um projeto Express-PHP
+    $composerFile = $this->projectRoot . '/composer.json';
+    if (file_exists($composerFile)) {
+      $composer = json_decode(file_get_contents($composerFile), true);
+      if (isset($composer['require']['cafernandes/express-php'])) {
+        echo "  ✅ Express-PHP project detected (OK)\n";
+      } else {
+        echo "  ⚠️  Express-PHP not detected in composer.json\n";
+      }
     }
 
-    private function printHeader(): void
-    {
-        echo "\n";
-        echo "🚀 Express-PHP Cycle ORM Extension Installer\n";
-        echo "=============================================\n\n";
-    }
+    echo "\n";
+  }
 
-    private function checkRequirements(): void
-    {
-        echo "📋 Checking requirements...\n";
+  private function createDirectories(): void
+  {
+    echo "📁 Creating directories...\n";
 
-        // Verificar versão do PHP
-        if (version_compare(PHP_VERSION, '8.1.0', '<')) {
-            throw new \RuntimeException('PHP 8.1.0 or higher is required');
-        }
-        echo "  ✅ PHP " . PHP_VERSION . " (OK)\n";
+    $directories = [
+      'app/Models',
+      'config',
+      'database/migrations',
+      'database/seeds'
+    ];
 
-        // Verificar extensões necessárias
-        $requiredExtensions = ['pdo', 'json'];
-        foreach ($requiredExtensions as $ext) {
-            if (!extension_loaded($ext)) {
-                throw new \RuntimeException("Required extension '{$ext}' is not loaded");
-            }
-            echo "  ✅ Extension {$ext} (OK)\n";
-        }
-
-        // Verificar se é um projeto Express-PHP
-        $composerFile = $this->projectRoot . '/composer.json';
-        if (file_exists($composerFile)) {
-            $composer = json_decode(file_get_contents($composerFile), true);
-            if (isset($composer['require']['cafernandes/express-php'])) {
-                echo "  ✅ Express-PHP project detected (OK)\n";
-            } else {
-                echo "  ⚠️  Express-PHP not detected in composer.json\n";
-            }
-        }
-
-        echo "\n";
-    }
-
-    private function createDirectories(): void
-    {
-        echo "📁 Creating directories...\n";
-
-        $directories = [
-            'app/Models',
-            'config',
-            'database/migrations',
-            'database/seeds'
-        ];
-
-        foreach ($directories as $dir) {
-            $fullPath = $this->projectRoot . '/' . $dir;
-            if (!is_dir($fullPath)) {
-                if (mkdir($fullPath, 0755, true)) {
-                    echo "  ✅ Created {$dir}\n";
-                } else {
-                    throw new \RuntimeException("Failed to create directory: {$dir}");
-                }
-            } else {
-                echo "  ➡️  {$dir} already exists\n";
-            }
-        }
-
-        echo "\n";
-    }
-
-    private function createConfigFiles(): void
-    {
-        echo "⚙️  Creating configuration files...\n";
-
-        // .env.example se não existir
-        $envExample = $this->projectRoot . '/.env.example';
-        if (!file_exists($envExample)) {
-            $envContent = $this->getEnvExampleContent();
-            file_put_contents($envExample, $envContent);
-            $this->createdFiles[] = '.env.example';
-            echo "  ✅ Created .env.example\n";
+    foreach ($directories as $dir) {
+      $fullPath = $this->projectRoot . '/' . $dir;
+      if (!is_dir($fullPath)) {
+        if (mkdir($fullPath, 0755, true)) {
+          echo "  ✅ Created {$dir}\n";
         } else {
-            echo "  ➡️  .env.example already exists\n";
+          throw new \RuntimeException("Failed to create directory: {$dir}");
         }
-
-        // config/cycle.php se não existir
-        $cycleConfig = $this->projectRoot . '/config/cycle.php';
-        if (!file_exists($cycleConfig)) {
-            $configContent = $this->getCycleConfigContent();
-            file_put_contents($cycleConfig, $configContent);
-            $this->createdFiles[] = 'config/cycle.php';
-            echo "  ✅ Created config/cycle.php\n";
-        } else {
-            echo "  ➡️  config/cycle.php already exists\n";
-        }
-
-        echo "\n";
+      } else {
+        echo "  ➡️  {$dir} already exists\n";
+      }
     }
 
-    private function createExampleEntity(): void
-    {
-        echo "🏗️  Creating example entity...\n";
+    echo "\n";
+  }
 
-        $userEntity = $this->projectRoot . '/app/Models/User.php';
-        if (!file_exists($userEntity)) {
-            $entityContent = $this->getUserEntityContent();
-            file_put_contents($userEntity, $entityContent);
-            $this->createdFiles[] = 'app/Models/User.php';
-            echo "  ✅ Created app/Models/User.php\n";
-        } else {
-            echo "  ➡️  app/Models/User.php already exists\n";
-        }
+  private function createConfigFiles(): void
+  {
+    echo "⚙️  Creating configuration files...\n";
 
-        echo "\n";
+    // .env.example se não existir
+    $envExample = $this->projectRoot . '/.env.example';
+    if (!file_exists($envExample)) {
+      $envContent = $this->getEnvExampleContent();
+      file_put_contents($envExample, $envContent);
+      $this->createdFiles[] = '.env.example';
+      echo "  ✅ Created .env.example\n";
+    } else {
+      echo "  ➡️  .env.example already exists\n";
     }
 
-    private function updateGitIgnore(): void
-    {
-        echo "📝 Updating .gitignore...\n";
-
-        $gitignoreFile = $this->projectRoot . '/.gitignore';
-        $cyclEntries = [
-            '',
-            '# Cycle ORM',
-            '*.sqlite',
-            '*.sqlite3',
-            '/storage/cache/cycle_*.cache'
-        ];
-
-        if (file_exists($gitignoreFile)) {
-            $content = file_get_contents($gitignoreFile);
-            if (strpos($content, '# Cycle ORM') === false) {
-                file_put_contents($gitignoreFile, $content . "\n" . implode("\n", $cyclEntries));
-                echo "  ✅ Updated .gitignore\n";
-            } else {
-                echo "  ➡️  .gitignore already contains Cycle ORM entries\n";
-            }
-        } else {
-            file_put_contents($gitignoreFile, implode("\n", $cyclEntries));
-            echo "  ✅ Created .gitignore\n";
-        }
-
-        echo "\n";
+    // config/cycle.php se não existir
+    $cycleConfig = $this->projectRoot . '/config/cycle.php';
+    if (!file_exists($cycleConfig)) {
+      $configContent = $this->getCycleConfigContent();
+      file_put_contents($cycleConfig, $configContent);
+      $this->createdFiles[] = 'config/cycle.php';
+      echo "  ✅ Created config/cycle.php\n";
+    } else {
+      echo "  ➡️  config/cycle.php already exists\n";
     }
 
-    private function printSummary(): void
-    {
-        echo "🎉 Installation completed successfully!\n\n";
+    echo "\n";
+  }
 
-        if (!empty($this->createdFiles)) {
-            echo "📄 Files created:\n";
-            foreach ($this->createdFiles as $file) {
-                echo "  • {$file}\n";
-            }
-            echo "\n";
-        }
+  private function createExampleEntity(): void
+  {
+    echo "🏗️  Creating example entity...\n";
 
-        echo "🚀 Next steps:\n";
-        echo "  1. Configure your database in .env:\n";
-        echo "     DB_CONNECTION=mysql\n";
-        echo "     DB_HOST=localhost\n";
-        echo "     DB_DATABASE=your_database\n";
-        echo "     DB_USERNAME=your_username\n";
-        echo "     DB_PASSWORD=your_password\n\n";
-
-        echo "  2. Sync your database schema:\n";
-        echo "     php express-cycle cycle:schema --sync\n\n";
-
-        echo "  3. Create your first entity:\n";
-        echo "     php express-cycle make:entity Post\n\n";
-
-        echo "  4. Check system status:\n";
-        echo "     php express-cycle cycle:status\n\n";
-
-        echo "📚 Documentation: https://github.com/CAFernandes/express-php-cycle-orm-extension\n";
+    $userEntity = $this->projectRoot . '/app/Models/User.php';
+    if (!file_exists($userEntity)) {
+      $entityContent = $this->getUserEntityContent();
+      file_put_contents($userEntity, $entityContent);
+      $this->createdFiles[] = 'app/Models/User.php';
+      echo "  ✅ Created app/Models/User.php\n";
+    } else {
+      echo "  ➡️  app/Models/User.php already exists\n";
     }
 
-    private function printError(string $message): void
-    {
-        echo "❌ {$message}\n";
+    echo "\n";
+  }
+
+  private function updateGitIgnore(): void
+  {
+    echo "📝 Updating .gitignore...\n";
+
+    $gitignoreFile = $this->projectRoot . '/.gitignore';
+    $cyclEntries = [
+      '',
+      '# Cycle ORM',
+      '*.sqlite',
+      '*.sqlite3',
+      '/storage/cache/cycle_*.cache'
+    ];
+
+    if (file_exists($gitignoreFile)) {
+      $content = file_get_contents($gitignoreFile);
+      if (strpos($content, '# Cycle ORM') === false) {
+        file_put_contents($gitignoreFile, $content . "\n" . implode("\n", $cyclEntries));
+        echo "  ✅ Updated .gitignore\n";
+      } else {
+        echo "  ➡️  .gitignore already contains Cycle ORM entries\n";
+      }
+    } else {
+      file_put_contents($gitignoreFile, implode("\n", $cyclEntries));
+      echo "  ✅ Created .gitignore\n";
     }
 
-    private function findProjectRoot(): string
-    {
-        $current = getcwd();
-        $maxDepth = 10;
+    echo "\n";
+  }
 
-        for ($i = 0; $i < $maxDepth; $i++) {
-            if (file_exists($current . '/composer.json')) {
-                return $current;
-            }
+  private function printSummary(): void
+  {
+    echo "🎉 Installation completed successfully!\n\n";
 
-            $parent = dirname($current);
-            if ($parent === $current) {
-                break; // Reached filesystem root
-            }
-            $current = $parent;
-        }
-
-        return getcwd(); // Fallback to current directory
+    if (!empty($this->createdFiles)) {
+      echo "📄 Files created:\n";
+      foreach ($this->createdFiles as $file) {
+        echo "  • {$file}\n";
+      }
+      echo "\n";
     }
 
-    private function getEnvExampleContent(): string
-    {
-        return <<<ENV
+    echo "🚀 Next steps:\n";
+    echo "  1. Configure your database in .env:\n";
+    echo "     DB_CONNECTION=mysql\n";
+    echo "     DB_HOST=localhost\n";
+    echo "     DB_DATABASE=your_database\n";
+    echo "     DB_USERNAME=your_username\n";
+    echo "     DB_PASSWORD=your_password\n\n";
+
+    echo "  2. Sync your database schema:\n";
+    echo "     php express-cycle cycle:schema --sync\n\n";
+
+    echo "  3. Create your first entity:\n";
+    echo "     php express-cycle make:entity Post\n\n";
+
+    echo "  4. Check system status:\n";
+    echo "     php express-cycle cycle:status\n\n";
+
+    echo "📚 Documentation: https://github.com/CAFernandes/express-php-cycle-orm-extension\n";
+  }
+
+  private function printError(string $message): void
+  {
+    echo "❌ {$message}\n";
+  }
+
+  private function findProjectRoot(): string
+  {
+    $current = getcwd();
+    $maxDepth = 10;
+
+    for ($i = 0; $i < $maxDepth; $i++) {
+      if (file_exists($current . '/composer.json')) {
+        return $current;
+      }
+
+      $parent = dirname($current);
+      if ($parent === $current) {
+        break; // Reached filesystem root
+      }
+      $current = $parent;
+    }
+
+    return getcwd(); // Fallback to current directory
+  }
+
+  private function getEnvExampleContent(): string
+  {
+    return <<<ENV
 # Application
 APP_ENV=local
 APP_DEBUG=true
@@ -267,11 +267,11 @@ CYCLE_SLOW_QUERY_MS=100
 CYCLE_PROFILE_QUERIES=false
 CYCLE_VALIDATE_SCHEMA=false
 ENV;
-    }
+  }
 
-    private function getCycleConfigContent(): string
-    {
-        return <<<'PHP'
+  private function getCycleConfigContent(): string
+  {
+    return <<<'PHP'
 <?php
 
 // Helper functions para compatibilidade
@@ -359,11 +359,11 @@ return [
     ]
 ];
 PHP;
-    }
+  }
 
-    private function getUserEntityContent(): string
-    {
-        return <<<'PHP'
+  private function getUserEntityContent(): string
+  {
+    return <<<'PHP'
 <?php
 
 namespace App\Models;
@@ -471,11 +471,11 @@ class User
     }
 }
 PHP;
-    }
+  }
 }
 
 // Executar instalador se chamado diretamente
 if (basename(__FILE__) === basename($_SERVER['SCRIPT_NAME'])) {
-    $installer = new ExpressCycleInstaller();
-    exit($installer->install());
+  $installer = new ExpressCycleInstaller();
+  exit($installer->install());
 }

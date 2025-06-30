@@ -1,4 +1,5 @@
 <?php
+
 namespace CAFernandes\ExpressPHP\CycleORM\Commands;
 
 /**
@@ -6,72 +7,70 @@ namespace CAFernandes\ExpressPHP\CycleORM\Commands;
  */
 class MigrateCommand extends BaseCommand
 {
-    public function handle(): int
-    {
-        if ($this->option('rollback')) {
-            return $this->rollback();
-        }
-
-        return $this->migrate();
+  public function handle(): int
+  {
+    if ($this->option('rollback')) {
+      return $this->rollback();
     }
 
-    private function migrate(): int
-    {
-        $this->info('Running migrations...');
+    return $this->migrate();
+  }
 
-        try {
-            if (function_exists('app')) {
-                $migrator = app('cycle.migrator');
-            } else {
-                $this->error('Application container not available');
-                return 1;
-            }
+  private function migrate(): int
+  {
+    $this->info('Running migrations...');
 
-            $migrations = $migrator->run();
+    try {
+      if (function_exists('app')) {
+        $migrator = app('cycle.migrator');
+      } else {
+        $this->error('Application container not available');
+        return 1;
+      }
 
-            if (empty($migrations)) {
-                $this->info('No pending migrations.');
-                return 0;
-            }
+      $migrations = $migrator->run();
 
-            $this->info('Executed migrations:');
-            foreach ($migrations as $migration) {
-                $this->line('- ' . $migration->getState()->getName());
-            }
+      if (empty($migrations)) {
+        $this->info('No pending migrations.');
+        return 0;
+      }
 
-            return 0;
+      $this->info('Executed migrations:');
+      foreach ($migrations as $migration) {
+        $this->line('- ' . $migration->getState()->getName());
+      }
 
-        } catch (\Exception $e) {
-            $this->error('Migration failed: ' . $e->getMessage());
-            return 1;
-        }
+      return 0;
+    } catch (\Exception $e) {
+      $this->error('Migration failed: ' . $e->getMessage());
+      return 1;
     }
+  }
 
-    private function rollback(): int
-    {
-        $this->info('Rolling back last migration...');
+  private function rollback(): int
+  {
+    $this->info('Rolling back last migration...');
 
-        try {
-            if (function_exists('app')) {
-                $migrator = app('cycle.migrator');
-            } else {
-                $this->error('Application container not available');
-                return 1;
-            }
+    try {
+      if (function_exists('app')) {
+        $migrator = app('cycle.migrator');
+      } else {
+        $this->error('Application container not available');
+        return 1;
+      }
 
-            $migration = $migrator->rollback();
+      $migration = $migrator->rollback();
 
-            if ($migration) {
-                $this->info('Rolled back: ' . $migration->getState()->getName());
-            } else {
-                $this->info('No migrations to rollback.');
-            }
+      if ($migration) {
+        $this->info('Rolled back: ' . $migration->getState()->getName());
+      } else {
+        $this->info('No migrations to rollback.');
+      }
 
-            return 0;
-
-        } catch (\Exception $e) {
-            $this->error('Rollback failed: ' . $e->getMessage());
-            return 1;
-        }
+      return 0;
+    } catch (\Exception $e) {
+      $this->error('Rollback failed: ' . $e->getMessage());
+      return 1;
     }
+  }
 }

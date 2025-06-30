@@ -1,4 +1,5 @@
 <?php
+
 namespace CAFernandes\ExpressPHP\CycleORM\Health;
 
 use Express\Http\Request;
@@ -10,41 +11,41 @@ use Express\Core\Application;
  */
 class HealthCheckMiddleware
 {
-    private Application $app;
+  private Application $app;
 
-    public function __construct(Application $app)
-    {
-        $this->app = $app;
+  public function __construct(Application $app)
+  {
+    $this->app = $app;
+  }
+
+  public function handle(Request $req, Response $res, callable $next): void
+  {
+    $path = $req->getPathInfo();
+
+    // Verificar se é uma requisição de health check
+    if ($path === '/health/cycle' || $path === '/health') {
+      $this->handleHealthCheck($req, $res);
+      return;
     }
 
-    public function handle(Request $req, Response $res, callable $next): void
-    {
-        $path = $req->getPathInfo();
+    $next();
+  }
 
-        // Verificar se é uma requisição de health check
-        if ($path === '/health/cycle' || $path === '/health') {
-            $this->handleHealthCheck($req, $res);
-            return;
-        }
+  private function handleHealthCheck(Request $req, Response $res): void
+  {
+    $detailed = $req->query['detailed'] ?? false;
 
-        $next();
+    if ($detailed) {
+      $health = CycleHealthCheck::detailedCheck($this->app);
+    } else {
+      $health = CycleHealthCheck::check($this->app);
     }
 
-    private function handleHealthCheck(Request $req, Response $res): void
-    {
-        $detailed = $req->query['detailed'] ?? false;
+    $statusCode = $health['cycle_orm'] === 'healthy' ? 200 : 503;
 
-        if ($detailed) {
-            $health = CycleHealthCheck::detailedCheck($this->app);
-        } else {
-            $health = CycleHealthCheck::check($this->app);
-        }
-
-        $statusCode = $health['cycle_orm'] === 'healthy' ? 200 : 503;
-
-        $res->status($statusCode)
-           ->header('Content-Type', 'application/json')
-           ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-           ->json($health);
-    }
+    $res->status($statusCode)
+      ->header('Content-Type', 'application/json')
+      ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+      ->json($health);
+  }
 }

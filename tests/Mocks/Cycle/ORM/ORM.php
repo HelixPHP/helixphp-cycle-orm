@@ -1,7 +1,8 @@
 <?php
+
 namespace Cycle\ORM;
 
 class ORM
 {
-    // Stub para uso em testes
+  // Stub para uso em testes
 }

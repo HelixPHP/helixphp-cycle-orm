@@ -1,7 +1,8 @@
 <?php
+
 namespace Express\Core;
 
 class ServiceProvider
 {
-    // Stub vazio para uso em testes
+  // Stub vazio para uso em testes
 }
