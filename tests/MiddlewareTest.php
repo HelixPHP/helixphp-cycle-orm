@@ -1,4 +1,5 @@
 <?php
+
 namespace CAFernandes\ExpressPHP\CycleORM\Tests;
 
 use PHPUnit\Framework\TestCase;
@@ -10,92 +11,113 @@ use Express\Core\Application;
 
 class MiddlewareTest extends TestCase
 {
-    private Application $app;
-    private Request $request;
-    private Response $response;
+    private $app;
+    private $request;
+    private $response;
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->app = $this->createMock(Application::class);
+        $this->app = new Application();
         $this->request = $this->createMock(Request::class);
         $this->response = $this->createMock(Response::class);
     }
 
     public function testCycleMiddlewareInjectsServices(): void
     {
-        // Mock ORM services
-        $orm = $this->createMock(\Cycle\ORM\ORM::class);
-        $em = $this->createMock(\Cycle\ORM\EntityManager::class);
-        $db = $this->createMock(\Cycle\Database\DatabaseManager::class);
-
-        $this->app->method('has')->willReturn(true);
-        $this->app->method('make')->willReturnMap([
-            ['cycle.orm', $orm],
-            ['cycle.em', $em],
-            ['cycle.database', $db]
-        ]);
-
+        $dbal = new \Cycle\Database\DatabaseManager(new \Cycle\Database\Config\DatabaseConfig([
+            'default' => 'default',
+            'databases' => [
+                'default' => ['connection' => 'sqlite']
+            ],
+            'connections' => [
+                'sqlite' => [
+                    'driver' => 'sqlite',
+                    'database' => ':memory:'
+                ]
+            ]
+        ]));
+        $factory = new \Cycle\ORM\Factory($dbal);
+        $schema = new \Cycle\ORM\Schema([]);
+        $orm = new \Cycle\ORM\ORM($factory, $schema);
+        $em = new \Cycle\ORM\EntityManager($orm);
+        $this->app->singleton('cycle.orm', $orm);
+        $this->app->singleton('cycle.em', $em);
+        $this->app->singleton('cycle.database', $dbal);
         $middleware = new CycleMiddleware($this->app);
-
         $called = false;
-        $next = function() use (&$called) {
-            $called = true;
-        };
-
+        $next = function() use (&$called) { $called = true; };
         $middleware->handle($this->request, $this->response, $next);
-
         $this->assertTrue($called);
     }
 
     public function testCycleMiddlewareThrowsWhenORMNotRegistered(): void
     {
-        $this->app->method('has')->willReturn(false);
-
         $middleware = new CycleMiddleware($this->app);
-
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Cycle ORM not properly registered');
-
         $middleware->handle($this->request, $this->response, function() {});
     }
 
     public function testTransactionMiddlewareHandlesCommit(): void
     {
-        $em = $this->createMock(\Cycle\ORM\EntityManager::class);
-        $em->method('hasChanges')->willReturn(true);
-        $em->expects($this->once())->method('run');
-
-        $this->app->method('has')->willReturn(true);
-        $this->app->method('make')->willReturn($em);
-
+        $dbal = new \Cycle\Database\DatabaseManager(new \Cycle\Database\Config\DatabaseConfig([
+            'default' => 'default',
+            'databases' => [
+                'default' => ['connection' => 'sqlite']
+            ],
+            'connections' => [
+                'sqlite' => [
+                    'driver' => 'sqlite',
+                    'database' => ':memory:'
+                ]
+            ]
+        ]));
+        $factory = new \Cycle\ORM\Factory($dbal);
+        $schema = new \Cycle\ORM\Schema([]);
+        $orm = new \Cycle\ORM\ORM($factory, $schema);
+        $em = new \Cycle\ORM\EntityManager($orm);
+        $this->app = $this->createRealAppWithEM($em);
         $middleware = new TransactionMiddleware($this->app);
-
         $called = false;
-        $next = function() use (&$called) {
-            $called = true;
-        };
-
+        $next = function() use (&$called) { $called = true; };
         $middleware->handle($this->request, $this->response, $next);
-
         $this->assertTrue($called);
     }
 
     public function testTransactionMiddlewareHandlesRollback(): void
     {
-        $em = $this->createMock(\Cycle\ORM\EntityManager::class);
-        $em->expects($this->once())->method('clean');
-
-        $this->app->method('has')->willReturn(true);
-        $this->app->method('make')->willReturn($em);
-
+        $dbal = new \Cycle\Database\DatabaseManager(new \Cycle\Database\Config\DatabaseConfig([
+            'default' => 'default',
+            'databases' => [
+                'default' => ['connection' => 'sqlite']
+            ],
+            'connections' => [
+                'sqlite' => [
+                    'driver' => 'sqlite',
+                    'database' => ':memory:'
+                ]
+            ]
+        ]));
+        $factory = new \Cycle\ORM\Factory($dbal);
+        $schema = new \Cycle\ORM\Schema([]);
+        $orm = new \Cycle\ORM\ORM($factory, $schema);
+        $em = new \Cycle\ORM\EntityManager($orm);
+        $this->app = $this->createRealAppWithEM($em);
         $middleware = new TransactionMiddleware($this->app);
-
         $this->expectException(\Exception::class);
+        $middleware->handle($this->request, $this->response, function() { throw new \Exception('Test exception'); });
+    }
 
-        $middleware->handle($this->request, $this->response, function() {
-            throw new \Exception('Test exception');
-        });
+    private function createRealAppWithEM($em)
+    {
+        $app = new \Express\Core\Application();
+        $app->singleton('cycle.em', fn() => $em);
+        $app->alias('cycle.em', 'em');
+        $app->singleton('cycle.orm', fn() => $em->getORM());
+        $app->alias('cycle.orm', 'orm');
+        $app->singleton('cycle.database', fn() => $em->getORM()->getFactory()->getDatabaseProvider());
+        $app->alias('cycle.database', 'db');
+        return $app;
     }
 }

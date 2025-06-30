@@ -14,7 +14,7 @@ class CycleHealthCheck
     /**
      * Verificar saúde geral do sistema Cycle ORM
      */
-    public static function check(Application $app): array
+    public static function check($app): array
     {
         $startTime = microtime(true);
         $status = [
@@ -60,7 +60,7 @@ class CycleHealthCheck
     /**
      * Verificar serviços registrados
      */
-    private static function checkServices(Application $app): array
+    private static function checkServices($app): array
     {
         $services = [
             'cycle.database' => 'Database Manager',
@@ -93,7 +93,7 @@ class CycleHealthCheck
     /**
      * Verificar conexão com database
      */
-    private static function checkDatabase(Application $app): array
+    private static function checkDatabase($app): array
     {
         try {
             if (!$app->has('cycle.database')) {
@@ -118,7 +118,8 @@ class CycleHealthCheck
 
             // Testar query simples
             $startTime = microtime(true);
-            $result = $pdo->query('SELECT 1')->fetchColumn();
+            // Usar o método query do DatabaseInterface, não o PDO direto!
+            $result = $db->query('SELECT 1')->fetchColumn();
             $queryTime = round((microtime(true) - $startTime) * 1000, 2);
 
             return [
@@ -140,7 +141,7 @@ class CycleHealthCheck
     /**
      * Verificar schema
      */
-    private static function checkSchema(Application $app): array
+    private static function checkSchema($app): array
     {
         try {
             if (!$app->has('cycle.orm')) {

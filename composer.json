@@ -1,6 +1,6 @@
 {
-    "name": "cafernandes/express-php-cycle-orm-extension",
-    "description": "Integração completa do Cycle ORM com o microframework Express-PHP",
+    "name": "express-php/cycle-orm-extension",
+    "description": "Cycle ORM integration for Express-PHP microframework",
     "keywords": ["express-php", "cycle-orm", "database", "orm", "microframework"],
     "type": "library",
     "license": "MIT",
@@ -12,88 +12,54 @@
     ],
     "require": {
         "php": "^8.1",
-        "cafernandes/express-php": "^2.1",
-        "cycle/orm": "^2.7",
-        "cycle/annotated": "^3.4",
-        "cycle/migrations": "^3.2",
-        "cycle/schema-builder": "^2.7",
-        "spiral/tokenizer": "^3.4"
+        "cafernandes/express-php": "dev-main",
+        "cycle/orm": "^2.0",
+        "cycle/annotated": "^3.0",
+        "cycle/migrations": "3.x-dev",
+        "cycle/schema-builder": "^2.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0",
-        "phpstan/phpstan": "^1.10",
-        "squizlabs/php_codesniffer": "^3.7",
-        "friendsofphp/php-cs-fixer": "^3.0",
-        "psalm/plugin-phpunit": "^0.18"
+        "phpstan/phpstan": "^1.0",
+        "squizlabs/php_codesniffer": "^3.0"
     },
     "autoload": {
         "psr-4": {
             "CAFernandes\\ExpressPHP\\CycleORM\\": "src/"
-        }
+        },
+        "files": [
+            "src/Helpers/env.php",
+            "src/Helpers/config.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
             "CAFernandes\\ExpressPHP\\CycleORM\\Tests\\": "tests/"
-        }
+        },
+        "files": [
+            "tests/Helpers/app.php"
+        ]
     },
-    "bin": [
-        "bin/express-cycle"
-    ],
     "extra": {
         "express-php": {
             "providers": [
                 "CAFernandes\\ExpressPHP\\CycleORM\\CycleServiceProvider"
             ]
-        },
-        "branch-alias": {
-            "dev-main": "1.0-dev"
         }
     },
     "scripts": {
-        "post-install-cmd": [
-            "@php scripts/post-install.php"
-        ],
-        "post-update-cmd": [
-            "@php scripts/post-install.php"
-        ],
         "test": "phpunit",
-        "test-coverage": "phpunit --coverage-html=coverage-html --coverage-clover=coverage.xml",
-        "analyse": "phpstan analyse",
-        "lint": "php-cs-fixer fix --dry-run --diff",
-        "fix": "php-cs-fixer fix",
-        "setup": [
-            "@composer install",
-            "@php install.php"
-        ],
-        "validate": [
-            "@lint",
-            "@analyse",
-            "@test"
-        ],
-        "ci": [
-            "@lint",
-            "@analyse",
-            "@test"
-        ]
+        "test-coverage": "phpunit --coverage-html coverage",
+        "phpstan": "phpstan analyse src --level=9",
+        "cs-check": "phpcs src --standard=PSR12",
+        "cs-fix": "phpcbf src --standard=PSR12"
     },
-    "scripts-descriptions": {
-        "test": "Run PHPUnit tests",
-        "test-coverage": "Run tests with coverage report",
-        "analyse": "Run PHPStan static analysis",
-        "lint": "Check code style with PHP CS Fixer",
-        "fix": "Fix code style issues",
-        "setup": "Setup development environment",
-        "validate": "Validate code quality",
-        "ci": "Run complete CI pipeline"
-    },
-    "config": {
-        "optimize-autoloader": true,
-        "preferred-install": "dist",
-        "sort-packages": true,
-        "allow-plugins": {
-            "composer/package-versions-deprecated": true
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../express-php"
         }
-    },
-    "minimum-stability": "stable",
-    "prefer-stable": true
+    ]
 }

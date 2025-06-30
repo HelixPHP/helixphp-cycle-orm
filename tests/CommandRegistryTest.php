@@ -5,6 +5,9 @@ use PHPUnit\Framework\TestCase;
 use CAFernandes\ExpressPHP\CycleORM\Commands\CommandRegistry;
 use CAFernandes\ExpressPHP\CycleORM\Commands\EntityCommand;
 
+/**
+ * @covers \CAFernandes\ExpressPHP\CycleORM\Commands\CommandRegistry
+ */
 class CommandRegistryTest extends TestCase
 {
     private CommandRegistry $registry;
@@ -33,7 +36,9 @@ class CommandRegistryTest extends TestCase
     {
         $this->registry->register('entity', EntityCommand::class);
 
+        ob_start();
         $result = $this->registry->run('entity', ['name' => 'TestEntity']);
+        ob_end_clean();
 
         $this->assertIsInt($result);
     }

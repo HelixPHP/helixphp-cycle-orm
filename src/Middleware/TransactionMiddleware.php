@@ -35,12 +35,8 @@ class TransactionMiddleware
             $next();
 
             // Commit apenas se há mudanças
-            if ($em->hasChanges()) {
-                $em->run();
-                $this->logDebug('Transaction committed with changes');
-            } else {
-                $this->logDebug('Transaction completed without changes');
-            }
+            $em->run();
+            $this->logDebug('Transaction committed');
 
         } catch (\Exception $e) {
             if ($transactionStarted) {

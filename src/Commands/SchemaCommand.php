@@ -6,6 +6,13 @@ namespace CAFernandes\ExpressPHP\CycleORM\Commands;
  */
 class SchemaCommand extends BaseCommand
 {
+    protected $app;
+    public function __construct(array $args = [], $app = null)
+    {
+        parent::__construct($args);
+        $this->app = $app;
+    }
+
     public function handle(): int
     {
         if ($this->option('sync')) {
@@ -20,9 +27,8 @@ class SchemaCommand extends BaseCommand
         $this->info('Synchronizing database schema...');
 
         try {
-            // Verificar se função app() existe
-            if (function_exists('app')) {
-                $migrator = app('cycle.migrator');
+            if ($this->app && method_exists($this->app, 'container')) {
+                $migrator = $this->app->container()->get('cycle.migrator');
             } else {
                 $this->error('Application container not available');
                 return 1;
@@ -50,8 +56,8 @@ class SchemaCommand extends BaseCommand
         $this->info('Cycle ORM Schema Information');
 
         try {
-            if (function_exists('app')) {
-                $orm = app('cycle.orm');
+            if ($this->app && method_exists($this->app, 'container')) {
+                $orm = $this->app->container()->get('cycle.orm');
                 $schema = $orm->getSchema();
 
                 $entities = [];

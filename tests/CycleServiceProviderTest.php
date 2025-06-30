@@ -4,55 +4,35 @@ namespace CAFernandes\ExpressPHP\CycleORM\Tests;
 use PHPUnit\Framework\TestCase;
 use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
 use Express\Core\Application;
-use Cycle\ORM\ORM;
-use Cycle\ORM\EntityManager;
-use Cycle\Database\DatabaseManager;
 
+/**
+ * @covers \CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider
+ */
 class CycleServiceProviderTest extends TestCase
 {
-    private Application $app;
+    private $container;
+    private $app;
     private CycleServiceProvider $provider;
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Mock da aplicação Express-PHP
-        $this->app = $this->createMock(Application::class);
-
-        // Configurar mocks básicos
-        $this->app->method('config')
-            ->willReturnCallback(function($key, $default = null) {
-                $config = [
-                    'cycle.database' => [
-                        'default' => 'sqlite',
-                        'databases' => ['default' => ['connection' => 'sqlite']],
-                        'connections' => [
-                            'sqlite' => [
-                                'driver' => 'sqlite',
-                                'database' => ':memory:'
-                            ]
-                        ]
-                    ],
-                    'cycle.entities' => [
-                        'directories' => [__DIR__ . '/Fixtures/Models'],
-                        'namespace' => 'Tests\\Fixtures\\Models'
-                    ],
-                    'cycle.schema' => [
-                        'cache' => false,
-                        'auto_sync' => false
-                    ]
-                ];
-                return $config[$key] ?? $default;
-            });
-
-        $this->app->method('has')->willReturn(false);
-        $this->app->method('singleton')->willReturn(true);
-        $this->app->method('alias')->willReturn(true);
-        $this->app->method('make')->willReturnCallback(function($abstract) {
-            return new \stdClass();
-        });
-
+        $this->app = new class extends Application {
+            private $bootedCallbacks = [];
+            public function booted($callback = null) {
+                if ($callback) {
+                    $this->bootedCallbacks[] = $callback;
+                } else {
+                    foreach ($this->bootedCallbacks as $cb) {
+                        $cb($this);
+                    }
+                }
+            }
+        };
+        $ref = new \ReflectionObject($this->app);
+        $prop = $ref->getProperty('container');
+        $prop->setAccessible(true);
+        $this->container = $prop->getValue($this->app);
         $this->provider = new CycleServiceProvider($this->app);
     }
 

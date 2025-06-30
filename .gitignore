@@ -32,3 +32,8 @@ Thumbs.db
 # Database
 *.sqlite
 *.sqlite3
+
+
+# Composer
+composer.lock
+vendor/

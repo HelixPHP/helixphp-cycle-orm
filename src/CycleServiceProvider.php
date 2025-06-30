@@ -1,7 +1,7 @@
 <?php
 namespace CAFernandes\ExpressPHP\CycleORM;
 
-use Express\Core\ServiceProvider;
+use Express\Providers\ExtensionServiceProvider; // Certifique-se que o Express-PHP está instalado e o namespace está correto
 use Cycle\Schema\Generator;
 use Cycle\ORM\EntityManager;
 use Cycle\ORM\Factory;
@@ -15,7 +15,7 @@ use Spiral\Tokenizer\Classes;
 use Spiral\Tokenizer\ClassLocator;
 use Spiral\Tokenizer\Reflection\ReflectionFile;
 
-class CycleServiceProvider extends ServiceProvider
+class CycleServiceProvider extends ExtensionServiceProvider
 {
     public function register(): void
     {
@@ -39,7 +39,7 @@ class CycleServiceProvider extends ServiceProvider
 
     private function registerDatabaseManager(): void
     {
-        $this->app->singleton('cycle.database', function (Application $app) {
+        $this->app->singleton('cycle.database', function ($app) {
             $config = $this->getDatabaseConfig();
             $this->validateDatabaseConfig($config);
             return new DatabaseManager(new DatabaseConfig($config));
@@ -50,7 +50,7 @@ class CycleServiceProvider extends ServiceProvider
 
     private function registerSchemaCompiler(): void
     {
-        $this->app->singleton('cycle.schema', function (Application $app) {
+        $this->app->singleton('cycle.schema', function ($app) {
             try {
                 $config = $this->getEntityConfig();
 
@@ -146,7 +146,7 @@ class CycleServiceProvider extends ServiceProvider
 
     private function logError(string $message): void
     {
-        if (method_exists($this->app, 'logger') && $this->app->has('logger')) {
+        if (method_exists($this->app, 'logger') && $this->app->make('logger')) {
             $this->app->logger()->error($message);
         } else {
             error_log($message);
@@ -215,7 +215,7 @@ class CycleServiceProvider extends ServiceProvider
 
     private function registerORM(): void
     {
-        $this->app->singleton('cycle.orm', function (Application $app) {
+        $this->app->singleton('cycle.orm', function ($app) {
             $factory = new Factory(
                 $app->make('cycle.database'),
                 null, // Use default selector factory
@@ -233,7 +233,7 @@ class CycleServiceProvider extends ServiceProvider
 
     private function registerEntityManager(): void
     {
-        $this->app->singleton('cycle.em', function (Application $app) {
+        $this->app->singleton('cycle.em', function ($app) {
             return new EntityManager($app->make('cycle.orm'));
         });
 
@@ -242,7 +242,7 @@ class CycleServiceProvider extends ServiceProvider
 
     private function registerRepositoryFactory(): void
     {
-        $this->app->singleton('cycle.repository', function (Application $app) {
+        $this->app->singleton('cycle.repository', function ($app) {
             return new RepositoryFactory($app->make('cycle.orm'));
         });
     }

@@ -24,14 +24,14 @@ class CycleMiddleware
     {
         try {
             // Verificar se serviços estão disponíveis
-            if (!$this->app->has('cycle.orm')) {
+            if (!$this->app->getContainer()->has('cycle.orm')) {
                 throw new \RuntimeException('Cycle ORM not properly registered');
             }
 
             // Injetar serviços principais
-            $req->orm = $this->app->make('cycle.orm');
-            $req->em = $this->app->make('cycle.em');
-            $req->db = $this->app->make('cycle.database');
+            $req->orm = $this->app->getContainer()->get('cycle.orm');
+            $req->em = $this->app->getContainer()->get('cycle.em');
+            $req->db = $this->app->getContainer()->get('cycle.database');
 
             // CORREÇÃO: Helper repository mais robusto
             $req->repository = function (string $entityClass) use ($req) {

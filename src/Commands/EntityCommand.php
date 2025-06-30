@@ -76,11 +76,18 @@ PHP;
 
     private function getEntityPath(string $className): string
     {
+        // Se rodando em ambiente de teste, salvar no sys_get_temp_dir()
+        if (\defined('PHPUNIT_COMPOSER_INSTALL') || getenv('APP_ENV') === 'testing') {
+            $dir = sys_get_temp_dir() . '/cycle_test_models';
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            return $dir . "/{$className}.php";
+        }
         // Verificar se função app_path existe
         if (function_exists('app_path')) {
             return app_path("Models/{$className}.php");
         }
-
         // Fallback para estrutura padrão
         return __DIR__ . "/../../../../app/Models/{$className}.php";
     }
