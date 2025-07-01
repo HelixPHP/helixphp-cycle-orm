@@ -28,7 +28,8 @@
   "require-dev": {
     "phpunit/phpunit": "^10.0",
     "phpstan/phpstan": "^1.0",
-    "squizlabs/php_codesniffer": "^3.0"
+    "squizlabs/php_codesniffer": "^3.13",
+    "friendsofphp/php-cs-fixer": "^3.76"
   },
   "autoload": {
     "psr-4": {
@@ -55,8 +56,25 @@
     "test": "phpunit",
     "test-coverage": "phpunit --coverage-html coverage",
     "phpstan": "phpstan analyse src --level=9",
-    "cs-check": "phpcs src --standard=PSR12",
-    "cs-fix": "phpcbf src --standard=PSR12"
+    "cs:check": "phpcs --standard=phpcs.xml --report=full",
+    "cs:check:summary": "phpcs --standard=phpcs.xml --report=summary",
+    "cs:check:diff": "phpcs --standard=phpcs.xml --report=diff",
+    "cs:fix": "phpcbf --standard=phpcs.xml",
+    "cs:fix:dry": "phpcbf --standard=phpcs.xml --dry-run",
+    "psr12:validate": [
+      "@cs:check:summary",
+      "echo 'PSR-12 validation completed!'"
+    ],
+    "psr12:fix": [
+      "@cs:fix",
+      "@cs:check:summary",
+      "echo 'PSR-12 auto-fix completed!'"
+    ],
+    "quality:psr12": [
+      "@psr12:validate",
+      "@phpstan",
+      "echo 'Quality check with PSR-12 completed!'"
+    ]
   },
   "minimum-stability": "dev",
   "prefer-stable": true

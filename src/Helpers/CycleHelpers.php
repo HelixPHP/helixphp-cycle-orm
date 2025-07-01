@@ -120,13 +120,15 @@ class CycleHelpers
         }
         $search = '%' . trim($search) . '%';
         if (is_object($query) && method_exists($query, 'where')) {
-            return $query->where(function ($subQuery) use ($search, $searchFields) {
-                foreach ($searchFields as $field) {
-                    if (is_object($subQuery) && method_exists($subQuery, 'orWhere')) {
-                        $subQuery->orWhere($field, 'LIKE', $search);
+            return $query->where(
+                function ($subQuery) use ($search, $searchFields) {
+                    foreach ($searchFields as $field) {
+                        if (is_object($subQuery) && method_exists($subQuery, 'orWhere')) {
+                            $subQuery->orWhere($field, 'LIKE', $search);
+                        }
                     }
                 }
-            });
+            );
         }
         return $query;
     }

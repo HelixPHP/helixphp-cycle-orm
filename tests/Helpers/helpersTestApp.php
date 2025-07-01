@@ -1,29 +1,30 @@
 <?php
+
 if (!function_exists('helpersTestApp')) {
-  function helpersTestApp($service = null)
-  {
-    // Retorna um stub de ORM para os testes
-    if ($service === 'cycle.orm') {
-      return new class {
-        public function getSchema()
-        {
-          return new class {
-            public function getRoles()
-            {
-              return ['User', 'Post'];
-            }
-          };
+    function helpersTestApp($service = null)
+    {
+      // Retorna um stub de ORM para os testes
+        if ($service === 'cycle.orm') {
+            return new class {
+                public function getSchema()
+                {
+                    return new class {
+                        public function getRoles()
+                        {
+                              return ['User', 'Post'];
+                        }
+                    };
+                }
+            };
         }
-      };
-    }
-    if ($service === 'cycle.migrator') {
-      return new class {
-        public function run()
-        {
-          return true;
+        if ($service === 'cycle.migrator') {
+            return new class {
+                public function run()
+                {
+                    return true;
+                }
+            };
         }
-      };
+        return null;
     }
-    return null;
-  }
 }

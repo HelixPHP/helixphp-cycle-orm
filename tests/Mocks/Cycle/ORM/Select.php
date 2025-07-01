@@ -4,9 +4,9 @@ namespace Cycle\ORM;
 
 class Select
 {
-  public function where($field, $value)
-  {
-    // Simula encadeamento
-    return $this;
-  }
+    public function where($field, $value)
+    {
+      // Simula encadeamento
+        return $this;
+    }
 }
