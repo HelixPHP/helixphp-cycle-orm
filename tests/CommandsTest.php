@@ -83,7 +83,7 @@ class CommandsTest extends TestCase
         $registry = new Registry($dbal);
         $schemaArray = (new Compiler())->compile($registry, []);
         $schema = new Schema($schemaArray); // Corrigido: Schema real
-        $orm = new class ($schema) {
+        $orm = new class($schema) {
             private object $schema;
 
             public function __construct(object $schema)

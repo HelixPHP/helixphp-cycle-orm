@@ -9,15 +9,9 @@ class EntityManager
         return false;
     }
 
-    public function beginTransaction(): void
-    {
-    }
+    public function beginTransaction(): void {}
 
-    public function commit(): void
-    {
-    }
+    public function commit(): void {}
 
-    public function rollback(): void
-    {
-    }
+    public function rollback(): void {}
 }

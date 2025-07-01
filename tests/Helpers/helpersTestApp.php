@@ -5,10 +5,10 @@ if (!function_exists('helpersTestApp')) {
     {
         // Retorna um stub de ORM para os testes
         if ('cycle.orm' === $service) {
-            return new class () {
+            return new class() {
                 public function getSchema(): object
                 {
-                    return new class () {
+                    return new class() {
                         /** @return array<int, string> */
                         public function getRoles(): array
                         {
@@ -19,7 +19,7 @@ if (!function_exists('helpersTestApp')) {
             };
         }
         if ('cycle.migrator' === $service) {
-            return new class () {
+            return new class() {
                 public function run(): bool
                 {
                     return true;

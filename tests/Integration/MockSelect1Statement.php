@@ -87,7 +87,5 @@ class MockSelect1Statement implements StatementInterface, \IteratorAggregate
         return 'SELECT 1';
     }
 
-    public function close(): void
-    {
-    }
+    public function close(): void {}
 }

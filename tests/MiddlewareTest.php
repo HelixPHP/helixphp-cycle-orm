@@ -79,8 +79,7 @@ class MiddlewareTest extends TestCase
         $middleware->handle(
             $this->request,
             $this->response,
-            function () {
-            }
+            function () {}
         );
     }
 

@@ -24,7 +24,7 @@ class CycleServiceProviderTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->app = new class () extends Application {
+        $this->app = new class() extends Application {
             /** @var array<int, callable> */
             private array $bootedCallbacks = [];
 
@@ -63,19 +63,22 @@ class CycleServiceProviderTest extends TestCase
         $mockRouter = $this->getMockBuilder(Router::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['get'])
-            ->getMock();
+            ->getMock()
+        ;
         $mockRouter->expects($this->any())
             ->method('get')
             ->willReturnCallback(
                 function ($route, $handler) {
                     $this->assertIsCallable($handler, 'Handler registrado no router deve ser callable');
                 }
-            );
+            )
+        ;
         // Cria um mock do container que retorna o mockRouter ao chamar get('router')
         $mockContainer = $this->getMockBuilder(get_class($this->container))
             ->disableOriginalConstructor()
             ->onlyMethods(['get'])
-            ->getMock();
+            ->getMock()
+        ;
         $mockContainer->method('get')->willReturnCallback(
             function ($service) use ($mockRouter) {
                 if ('router' === $service) {

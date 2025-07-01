@@ -30,7 +30,7 @@ class HealthCheckTest extends TestCase
 {
     public function testHealthCheckWithNoServices(): void
     {
-        $app = new class () extends Application {
+        $app = new class() extends Application {
             private $bootedCallbacks = [];
 
             private array $services = [];
@@ -79,7 +79,7 @@ class HealthCheckTest extends TestCase
 
     public function testHealthCheckWithAllServices(): void
     {
-        $app = new class () extends Application {
+        $app = new class() extends Application {
             private $bootedCallbacks = [];
 
             private array $services = [];
@@ -118,7 +118,7 @@ class HealthCheckTest extends TestCase
             }
         };
         // Mock DBAL
-        $pdo = new class () {
+        $pdo = new class() {
             public function getAttribute($attr)
             {
                 if (\PDO::ATTR_SERVER_VERSION === $attr) {
@@ -128,7 +128,7 @@ class HealthCheckTest extends TestCase
 
             public function query($sql)
             {
-                return new class () {
+                return new class() {
                     public function fetchColumn()
                     {
                         return '1';
@@ -136,7 +136,7 @@ class HealthCheckTest extends TestCase
                 };
             }
         };
-        $driver = new class ($pdo) implements DriverInterface {
+        $driver = new class($pdo) implements DriverInterface {
             private $pdo;
 
             public function __construct($pdo)
@@ -155,13 +155,9 @@ class HealthCheckTest extends TestCase
             }
 
             // Métodos não usados
-            public function connect(): void
-            {
-            }
+            public function connect(): void {}
 
-            public function disconnect(): void
-            {
-            }
+            public function disconnect(): void {}
 
             public function isConnected(): bool
             {
@@ -173,17 +169,13 @@ class HealthCheckTest extends TestCase
                 return 'default';
             }
 
-            public function getSchema(?string $name = null)
-            {
-            }
+            public function getSchema(?string $name = null) {}
 
-            public function getQuoter()
-            {
-            }
+            public function getQuoter() {}
 
             public function getQueryCompiler(): CompilerInterface
             {
-                return new class () implements CompilerInterface {
+                return new class() implements CompilerInterface {
                     public function compile(
                         QueryParameters $params,
                         string $prefix,
@@ -194,9 +186,7 @@ class HealthCheckTest extends TestCase
                 };
             }
 
-            public function getTransaction(?int $isolationLevel = null)
-            {
-            }
+            public function getTransaction(?int $isolationLevel = null) {}
 
             public static function create(
                 DriverConfig $config
@@ -236,7 +226,7 @@ class HealthCheckTest extends TestCase
 
             public function query(string $statement, array $parameters = []): StatementInterface
             {
-                return new class () implements StatementInterface, \IteratorAggregate {
+                return new class() implements StatementInterface, \IteratorAggregate {
                     public function fetch(int $mode = StatementInterface::FETCH_ASSOC): mixed
                     {
                         return '1';
@@ -292,9 +282,7 @@ class HealthCheckTest extends TestCase
                         return [];
                     }
 
-                    public function close(): void
-                    {
-                    }
+                    public function close(): void {}
                 };
             }
 
@@ -313,22 +301,18 @@ class HealthCheckTest extends TestCase
                 return new \DateTimeZone('UTC');
             }
 
-            public function setTimezone(\DateTimeZone $timezone): void
-            {
-            }
+            public function setTimezone(\DateTimeZone $timezone): void {}
 
             public function getSource(): ?string
             {
                 return null;
             }
 
-            public function setSource(?string $source): void
-            {
-            }
+            public function setSource(?string $source): void {}
 
             public function getSchemaHandler(): HandlerInterface
             {
-                return new class () implements HandlerInterface {
+                return new class() implements HandlerInterface {
                     public function getPrimaryKeys(string $table): array
                     {
                         return [];
@@ -363,7 +347,7 @@ class HealthCheckTest extends TestCase
 
             public function getQueryBuilder(): BuilderInterface
             {
-                return new class () implements BuilderInterface {
+                return new class() implements BuilderInterface {
                     public function withDriver($driver, $prefix = null): static
                     {
                         return $this;
@@ -391,7 +375,7 @@ class HealthCheckTest extends TestCase
                 return 0;
             }
         };
-        $database = new class ($driver) implements DatabaseInterface {
+        $database = new class($driver) implements DatabaseInterface {
             private $driver;
             public const WRITE = 0;
 
@@ -427,7 +411,7 @@ class HealthCheckTest extends TestCase
 
             public function table(string $name): TableInterface
             {
-                return new class ($name) implements TableInterface {
+                return new class($name) implements TableInterface {
                     private $name;
 
                     public function __construct($name)
@@ -515,7 +499,7 @@ class HealthCheckTest extends TestCase
 
             public function query(string $query, array $parameters = []): StatementInterface
             {
-                return new class () implements StatementInterface, \IteratorAggregate {
+                return new class() implements StatementInterface, \IteratorAggregate {
                     public function fetch(int $mode = StatementInterface::FETCH_ASSOC): mixed
                     {
                         return '1';
@@ -571,9 +555,7 @@ class HealthCheckTest extends TestCase
                         return [];
                     }
 
-                    public function close(): void
-                    {
-                    }
+                    public function close(): void {}
                 };
             }
 
@@ -589,7 +571,7 @@ class HealthCheckTest extends TestCase
 
             public function insert(string $table = ''): InsertQuery
             {
-                return new class () implements InsertQuery {
+                return new class() implements InsertQuery {
                     public function columns(array $columns): static
                     {
                         return $this;
@@ -617,7 +599,7 @@ class HealthCheckTest extends TestCase
                 array $values = [],
                 array $where = []
             ): UpdateQuery {
-                return new class () implements UpdateQuery {
+                return new class() implements UpdateQuery {
                     public function set(array $values): static
                     {
                         return $this;
@@ -647,7 +629,7 @@ class HealthCheckTest extends TestCase
 
             public function delete(string $table = '', array $where = []): DeleteQuery
             {
-                return new class () implements DeleteQuery {
+                return new class() implements DeleteQuery {
                     public function where(string $column, string $operator, mixed $value = null): static
                     {
                         return $this;
@@ -672,7 +654,7 @@ class HealthCheckTest extends TestCase
 
             public function select(mixed $columns = '*'): SelectQuery
             {
-                return new class () implements SelectQuery {
+                return new class() implements SelectQuery {
                     private string $table = '';
 
                     public function from(string $table): static
@@ -784,7 +766,7 @@ class HealthCheckTest extends TestCase
             }
         };
         // Mock DBAL compatível com métodos comuns do DatabaseManager
-        $dbal = new class ($database) {
+        $dbal = new class($database) {
             private $database;
 
             public function __construct($database)
@@ -828,7 +810,7 @@ class HealthCheckTest extends TestCase
                 }
             }
         );
-        $orm = new class ($schema) {
+        $orm = new class($schema) {
             private $schema;
 
             public function __construct($schema)
@@ -845,19 +827,16 @@ class HealthCheckTest extends TestCase
         // Mock mínimos para EM e Schema
         $app->singleton(
             'cycle.em',
-            fn () => new class () {
-            }
+            fn () => new class() {}
         );
         $app->singleton('cycle.schema', fn () => $schema);
         $app->singleton(
             'cycle.migrator',
-            fn () => new class () {
-            }
+            fn () => new class() {}
         );
         $app->singleton(
             'cycle.repository',
-            fn () => new class () {
-            }
+            fn () => new class() {}
         );
         $result = CycleHealthCheck::check($app);
         // var_dump($result); // DEBUG: Exibe resultado do health check
