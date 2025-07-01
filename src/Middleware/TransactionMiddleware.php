@@ -50,13 +50,17 @@ class TransactionMiddleware
             $next($req, $res);
 
           // Commit apenas se há mudanças
-            if (is_object($em) && method_exists($em, 'run')) {
+            if (is_object($em) && method_exists($em, 'commitTransaction')) {
+                $em->commitTransaction();
+            } elseif (is_object($em) && method_exists($em, 'run')) {
                 $em->run();
             }
             $this->logDebug('Transaction committed');
         } catch (\Exception $e) {
             try {
-                if (is_object($em) && method_exists($em, 'clean')) {
+                if (is_object($em) && method_exists($em, 'rollbackTransaction')) {
+                    $em->rollbackTransaction();
+                } elseif (is_object($em) && method_exists($em, 'clean')) {
                     $em->clean();
                 }
                 $this->logDebug('Transaction rolled back due to error: ' . $e->getMessage());

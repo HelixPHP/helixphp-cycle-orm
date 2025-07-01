@@ -2,6 +2,8 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Monitoring;
 
+use CAFernandes\ExpressPHP\CycleORM\Monitoring\MetricsCollector;
+
 /**
  * Profiler de performance para Cycle ORM
  */
@@ -45,7 +47,7 @@ class PerformanceProfiler
         self::$profiles[$name] = [
             'start_time' => microtime(true),
             'start_memory' => memory_get_usage(true),
-            'queries_before' => 0
+            'queries_before' => MetricsCollector::getMetrics()['queries_executed'] ?? 0
         ];
     }
 

@@ -20,9 +20,24 @@ class HealthCheckMiddleware
 
     public function handle(Request $req, Response $res, callable $next): void
     {
-        $path = $req->pathCallable;
+        // Compatível com Express-PHP: prioriza getPathInfo(), depois path, depois pathCallable
+        if (method_exists($req, 'getPathInfo') && is_callable([$req, 'getPathInfo'])) {
+            /**
+             * @phpstan-ignore-next-line getPathInfo is not defined in the current type of $req.
+             * Retrieves the path info from the request.
+             *
+             * @var string $path The path information extracted from the request.
+             */
+            $path = $req->getPathInfo();
+        } elseif (property_exists($req, 'path')) {
+            $path = $req->path;
+        } elseif (property_exists($req, 'pathCallable')) {
+            $path = $req->pathCallable;
+        } else {
+            $path = null;
+        }
 
-      // Verificar se é uma requisição de health check
+        // Verificar se é uma requisição de health check
         if ($path === '/health/cycle' || $path === '/health') {
             $this->handleHealthCheck($req, $res);
             return;
