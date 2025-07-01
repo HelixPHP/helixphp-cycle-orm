@@ -78,7 +78,21 @@ class CycleHealthCheck
         $missing = [];
 
         foreach ($services as $service => $name) {
-            if ($app instanceof ContainerInterface && $app->has($service)) {
+            $hasService = false;
+
+            if ($app instanceof ContainerInterface) {
+                $hasService = $app->has($service);
+            } elseif (method_exists($app, 'has')) {
+                $hasService = $app->has($service);
+            } elseif (method_exists($app, 'getContainer')) {
+                // Para Application do Express PHP
+                $container = $app->getContainer();
+                if ($container && method_exists($container, 'has')) {
+                    $hasService = $container->has($service);
+                }
+            }
+
+            if ($hasService) {
                 $registered[] = $name;
             } else {
                 $missing[] = $name;
@@ -100,20 +114,27 @@ class CycleHealthCheck
      */
     private static function checkDatabase(object $app): array
     {
+        $hasDatabase = false;
+        $dbManager = null;
+
         if ($app instanceof ContainerInterface && $app->has('cycle.database')) {
             $dbManager = $app->get('cycle.database');
-            if (is_object($dbManager) && method_exists($dbManager, 'database')) {
-                $db = $dbManager->database();
-                $status = $db ? 'healthy' : 'unhealthy';
-            } else {
-                $status = 'unhealthy';
+        } elseif (method_exists($app, 'has') && $app->has('cycle.database')) {
+            $dbManager = method_exists($app, 'make') ? $app->make('cycle.database') : null;
+        } elseif (method_exists($app, 'getContainer')) {
+            $container = $app->getContainer();
+            if ($container && method_exists($container, 'has') && $container->has('cycle.database')) {
+                $dbManager = method_exists($container, 'get') ? $container->get('cycle.database') : null;
             }
-        } else {
-            $status = 'unhealthy';
+        }
+
+        if ($dbManager && is_object($dbManager) && method_exists($dbManager, 'database')) {
+            $db = $dbManager->database();
+            $hasDatabase = $db ? true : false;
         }
 
         return [
-            'status' => $status
+            'status' => $hasDatabase ? 'healthy' : 'unhealthy'
         ];
     }
 
@@ -125,20 +146,27 @@ class CycleHealthCheck
      */
     private static function checkSchema(object $app): array
     {
+        $hasSchema = false;
+        $orm = null;
+
         if ($app instanceof ContainerInterface && $app->has('cycle.orm')) {
             $orm = $app->get('cycle.orm');
-            if (is_object($orm) && method_exists($orm, 'getSchema')) {
-                $schema = $orm->getSchema();
-                $status = $schema ? 'healthy' : 'unhealthy';
-            } else {
-                $status = 'unhealthy';
+        } elseif (method_exists($app, 'has') && $app->has('cycle.orm')) {
+            $orm = method_exists($app, 'make') ? $app->make('cycle.orm') : null;
+        } elseif (method_exists($app, 'getContainer')) {
+            $container = $app->getContainer();
+            if ($container && method_exists($container, 'has') && $container->has('cycle.orm')) {
+                $orm = method_exists($container, 'get') ? $container->get('cycle.orm') : null;
             }
-        } else {
-            $status = 'unhealthy';
+        }
+
+        if ($orm && is_object($orm) && method_exists($orm, 'getSchema')) {
+            $schema = $orm->getSchema();
+            $hasSchema = $schema ? true : false;
         }
 
         return [
-            'status' => $status
+            'status' => $hasSchema ? 'healthy' : 'unhealthy'
         ];
     }
 

@@ -18,6 +18,10 @@ use Symfony\Component\Finder\Finder;
 use Cycle\Schema\Registry;
 use Cycle\Annotated\Entities as AnnotatedEntities;
 
+// Incluir os helpers necessários
+require_once __DIR__ . '/Helpers/env.php';
+require_once __DIR__ . '/Helpers/config.php';
+
 class CycleServiceProvider extends ExtensionServiceProvider
 {
   /**
@@ -32,13 +36,17 @@ class CycleServiceProvider extends ExtensionServiceProvider
     $this->registerORM();
     $this->registerEntityManager();
     $this->registerRepositoryFactory();
-  }
-
-  public function boot(): void
+    $this->registerMigrator();
+  }  public function boot(): void
   {
     $this->registerMiddlewares();
     $this->registerCommands();
-    if (config('app.debug', false) || env('APP_ENV') === 'development') {
+
+    // Verificar se devemos habilitar funcionalidades de desenvolvimento
+    // Usa funções globais para evitar problemas de inicialização
+    $debug = $_ENV['APP_DEBUG'] ?? $_SERVER['APP_DEBUG'] ?? getenv('APP_DEBUG') ?: false;
+    $env = $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? getenv('APP_ENV') ?: 'production';
+    if ($debug || $env === 'development') {
       $this->enableDevelopmentFeatures();
     }
   }
@@ -114,19 +122,28 @@ class CycleServiceProvider extends ExtensionServiceProvider
     } else {
       error_log($message);
     }
-  }
-
-  private function enableDevelopmentFeatures(): void
+  }  private function enableDevelopmentFeatures(): void
   {
-    if (config('cycle.development.log_queries', false)) {
-      $this->app->getContainer()->bind('cycle.query_logger', function() {
-        return new QueryLogger();
-      });
+    try {
+      $logQueries = $_ENV['CYCLE_LOG_QUERIES'] ?? $_SERVER['CYCLE_LOG_QUERIES'] ?? getenv('CYCLE_LOG_QUERIES') ?: false;
+      if ($logQueries) {
+        $this->app->getContainer()->bind('cycle.query_logger', function() {
+          return new QueryLogger();
+        });
+      }
+    } catch (\Exception $e) {
+      $this->logError('Failed to enable query logging: ' . $e->getMessage());
     }
-    if (config('cycle.development.profile_queries', false)) {
-      $this->app->getContainer()->bind('cycle.profiler', function() {
-        return new PerformanceProfiler();
-      });
+
+    try {
+      $profileQueries = $_ENV['CYCLE_PROFILE_QUERIES'] ?? $_SERVER['CYCLE_PROFILE_QUERIES'] ?? getenv('CYCLE_PROFILE_QUERIES') ?: false;
+      if ($profileQueries) {
+        $this->app->getContainer()->bind('cycle.profiler', function() {
+          return new PerformanceProfiler();
+        });
+      }
+    } catch (\Exception $e) {
+      $this->logError('Failed to enable query profiling: ' . $e->getMessage());
     }
   }
 
@@ -154,6 +171,18 @@ class CycleServiceProvider extends ExtensionServiceProvider
   {
     $this->app->getContainer()->bind('cycle.repository', function ($app) {
       return new RepositoryFactory($app->getContainer()->get('cycle.orm'));
+    });
+  }
+
+  private function registerMigrator(): void
+  {
+    $this->app->getContainer()->bind('cycle.migrator', function ($app) {
+      // Retorna um migrator básico ou mock para desenvolvimento
+      return new class {
+        public function getStatus(): array {
+          return ['pending' => [], 'executed' => []];
+        }
+      };
     });
   }
 

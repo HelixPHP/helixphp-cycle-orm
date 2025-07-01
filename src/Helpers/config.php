@@ -13,16 +13,21 @@ if (!function_exists('config')) {
   {
     // Tenta buscar do container global, se existir
     if (function_exists('app') && app()) {
-      /** @var Express\Core\Application $container */
-      $container = app();
-      $configService = null;
-      if (method_exists($container, 'has') && $container->has('config') && method_exists($container, 'get')) {
-        $configService = $container->get('config', []);
-      } elseif (method_exists($container, 'make')) {
-        $configService = $container->make('config');
-      }
-      if ($configService && method_exists($configService, 'get')) {
-        return $configService->get($key, $default);
+      try {
+        /** @var Express\Core\Application $container */
+        $container = app();
+        $configService = null;
+        if (method_exists($container, 'has') && $container->has('config') && method_exists($container, 'get')) {
+          $configService = $container->get('config', []);
+        } elseif (method_exists($container, 'make')) {
+          $configService = $container->make('config');
+        }
+        if ($configService && method_exists($configService, 'get')) {
+          return $configService->get($key, $default);
+        }
+      } catch (\Exception $e) {
+        // Se houver qualquer erro, retorna o default silenciosamente
+        return $default;
       }
     }
     // Fallback: retorna default
