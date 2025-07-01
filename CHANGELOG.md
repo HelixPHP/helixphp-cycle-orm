@@ -1,31 +1,24 @@
-# Changelog
+# CHANGELOG
 
-All notable changes to `express-php-cycle-orm-extension` will be documented in this file.
+## [1.0.1] - 2025-07-01
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Adicionado
+- Padronização do nome do pacote para `cafernandes/express-php-cycle-orm-extension` em toda a documentação e exemplos.
+- Guia técnico e quick start centralizado em `docs/guia-tecnico-quickstart.md`.
+- Referências cruzadas entre os arquivos de documentação para facilitar navegação.
 
-## [Unreleased]
+### Corrigido
+- Ajustes de exemplos de instalação e uso rápido para refletir o nome correto do pacote.
+- Correções de instruções e comandos para integração Express-PHP + Cycle ORM.
 
-### Added
-- Initial release of Express-PHP Cycle ORM Extension
-- Auto-discovery Service Provider
-- CycleMiddleware for automatic ORM injection
-- TransactionMiddleware for automatic transaction management
-- EntityValidationMiddleware for entity validation
-- Console commands for schema management and entity generation
-- Comprehensive configuration system
-- Performance optimizations for Express-PHP integration
+---
 
-### Security
-- Database connection encryption support
-- Query audit logging capabilities
-- Raw query execution controls
+## [1.0.0] - 2025-07-01
 
-## [1.0.0] - 2025-01-01
-
-### Added
-- First stable release
-- Full Express-PHP v2.1+ compatibility
-- Cycle ORM v2.7+ integration
-- Production-ready features
+### Adicionado
+- Primeira versão estável da extensão Express-PHP Cycle ORM.
+- Integração automática do Cycle ORM ao Express-PHP via Service Provider.
+- Middlewares para transação, validação, health check e injeção de serviços.
+- Helpers para filtros, paginação, busca e ordenação.
+- CLI para geração de entidades, sync de schema, migrações e status.
+- Documentação completa com exemplos de CRUD, queries avançadas e melhores práticas.
