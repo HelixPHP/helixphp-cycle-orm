@@ -2,10 +2,8 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Monitoring;
 
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\MetricsCollector;
-
 /**
- * Profiler de performance para Cycle ORM
+ * Profiler de performance para Cycle ORM.
  */
 class PerformanceProfiler
 {
@@ -13,11 +11,11 @@ class PerformanceProfiler
      * @var array<string, array<string, mixed>>
      */
     private static array $profiles = [];
+
     private static bool $enabled = false;
 
     /**
-     * Habilitar profiling
-     * @return void
+     * Habilitar profiling.
      */
     public static function enable(): void
     {
@@ -25,8 +23,7 @@ class PerformanceProfiler
     }
 
     /**
-     * Desabilitar profiling
-     * @return void
+     * Desabilitar profiling.
      */
     public static function disable(): void
     {
@@ -34,9 +31,7 @@ class PerformanceProfiler
     }
 
     /**
-     * Iniciar profile
-     * @param string $name
-     * @return void
+     * Iniciar profile.
      */
     public static function start(string $name): void
     {
@@ -47,13 +42,13 @@ class PerformanceProfiler
         self::$profiles[$name] = [
             'start_time' => microtime(true),
             'start_memory' => memory_get_usage(true),
-            'queries_before' => MetricsCollector::getMetrics()['queries_executed'] ?? 0
+            'queries_before' => MetricsCollector::getMetrics()['queries_executed'] ?? 0,
         ];
     }
 
     /**
-     * Finalizar profile
-     * @param string $name
+     * Finalizar profile.
+     *
      * @return array<string, mixed>
      */
     public static function end(string $name): array
@@ -70,7 +65,7 @@ class PerformanceProfiler
             'name' => $name,
             'duration_ms' => round(($endTime - $start['start_time']) * 1000, 2),
             'memory_used_mb' => round(($endMemory - $start['start_memory']) / 1024 / 1024, 2),
-            'timestamp' => date('c')
+            'timestamp' => date('c'),
         ];
 
         unset(self::$profiles[$name]);
@@ -84,7 +79,8 @@ class PerformanceProfiler
     }
 
     /**
-     * Retorna todos os perfis ativos
+     * Retorna todos os perfis ativos.
+     *
      * @return array<string, array<string, mixed>>
      */
     public static function getActiveProfiles(): array
@@ -93,10 +89,9 @@ class PerformanceProfiler
     }
 
     /**
-     * Registrar um profile manualmente
-     * @param string $name
+     * Registrar um profile manualmente.
+     *
      * @param array<string, mixed> $profile
-     * @return void
      */
     public static function profile(string $name, array $profile): void
     {

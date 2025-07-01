@@ -1,4 +1,3 @@
-
 <?php
 
 $finder = PhpCsFixer\Finder::create()
@@ -12,6 +11,7 @@ $finder = PhpCsFixer\Finder::create()
     ->ignoreVCS(true);
 
 return (new PhpCsFixer\Config())
+    ->setUnsupportedPhpVersionAllowed(true)
     ->setRules([
         '@PSR12' => true,
         '@PhpCsFixer' => true,

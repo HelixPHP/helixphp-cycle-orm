@@ -2,41 +2,28 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM;
 
-use Express\Providers\ExtensionServiceProvider;
-use Cycle\Schema\Generator;
+use CAFernandes\ExpressPHP\CycleORM\Monitoring\PerformanceProfiler;
+use CAFernandes\ExpressPHP\CycleORM\Monitoring\QueryLogger;
+use Cycle\Annotated\Entities as AnnotatedEntities;
+use Cycle\Database\Config\DatabaseConfig;
+use Cycle\Database\DatabaseManager;
 use Cycle\ORM\EntityManager;
 use Cycle\ORM\Factory;
 use Cycle\ORM\ORM;
-use Cycle\Database\DatabaseManager;
-use Cycle\Database\Config\DatabaseConfig;
 use Cycle\Schema\Compiler;
+use Cycle\Schema\Generator;
+use Cycle\Schema\Registry;
+use Express\Core\Application;
+use Express\Providers\ExtensionServiceProvider;
 use Spiral\Tokenizer\ClassesInterface;
 use Spiral\Tokenizer\ClassLocator;
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\QueryLogger;
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\PerformanceProfiler;
 use Symfony\Component\Finder\Finder;
-use Cycle\Schema\Registry;
-use Cycle\Annotated\Entities as AnnotatedEntities;
 
 class CycleServiceProvider extends ExtensionServiceProvider
 {
-  /**
-   * @var \Express\Core\Application
-   */
-    protected \Express\Core\Application $app;
+    protected Application $app;
 
-    // Incluir os helpers necessários
-    private static function includeHelpers(): void
-    {
-        require_once __DIR__ . '/Helpers/env.php';
-        require_once __DIR__ . '/Helpers/config.php';
-        require_once __DIR__ . '/Helpers/app_path.php';
-    }
-
-    /**
-     * @param \Express\Core\Application $app
-     */
-    public function __construct(\Express\Core\Application $app)
+    public function __construct(Application $app)
     {
         self::includeHelpers();
         $this->app = $app;
@@ -57,15 +44,50 @@ class CycleServiceProvider extends ExtensionServiceProvider
         $this->registerMiddlewares();
         $this->registerCommands();
 
-      // Verificar se devemos habilitar funcionalidades de desenvolvimento
-      // Usa funções globais para evitar problemas de inicialização
+        // Verificar se devemos habilitar funcionalidades de desenvolvimento
+        // Usa funções globais para evitar problemas de inicialização
         $debug = $_ENV['APP_DEBUG'] ?? $_SERVER['APP_DEBUG'] ?? getenv('APP_DEBUG') ?: false;
         $env = $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? getenv('APP_ENV') ?: 'production';
         if (
-            $debug || $env === 'development'
+            $debug || 'development' === $env
         ) {
             $this->enableDevelopmentFeatures();
         }
+    }
+
+    /**
+     * Garante que o handler é sempre callable (nunca array)
+     * Use este método ao registrar rotas no router:
+     *   $router->get('/rota', $this->ensureCallableHandler([$controller, 'metodo']));
+     * Assim, evita-se TypeError ao passar array como handler.
+     *
+     * @param mixed $handler
+     */
+    protected function ensureCallableHandler($handler): callable
+    {
+        if (is_callable($handler)) {
+            return $handler;
+        }
+        if (
+            is_array($handler)
+            && 2 === count($handler)
+            && is_object($handler[0])
+            && is_string($handler[1])
+            && method_exists($handler[0], $handler[1])
+        ) {
+            return function (...$args) use ($handler) {
+                return $handler[0]->{$handler[1]}(...$args);
+            };
+        }
+        throw new \InvalidArgumentException('Handler de rota inválido: deve ser callable.');
+    }
+
+    // Incluir os helpers necessários
+    private static function includeHelpers(): void
+    {
+        require_once __DIR__ . '/Helpers/env.php';
+        require_once __DIR__ . '/Helpers/config.php';
+        require_once __DIR__ . '/Helpers/app_path.php';
     }
 
     private function registerDatabaseManager(): void
@@ -75,6 +97,7 @@ class CycleServiceProvider extends ExtensionServiceProvider
             function ($app) {
                 $config = $this->getDatabaseConfig();
                 $this->validateDatabaseConfig($config);
+
                 return new DatabaseManager(new DatabaseConfig($config));
             }
         );
@@ -92,13 +115,14 @@ class CycleServiceProvider extends ExtensionServiceProvider
                             ClassesInterface::class,
                             function () use ($config) {
                                 $finder = new Finder();
-                                $dirs =
-                                isset($config['directories']) &&
-                                (
-                                    is_array($config['directories']) ||
-                                    is_string($config['directories'])
+                                $dirs
+                                = isset($config['directories'])
+                                && (
+                                    is_array($config['directories'])
+                                    || is_string($config['directories'])
                                 ) ? $config['directories'] : [];
                                 $finder->files()->in($dirs);
+
                                 return new ClassLocator($finder);
                             }
                         );
@@ -116,8 +140,8 @@ class CycleServiceProvider extends ExtensionServiceProvider
                         new Generator\RenderModifiers(),
                     ];
                     $compiler = new Compiler();
-                    $schema = $compiler->compile($registry, $generators);
-                    return $schema;
+
+                    return $compiler->compile($registry, $generators);
                 } catch (\Exception $e) {
                     $this->logError('Failed to compile Cycle schema: ' . $e->getMessage());
                     throw $e;
@@ -136,7 +160,7 @@ class CycleServiceProvider extends ExtensionServiceProvider
 
     private function registerCommands(): void
     {
-        if (php_sapi_name() === 'cli') {
+        if ('cli' === php_sapi_name()) {
             $this->app->getContainer()->bind(
                 'cycle.commands',
                 function () {
@@ -165,9 +189,9 @@ class CycleServiceProvider extends ExtensionServiceProvider
     private function enableDevelopmentFeatures(): void
     {
         try {
-            $logQueries = $_ENV['CYCLE_LOG_QUERIES'] ??
-                $_SERVER['CYCLE_LOG_QUERIES'] ??
-                getenv('CYCLE_LOG_QUERIES') ?: false;
+            $logQueries = $_ENV['CYCLE_LOG_QUERIES']
+                ?? $_SERVER['CYCLE_LOG_QUERIES']
+                ?? getenv('CYCLE_LOG_QUERIES') ?: false;
             if ($logQueries) {
                 $this->app->getContainer()->bind(
                     'cycle.query_logger',
@@ -181,9 +205,9 @@ class CycleServiceProvider extends ExtensionServiceProvider
         }
 
         try {
-            $profileQueries = $_ENV['CYCLE_PROFILE_QUERIES'] ??
-                $_SERVER['CYCLE_PROFILE_QUERIES'] ??
-                getenv('CYCLE_PROFILE_QUERIES') ?: false;
+            $profileQueries = $_ENV['CYCLE_PROFILE_QUERIES']
+                ?? $_SERVER['CYCLE_PROFILE_QUERIES']
+                ?? getenv('CYCLE_PROFILE_QUERIES') ?: false;
             if ($profileQueries) {
                 $this->app->getContainer()->bind(
                     'cycle.profiler',
@@ -205,6 +229,7 @@ class CycleServiceProvider extends ExtensionServiceProvider
                 $factory = new Factory(
                     $app->getContainer()->get('cycle.database')
                 );
+
                 return new ORM(
                     $factory,
                     $app->getContainer()->get('cycle.schema')
@@ -239,10 +264,10 @@ class CycleServiceProvider extends ExtensionServiceProvider
             'cycle.migrator',
             function ($app) {
                 // Retorna um migrator básico ou mock para desenvolvimento
-                return new class {
-                  /**
-                   * @return array{pending: array<int, mixed>, executed: array<int, mixed>}
-                   */
+                return new class () {
+                    /**
+                     * @return array{pending: array<int, mixed>, executed: array<int, mixed>}
+                     */
                     public function getStatus(): array
                     {
                         return ['pending' => [], 'executed' => []];
@@ -250,22 +275,23 @@ class CycleServiceProvider extends ExtensionServiceProvider
 
                     public function run(): void
                     {
-                      // Mock implementation
+                        // Mock implementation
                     }
 
                     public function rollback(): void
                     {
-                      // Mock implementation
+                        // Mock implementation
                     }
                 };
             }
         );
     }
 
-  /**
-   * Retorna a configuração do banco de dados.
-   * @return array<string, mixed>
-   */
+    /**
+     * Retorna a configuração do banco de dados.
+     *
+     * @return array<string, mixed>
+     */
     private function getDatabaseConfig(): array
     {
         $result = config(
@@ -273,13 +299,13 @@ class CycleServiceProvider extends ExtensionServiceProvider
             [
                 'default' => env('DB_CONNECTION', 'mysql'),
                 'databases' => [
-                    'default' => ['connection' => env('DB_CONNECTION', 'mysql')]
+                    'default' => ['connection' => env('DB_CONNECTION', 'mysql')],
                 ],
                 'connections' => [
                     'mysql' => [
                         'driver' => 'mysql',
                         'host' => env('DB_HOST', 'localhost'),
-                        'port' => (int) env('DB_PORT', 3306),
+                        'port' => (int) (is_numeric(env('DB_PORT', 3306)) ? env('DB_PORT', 3306) : 3306),
                         'database' => env('DB_DATABASE'),
                         'username' => env('DB_USERNAME'),
                         'password' => env('DB_PASSWORD', ''),
@@ -288,18 +314,20 @@ class CycleServiceProvider extends ExtensionServiceProvider
                         'options' => [
                             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
                             \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ]
         );
+
         return is_array($result) ? $result : [];
     }
 
-  /**
-   * Retorna a configuração das entidades.
-   * @return array<string, mixed>
-   */
+    /**
+     * Retorna a configuração das entidades.
+     *
+     * @return array<string, mixed>
+     */
     private function getEntityConfig(): array
     {
         $result = config(
@@ -308,16 +336,18 @@ class CycleServiceProvider extends ExtensionServiceProvider
                 'directories' => [
                     app_path('Models'),
                 ],
-                'namespace' => 'App\\Models'
+                'namespace' => 'App\Models',
             ]
         );
+
         return is_array($result) ? $result : [];
     }
 
-  /**
-   * Valida a configuração do banco de dados.
-   * @param array<string, mixed> $config
-   */
+    /**
+     * Valida a configuração do banco de dados.
+     *
+     * @param array<string, mixed> $config
+     */
     private function validateDatabaseConfig(array $config): void
     {
         $required = ['default', 'databases', 'connections'];
@@ -330,12 +360,12 @@ class CycleServiceProvider extends ExtensionServiceProvider
 
         $default = $config['default'];
         $defaultStr = (is_string($default) || is_numeric($default))
-            ? (string)$default
+            ? (string) $default
             : '';
         if (
-            !isset($config['connections']) ||
-            !is_array($config['connections']) ||
-            !isset($config['connections'][$defaultStr])
+            !isset($config['connections'])
+            || !is_array($config['connections'])
+            || !isset($config['connections'][$defaultStr])
         ) {
             throw new \InvalidArgumentException(
                 "Default connection '" . $defaultStr . "' not configured"
@@ -343,10 +373,11 @@ class CycleServiceProvider extends ExtensionServiceProvider
         }
     }
 
-  /**
-   * Valida a configuração das entidades.
-   * @param array<string, mixed> $config
-   */
+    /**
+     * Valida a configuração das entidades.
+     *
+     * @param array<string, mixed> $config
+     */
     private function validateEntityConfig(array $config): void
     {
         if (!isset($config['directories']) || !is_array($config['directories']) || empty($config['directories'])) {
@@ -358,39 +389,11 @@ class CycleServiceProvider extends ExtensionServiceProvider
                 throw new \InvalidArgumentException('Entity directory must be a string');
             }
             if (!is_dir($dir)) {
-              // Criar diretório se não existir
+                // Criar diretório se não existir
                 if (!mkdir($dir, 0755, true) && !is_dir($dir)) {
                     throw new \InvalidArgumentException("Entity directory cannot be created: {$dir}");
                 }
             }
         }
-    }
-
-  /**
-   * Garante que o handler é sempre callable (nunca array)
-   * Use este método ao registrar rotas no router:
-   *   $router->get('/rota', $this->ensureCallableHandler([$controller, 'metodo']));
-   * Assim, evita-se TypeError ao passar array como handler.
-   *
-   * @param mixed $handler
-   * @return callable
-   */
-    protected function ensureCallableHandler($handler): callable
-    {
-        if (is_callable($handler)) {
-            return $handler;
-        }
-        if (
-            is_array($handler) &&
-            count($handler) === 2 &&
-            is_object($handler[0]) &&
-            is_string($handler[1]) &&
-            method_exists($handler[0], $handler[1])
-        ) {
-            return function (...$args) use ($handler) {
-                return $handler[0]->{$handler[1]}(...$args);
-            };
-        }
-        throw new \InvalidArgumentException('Handler de rota inválido: deve ser callable.');
     }
 }

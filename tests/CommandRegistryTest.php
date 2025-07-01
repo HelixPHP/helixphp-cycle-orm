@@ -2,12 +2,14 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Tests;
 
-use PHPUnit\Framework\TestCase;
 use CAFernandes\ExpressPHP\CycleORM\Commands\CommandRegistry;
 use CAFernandes\ExpressPHP\CycleORM\Commands\EntityCommand;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CAFernandes\ExpressPHP\CycleORM\Commands\CommandRegistry
+ *
+ * @internal
  */
 class CommandRegistryTest extends TestCase
 {

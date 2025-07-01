@@ -12,12 +12,6 @@ parameters:
         - '#Class Cycle\\ORM\\ORM does not have a constructor#'
         - '#Class Cycle\\ORM\\EntityManager does not have a constructor#'
         - '#Call to an undefined method Cycle\\ORM\\ORM::getRepository#'
-        - '#Parameter \#1 \$dbal of class Cycle\\ORM\\Factory constructor expects Cycle\\Database\\DatabaseProviderInterface, Cycle\\Database\\DatabaseManager given#'
-        - '#Parameter \#1 \$dbal of class Cycle\\Schema\\Registry constructor expects Cycle\\Database\\DatabaseProviderInterface, Cycle\\Database\\DatabaseManager given#'
-        - '#Class Cycle\\ORM\\Select does not have a constructor and must be instantiated without any parameters#'
-        - '#Method .* is unused#'
-        - '#Call to an undefined method object::.*#'
-        - '#Parameter .* expects .*, object given#'
         # Integration test specific ignores (complex mocks)
         - path: tests/Integration/FullIntegrationTest.php
           message: '#has no type specified#'

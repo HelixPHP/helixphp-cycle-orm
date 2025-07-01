@@ -2,18 +2,31 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Tests;
 
-use PHPUnit\Framework\TestCase;
 use CAFernandes\ExpressPHP\CycleORM\Middleware\CycleMiddleware;
 use CAFernandes\ExpressPHP\CycleORM\Middleware\TransactionMiddleware;
+use Cycle\Database\Config\DatabaseConfig;
+use Cycle\Database\DatabaseManager;
+use Cycle\ORM\EntityManager;
+use Cycle\ORM\Factory;
+use Cycle\ORM\ORM;
+use Cycle\ORM\Schema;
+use Express\Core\Application;
 use Express\Http\Request;
 use Express\Http\Response;
-use Express\Core\Application;
+use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class MiddlewareTest extends TestCase
 {
-    private object $app;
-    private object $request;
-    private object $response;
+    private Application $app;
+
+    private Request $request;
+
+    private Response $response;
 
     protected function setUp(): void
     {
@@ -25,26 +38,27 @@ class MiddlewareTest extends TestCase
 
     public function testCycleMiddlewareInjectsServices(): void
     {
-        $dbal = new \Cycle\Database\DatabaseManager(
-            new \Cycle\Database\Config\DatabaseConfig(
+        $dbal = new DatabaseManager(
+            new DatabaseConfig(
                 [
                     'default' => 'default',
                     'databases' => [
-                        'default' => ['connection' => 'sqlite']
+                        'default' => ['connection' => 'sqlite'],
                     ],
                     'connections' => [
                         'sqlite' => [
                             'driver' => 'sqlite',
-                            'database' => ':memory:'
-                        ]
-                    ]
+                            'database' => ':memory:',
+                        ],
+                    ],
                 ]
             )
         );
-        $factory = new \Cycle\ORM\Factory($dbal);
-        $schema = new \Cycle\ORM\Schema([]);
-        $orm = new \Cycle\ORM\ORM($factory, $schema);
-        $em = new \Cycle\ORM\EntityManager($orm);
+        // @phpstan-ignore-next-line
+        $factory = new Factory($dbal);
+        $schema = new Schema([]);
+        $orm = new ORM($factory, $schema);
+        $em = new EntityManager($orm);
         $this->app->singleton('cycle.orm', $orm);
         $this->app->singleton('cycle.em', $em);
         $this->app->singleton('cycle.database', $dbal);
@@ -72,27 +86,28 @@ class MiddlewareTest extends TestCase
 
     public function testTransactionMiddlewareHandlesCommit(): void
     {
-        $dbal = new \Cycle\Database\DatabaseManager(
-            new \Cycle\Database\Config\DatabaseConfig(
+        $dbal = new DatabaseManager(
+            new DatabaseConfig(
                 [
                     'default' => 'default',
                     'databases' => [
-                        'default' => ['connection' => 'sqlite']
+                        'default' => ['connection' => 'sqlite'],
                     ],
                     'connections' => [
                         'sqlite' => [
                             'driver' => 'sqlite',
-                            'database' => ':memory:'
-                        ]
-                    ]
+                            'database' => ':memory:',
+                        ],
+                    ],
                 ]
             )
         );
-        $factory = new \Cycle\ORM\Factory($dbal);
-        $schema = new \Cycle\ORM\Schema([]);
-        $orm = new \Cycle\ORM\ORM($factory, $schema);
-        $em = new \Cycle\ORM\EntityManager($orm);
-        $this->app = $this->createRealAppWithEM($em);
+        // @phpstan-ignore-next-line
+        $factory = new Factory($dbal);
+        $schema = new Schema([]);
+        $orm = new ORM($factory, $schema);
+        $em = new EntityManager($orm);
+        $this->app = $this->createRealAppWithEM($em, $orm, $dbal);
         $middleware = new TransactionMiddleware($this->app);
         $called = false;
         $next = function () use (&$called) {
@@ -104,27 +119,28 @@ class MiddlewareTest extends TestCase
 
     public function testTransactionMiddlewareHandlesRollback(): void
     {
-        $dbal = new \Cycle\Database\DatabaseManager(
-            new \Cycle\Database\Config\DatabaseConfig(
+        $dbal = new DatabaseManager(
+            new DatabaseConfig(
                 [
                     'default' => 'default',
                     'databases' => [
-                        'default' => ['connection' => 'sqlite']
+                        'default' => ['connection' => 'sqlite'],
                     ],
                     'connections' => [
                         'sqlite' => [
                             'driver' => 'sqlite',
-                            'database' => ':memory:'
-                        ]
-                    ]
+                            'database' => ':memory:',
+                        ],
+                    ],
                 ]
             )
         );
-        $factory = new \Cycle\ORM\Factory($dbal);
-        $schema = new \Cycle\ORM\Schema([]);
-        $orm = new \Cycle\ORM\ORM($factory, $schema);
-        $em = new \Cycle\ORM\EntityManager($orm);
-        $this->app = $this->createRealAppWithEM($em);
+        // @phpstan-ignore-next-line
+        $factory = new Factory($dbal);
+        $schema = new Schema([]);
+        $orm = new ORM($factory, $schema);
+        $em = new EntityManager($orm);
+        $this->app = $this->createRealAppWithEM($em, $orm, $dbal);
         $middleware = new TransactionMiddleware($this->app);
         $this->expectException(\Exception::class);
         $middleware->handle(
@@ -136,15 +152,16 @@ class MiddlewareTest extends TestCase
         );
     }
 
-    private function createRealAppWithEM(object $em): \Express\Core\Application
+    private function createRealAppWithEM(EntityManager $em, ORM $orm, DatabaseManager $dbal): Application
     {
-        $app = new \Express\Core\Application();
-        $app->singleton('cycle.em', fn() => $em);
+        $app = new Application();
+        $app->singleton('cycle.em', fn () => $em);
         $app->alias('cycle.em', 'em');
-        $app->singleton('cycle.orm', fn() => $em->getORM());
+        $app->singleton('cycle.orm', fn () => $orm);
         $app->alias('cycle.orm', 'orm');
-        $app->singleton('cycle.database', fn() => $em->getORM()->getFactory()->getDatabaseProvider());
+        $app->singleton('cycle.database', fn () => $dbal);
         $app->alias('cycle.database', 'db');
+
         return $app;
     }
 }

@@ -6,8 +6,6 @@ class EnvironmentHelper
 {
     /**
      * Verifica se o ambiente é produção.
-     *
-     * @return bool
      */
     public static function isProduction(): bool
     {
@@ -16,8 +14,6 @@ class EnvironmentHelper
 
     /**
      * Verifica se o ambiente é desenvolvimento.
-     *
-     * @return bool
      */
     public static function isDevelopment(): bool
     {
@@ -26,8 +22,6 @@ class EnvironmentHelper
 
     /**
      * Verifica se o ambiente é de testes.
-     *
-     * @return bool
      */
     public static function isTesting(): bool
     {
@@ -36,12 +30,11 @@ class EnvironmentHelper
 
     /**
      * Retorna o nome do ambiente atual.
-     *
-     * @return string
      */
     public static function getEnvironment(): string
     {
         $env = env('APP_ENV', 'production');
+
         return is_string($env) ? $env : 'production';
     }
 }

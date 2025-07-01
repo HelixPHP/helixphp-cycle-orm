@@ -5,14 +5,15 @@ namespace CAFernandes\ExpressPHP\CycleORM\Health;
 use Psr\Container\ContainerInterface;
 
 /**
- * Sistema de Health Check para Cycle ORM
+ * Sistema de Health Check para Cycle ORM.
  */
 class CycleHealthCheck
 {
     /**
-     * Verificar saúde geral do sistema Cycle ORM
+     * Verificar saúde geral do sistema Cycle ORM.
      *
      * @param object $app Container da aplicação
+     *
      * @return array<string, mixed>
      */
     public static function check(object $app): array
@@ -21,7 +22,7 @@ class CycleHealthCheck
         $status = [
             'cycle_orm' => 'healthy',
             'timestamp' => date('c'),
-            'checks' => []
+            'checks' => [],
         ];
 
         try {
@@ -40,7 +41,7 @@ class CycleHealthCheck
             // Status geral
             $allHealthy = true;
             foreach ($status['checks'] as $check) {
-                if ($check['status'] !== 'healthy') {
+                if ('healthy' !== $check['status']) {
                     $allHealthy = false;
                     break;
                 }
@@ -58,9 +59,37 @@ class CycleHealthCheck
     }
 
     /**
-     * Verificar serviços registrados
+     * Health check detalhado para debugging.
      *
-     * @param object|ContainerInterface $app
+     * @return array<string, mixed>
+     */
+    public static function detailedCheck(object $app): array
+    {
+        $basicCheck = self::check($app);
+
+        // Adicionar informações detalhadas
+        $basicCheck['detailed'] = [
+            'php_version' => PHP_VERSION,
+            'cycle_version' => self::getCycleVersion(),
+            'pdo_drivers' => \PDO::getAvailableDrivers(),
+            'loaded_extensions' => self::getRelevantExtensions(),
+            'configuration' => self::getConfiguration($app),
+            'environment' => [
+                'app_env' => function_exists('env') ? env('APP_ENV', 'unknown') : (getenv('APP_ENV') ?: 'unknown'),
+                'debug_mode' => function_exists('env') ? env('APP_DEBUG', false) : (getenv('APP_DEBUG') ?: false),
+                'memory_limit' => ini_get('memory_limit'),
+                'max_execution_time' => ini_get('max_execution_time'),
+            ],
+        ];
+
+        return $basicCheck;
+    }
+
+    /**
+     * Verificar serviços registrados.
+     *
+     * @param ContainerInterface|object $app
+     *
      * @return array<string, mixed>
      */
     private static function checkServices(object $app): array
@@ -71,7 +100,7 @@ class CycleHealthCheck
             'cycle.em' => 'Entity Manager',
             'cycle.schema' => 'Schema',
             'cycle.migrator' => 'Migrator',
-            'cycle.repository' => 'Repository Factory'
+            'cycle.repository' => 'Repository Factory',
         ];
 
         $registered = [];
@@ -102,14 +131,15 @@ class CycleHealthCheck
         return [
             'registered' => $registered,
             'missing' => $missing,
-            'status' => empty($missing) ? 'healthy' : 'unhealthy'
+            'status' => empty($missing) ? 'healthy' : 'unhealthy',
         ];
     }
 
     /**
-     * Verificar conexão com database
+     * Verificar conexão com database.
      *
-     * @param object|ContainerInterface $app
+     * @param ContainerInterface|object $app
+     *
      * @return array<string, mixed>
      */
     private static function checkDatabase(object $app): array
@@ -126,13 +156,13 @@ class CycleHealthCheck
         } elseif (method_exists($app, 'getContainer')) {
             $container = $app->getContainer();
             if (
-                is_object($container) &&
-                method_exists($container, 'has') &&
-                $container->has('cycle.database')
+                is_object($container)
+                && method_exists($container, 'has')
+                && $container->has('cycle.database')
             ) {
                 $dbManager = (
-                    is_object($container) &&
-                    method_exists($container, 'get')
+                    is_object($container)
+                    && method_exists($container, 'get')
                 ) ? $container->get('cycle.database') : null;
             }
         }
@@ -143,14 +173,15 @@ class CycleHealthCheck
         }
 
         return [
-            'status' => $hasDatabase ? 'healthy' : 'unhealthy'
+            'status' => $hasDatabase ? 'healthy' : 'unhealthy',
         ];
     }
 
     /**
-     * Verificar schema
+     * Verificar schema.
      *
-     * @param object|ContainerInterface $app
+     * @param ContainerInterface|object $app
+     *
      * @return array<string, mixed>
      */
     private static function checkSchema(object $app): array
@@ -167,13 +198,13 @@ class CycleHealthCheck
         } elseif (method_exists($app, 'getContainer')) {
             $container = $app->getContainer();
             if (
-                is_object($container) &&
-                method_exists($container, 'has') &&
-                $container->has('cycle.orm')
+                is_object($container)
+                && method_exists($container, 'has')
+                && $container->has('cycle.orm')
             ) {
                 $orm = (
-                    is_object($container) &&
-                    method_exists($container, 'get')
+                    is_object($container)
+                    && method_exists($container, 'get')
                 ) ? $container->get('cycle.orm') : null;
             }
         }
@@ -184,15 +215,13 @@ class CycleHealthCheck
         }
 
         return [
-            'status' => $hasSchema ? 'healthy' : 'unhealthy'
+            'status' => $hasSchema ? 'healthy' : 'unhealthy',
         ];
     }
 
     /**
-     * Verificar performance
+     * Verificar performance.
      *
-     * @param object $app
-     * @param float $startTime
      * @return array<string, mixed>
      */
     private static function checkPerformance(object $app, float $startTime): array
@@ -228,37 +257,7 @@ class CycleHealthCheck
     }
 
     /**
-     * Health check detalhado para debugging
-     *
-     * @param object $app
-     * @return array<string, mixed>
-     */
-    public static function detailedCheck(object $app): array
-    {
-        $basicCheck = self::check($app);
-
-        // Adicionar informações detalhadas
-        $basicCheck['detailed'] = [
-            'php_version' => PHP_VERSION,
-            'cycle_version' => self::getCycleVersion(),
-            'pdo_drivers' => \PDO::getAvailableDrivers(),
-            'loaded_extensions' => self::getRelevantExtensions(),
-            'configuration' => self::getConfiguration($app),
-            'environment' => [
-                'app_env' => function_exists('env') ? env('APP_ENV', 'unknown') : (getenv('APP_ENV') ?: 'unknown'),
-                'debug_mode' => function_exists('env') ? env('APP_DEBUG', false) : (getenv('APP_DEBUG') ?: false),
-                'memory_limit' => ini_get('memory_limit'),
-                'max_execution_time' => ini_get('max_execution_time')
-            ]
-        ];
-
-        return $basicCheck;
-    }
-
-    /**
-     * Retorna a versão do Cycle ORM
-     *
-     * @return string
+     * Retorna a versão do Cycle ORM.
      */
     private static function getCycleVersion(): string
     {
@@ -272,14 +271,15 @@ class CycleHealthCheck
         }
         foreach ($json['packages'] as $package) {
             if (isset($package['name']) && str_starts_with($package['name'], 'cycle/')) {
-                return (string)($package['version'] ?? '');
+                return (string) ($package['version'] ?? '');
             }
         }
+
         return '';
     }
 
     /**
-     * Retorna extensões relevantes
+     * Retorna extensões relevantes.
      *
      * @return array<int, string>
      */
@@ -296,13 +296,13 @@ class CycleHealthCheck
                 $result[] = $ext;
             }
         }
+
         return $result;
     }
 
     /**
-     * Retorna configuração do Cycle ORM
+     * Retorna configuração do Cycle ORM.
      *
-     * @param object $app
      * @return array<string, mixed>
      */
     private static function getConfiguration(object $app): array
@@ -334,6 +334,7 @@ if (!function_exists('base_path')) {
     function base_path(string $path = ''): string
     {
         $basePath = dirname(__DIR__, 4);
+
         return $basePath . ($path ? '/' . ltrim($path, '/') : '');
     }
 }

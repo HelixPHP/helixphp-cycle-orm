@@ -2,19 +2,32 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Tests;
 
-use PHPUnit\Framework\TestCase;
 use CAFernandes\ExpressPHP\CycleORM\Helpers\CycleHelpers;
 use CAFernandes\ExpressPHP\CycleORM\Helpers\EnvironmentHelper;
+use CAFernandes\ExpressPHP\CycleORM\Tests\Fixtures\TestEntity;
+use Cycle\Database\Config\DatabaseConfig;
+use Cycle\Database\Config\SQLite\MemoryConnectionConfig;
+use Cycle\Database\Config\SQLiteDriverConfig;
+use Cycle\Database\DatabaseManager;
+use Cycle\ORM\EntityManager;
+use Cycle\ORM\Factory;
+use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\ORM;
+use Cycle\ORM\Schema;
+use Cycle\ORM\Select;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CAFernandes\ExpressPHP\CycleORM\Helpers\CycleHelpers
  * @covers \CAFernandes\ExpressPHP\CycleORM\Helpers\EnvironmentHelper
+ *
+ * @internal
  */
 class HelpersTest extends TestCase
 {
     public function testPaginateValidation(): void
     {
-        $mockQuery = $this->createMock(\Cycle\ORM\Select::class);
+        $mockQuery = $this->createMock(Select::class);
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Page must be greater than 0');
@@ -24,7 +37,7 @@ class HelpersTest extends TestCase
 
     public function testPaginatePerPageValidation(): void
     {
-        $mockQuery = $this->createMock(\Cycle\ORM\Select::class);
+        $mockQuery = $this->createMock(Select::class);
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Per page must be between 1 and 1000');
@@ -35,32 +48,33 @@ class HelpersTest extends TestCase
     public function testApplyFiltersWithAllowedFields(): void
     {
         $pdo = new \PDO('sqlite::memory:');
-        $dbal = new \Cycle\Database\DatabaseManager(
-            new \Cycle\Database\Config\DatabaseConfig(
+        $dbal = new DatabaseManager(
+            new DatabaseConfig(
                 [
                     'default' => 'default',
                     'databases' => [
-                        'default' => ['connection' => 'sqlite']
+                        'default' => ['connection' => 'sqlite'],
                     ],
                     'connections' => [
-                        'sqlite' => new \Cycle\Database\Config\SQLiteDriverConfig(
-                            connection: new \Cycle\Database\Config\SQLite\MemoryConnectionConfig()
-                        )
-                    ]
+                        'sqlite' => new SQLiteDriverConfig(
+                            connection: new MemoryConnectionConfig()
+                        ),
+                    ],
                 ]
             )
         );
-        $factory = new \Cycle\ORM\Factory($dbal);
-        $schema = new \Cycle\ORM\Schema(
+        // @phpstan-ignore-next-line
+        $factory = new Factory($dbal);
+        $schema = new Schema(
             [
                 'TestEntity' => [
-                    \Cycle\ORM\Schema::ENTITY => \CAFernandes\ExpressPHP\CycleORM\Tests\Fixtures\TestEntity::class,
-                    \Cycle\ORM\Schema::MAPPER => \Cycle\ORM\Mapper\Mapper::class,
-                    \Cycle\ORM\Schema::DATABASE => 'default',
-                    \Cycle\ORM\Schema::TABLE => 'test_entities',
-                    \Cycle\ORM\Schema::PRIMARY_KEY => 'id',
-                    \Cycle\ORM\Schema::COLUMNS => ['id', 'name', 'description', 'active', 'createdAt'],
-                    \Cycle\ORM\Schema::TYPECAST => [
+                    Schema::ENTITY => TestEntity::class,
+                    Schema::MAPPER => Mapper::class,
+                    Schema::DATABASE => 'default',
+                    Schema::TABLE => 'test_entities',
+                    Schema::PRIMARY_KEY => 'id',
+                    Schema::COLUMNS => ['id', 'name', 'description', 'active', 'createdAt'],
+                    Schema::TYPECAST => [
                         'id' => 'int',
                         'active' => 'bool',
                         'createdAt' => 'datetime',
@@ -68,9 +82,10 @@ class HelpersTest extends TestCase
                 ],
             ]
         );
-        $orm = new \Cycle\ORM\ORM($factory, $schema);
-        $em = new \Cycle\ORM\EntityManager($orm);
-        $select = new \Cycle\ORM\Select($orm, \CAFernandes\ExpressPHP\CycleORM\Tests\Fixtures\TestEntity::class);
+        $orm = new ORM($factory, $schema);
+        $em = new EntityManager($orm);
+        // @phpstan-ignore-next-line
+        $select = new Select($orm, TestEntity::class);
         $filters = ['name' => 'John', 'forbidden' => 'value'];
         $allowedFields = ['name'];
         $result = CycleHelpers::applyFilters($select, $filters, $allowedFields);
@@ -79,7 +94,7 @@ class HelpersTest extends TestCase
 
     public function testApplySortingWithInvalidDirection(): void
     {
-        $mockQuery = $this->createMock(\Cycle\ORM\Select::class);
+        $mockQuery = $this->createMock(Select::class);
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("Sort direction must be 'asc' or 'desc'");
@@ -89,7 +104,7 @@ class HelpersTest extends TestCase
 
     public function testApplySortingWithDisallowedField(): void
     {
-        $mockQuery = $this->createMock(\Cycle\ORM\Select::class);
+        $mockQuery = $this->createMock(Select::class);
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("Sort field 'forbidden' is not allowed");
@@ -99,7 +114,7 @@ class HelpersTest extends TestCase
 
     public function testEnvironmentHelper(): void
     {
-      // Mock environment variables
+        // Mock environment variables
         $_ENV['APP_ENV'] = 'testing';
 
         $this->assertTrue(EnvironmentHelper::isTesting());
@@ -107,7 +122,7 @@ class HelpersTest extends TestCase
         $this->assertFalse(EnvironmentHelper::isDevelopment());
         $this->assertEquals('testing', EnvironmentHelper::getEnvironment());
 
-      // Cleanup
+        // Cleanup
         unset($_ENV['APP_ENV']);
     }
 }

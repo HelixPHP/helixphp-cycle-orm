@@ -2,12 +2,12 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Health;
 
+use Express\Core\Application;
 use Express\Http\Request;
 use Express\Http\Response;
-use Express\Core\Application;
 
 /**
- * Middleware para expor endpoint de health check
+ * Middleware para expor endpoint de health check.
  */
 class HealthCheckMiddleware
 {
@@ -32,8 +32,9 @@ class HealthCheckMiddleware
         }
 
         // Verificar se é uma requisição de health check
-        if ($path === '/health/cycle' || $path === '/health') {
+        if ('/health/cycle' === $path || '/health' === $path) {
             $this->handleHealthCheck($req, $res);
+
             return;
         }
 
@@ -50,11 +51,11 @@ class HealthCheckMiddleware
             $health = CycleHealthCheck::check($this->app);
         }
 
-        $statusCode = $health['cycle_orm'] === 'healthy' ? 200 : 503;
+        $statusCode = 'healthy' === $health['cycle_orm'] ? 200 : 503;
 
         $res->status($statusCode)
-        ->header('Content-Type', 'application/json')
-        ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-        ->json($health);
+            ->header('Content-Type', 'application/json')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->json($health);
     }
 }

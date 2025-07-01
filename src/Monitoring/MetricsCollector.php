@@ -3,12 +3,12 @@
 namespace CAFernandes\ExpressPHP\CycleORM\Monitoring;
 
 /**
- * Coletor de métricas para Cycle ORM
+ * Coletor de métricas para Cycle ORM.
  */
 class MetricsCollector
 {
     /**
-     * @var array<string, int|float>
+     * @var array<string, float|int>
      */
     private static array $metrics = [
         'queries_executed' => 0,
@@ -27,11 +27,7 @@ class MetricsCollector
     private static array $slowQueries = [];
 
     /**
-     * Incrementar contador de métrica
-     *
-     * @param string $metric
-     * @param int $value
-     * @return void
+     * Incrementar contador de métrica.
      */
     public static function increment(string $metric, int $value = 1): void
     {
@@ -41,11 +37,7 @@ class MetricsCollector
     }
 
     /**
-     * Registrar tempo de query
-     *
-     * @param string $query
-     * @param float $timeMs
-     * @return void
+     * Registrar tempo de query.
      */
     public static function recordQueryTime(string $query, float $timeMs): void
     {
@@ -58,7 +50,7 @@ class MetricsCollector
             self::$slowQueries[] = [
                 'query' => substr($query, 0, 100) . '...',
                 'time_ms' => $timeMs,
-                'timestamp' => time()
+                'timestamp' => time(),
             ];
 
             // Manter apenas últimas 10 queries lentas
@@ -69,31 +61,27 @@ class MetricsCollector
     }
 
     /**
-     * Registrar falha de query
-     *
-     * @param string $query
-     * @return void
+     * Registrar falha de query.
      */
     public static function recordQueryFailure(string $query): void
     {
         self::$metrics['queries_failed']++;
-        error_log("Cycle ORM Query Failed: Query: " . substr($query, 0, 100));
+        error_log('Cycle ORM Query Failed: Query: ' . substr($query, 0, 100));
     }
 
     /**
-     * Retorna métricas atuais (exceto slowQueries)
+     * Retorna métricas atuais (exceto slowQueries).
      *
-     * @return array<string, int|float>
+     * @return array<string, float|int>
      */
     public static function getMetrics(): array
     {
-        $metrics = self::$metrics;
+        return self::$metrics;
         // Não existe a chave 'slowQueries' em metrics, então não é necessário unset
-        return $metrics;
     }
 
     /**
-     * Retorna queries lentas
+     * Retorna queries lentas.
      *
      * @return array<int, array<string, mixed>>
      */

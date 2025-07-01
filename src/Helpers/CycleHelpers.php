@@ -5,13 +5,14 @@ namespace CAFernandes\ExpressPHP\CycleORM\Helpers;
 class CycleHelpers
 {
     /**
-     * Paginação otimizada com cache de count
+     * Paginação otimizada com cache de count.
      *
-     * @param object $query Query do ORM (ex: Select)
-     * @param int $page Página atual
-     * @param int $perPage Itens por página
-     * @param bool $cacheCount Se deve usar cache para o count
-     * @return array{data: array<int, mixed>, pagination: array<string, int|bool>}
+     * @param object $query      Query do ORM (ex: Select)
+     * @param int    $page       Página atual
+     * @param int    $perPage    Itens por página
+     * @param bool   $cacheCount Se deve usar cache para o count
+     *
+     * @return array{data: array<int, mixed>, pagination: array<string, bool|int>}
      */
     public static function paginate(object $query, int $page = 1, int $perPage = 15, bool $cacheCount = true): array
     {
@@ -36,6 +37,7 @@ class CycleHelpers
         }
         $items = is_object($query) && method_exists($query, 'fetchAll') ? $query->fetchAll() : [];
         $lastPage = max(1, (int) ceil($count / $perPage));
+
         return [
             'data' => $items,
             'pagination' => [
@@ -45,17 +47,18 @@ class CycleHelpers
                 'last_page' => $lastPage,
                 'from' => $count > 0 ? $offset + 1 : 0,
                 'to' => min($offset + $perPage, $count),
-                'has_more' => $page < $lastPage
-            ]
+                'has_more' => $page < $lastPage,
+            ],
         ];
     }
 
     /**
-     * Filtros com sanitização e validação
+     * Filtros com sanitização e validação.
      *
-     * @param object $query Query do ORM
-     * @param array<string, mixed> $filters Filtros a aplicar
-     * @param array<int, string> $allowedFields Campos permitidos
+     * @param object               $query         Query do ORM
+     * @param array<string, mixed> $filters       Filtros a aplicar
+     * @param array<int, string>   $allowedFields Campos permitidos
+     *
      * @return object Query modificada
      */
     public static function applyFilters(object $query, array $filters, array $allowedFields = []): object
@@ -64,18 +67,18 @@ class CycleHelpers
             if (!empty($allowedFields) && !in_array($field, $allowedFields)) {
                 continue;
             }
-            if ($value === null || $value === '' || $value === []) {
+            if (null === $value || '' === $value || [] === $value) {
                 continue;
             }
             if (is_object($query) && method_exists($query, 'where')) {
                 if (is_array($value)) {
                     $query = $query->where($field, 'IN', array_filter($value));
-                } elseif (is_string($value) && strpos($value, '%') !== false) {
+                } elseif (is_string($value) && false !== strpos($value, '%')) {
                     $query = $query->where($field, 'LIKE', $value);
                 } elseif (
-                    is_string($value) &&
-                    preg_match(
-                        '/^(\\d{4}-\\d{2}-\\d{2})\\.\\.(\\d{4}-\\d{2}-\\d{2})$/',
+                    is_string($value)
+                    && preg_match(
+                        '/^(\d{4}-\d{2}-\d{2})\.\.(\d{4}-\d{2}-\d{2})$/',
                         $value,
                         $matches
                     )
@@ -87,16 +90,18 @@ class CycleHelpers
                 }
             }
         }
+
         return $query;
     }
 
     /**
-     * Ordenação dinâmica
+     * Ordenação dinâmica.
      *
-     * @param object $query Query do ORM
-     * @param string|null $sortBy Campo para ordenar
-     * @param string $direction Direção (asc|desc)
+     * @param object             $query         Query do ORM
+     * @param null|string        $sortBy        Campo para ordenar
+     * @param string             $direction     Direção (asc|desc)
      * @param array<int, string> $allowedFields Campos permitidos
+     *
      * @return object Query modificada
      */
     public static function applySorting(
@@ -118,15 +123,17 @@ class CycleHelpers
         if (is_object($query) && method_exists($query, 'orderBy')) {
             return $query->orderBy($sortBy, $direction);
         }
+
         return $query;
     }
 
     /**
-     * Busca textual simples
+     * Busca textual simples.
      *
-     * @param object $query Query do ORM
-     * @param string|null $search Termo de busca
+     * @param object             $query        Query do ORM
+     * @param null|string        $search       Termo de busca
      * @param array<int, string> $searchFields Campos pesquisáveis
+     *
      * @return object Query modificada
      */
     public static function applySearch(object $query, ?string $search = null, array $searchFields = []): object
@@ -146,6 +153,7 @@ class CycleHelpers
                 }
             );
         }
+
         return $query;
     }
 }

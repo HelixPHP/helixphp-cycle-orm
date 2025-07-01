@@ -2,41 +2,25 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Http;
 
-use Express\Http\Request;
-use Cycle\ORM\ORMInterface;
-use Cycle\ORM\EntityManagerInterface;
-use Cycle\ORM\RepositoryInterface;
 use Cycle\Database\DatabaseInterface;
+use Cycle\ORM\EntityManagerInterface;
+use Cycle\ORM\ORMInterface;
+use Cycle\ORM\RepositoryInterface;
+use Cycle\ORM\Select;
+use Express\Http\Request;
 
 /**
  * Wrapper que estende dinamicamente o Request original
- * Mantém 100% de compatibilidade com Express\Http\Request
+ * Mantém 100% de compatibilidade com Express\Http\Request.
  */
 class CycleRequest
 {
-    /**
-     * @var Request
-     */
-    private Request $originalRequest;
-
-    /**
-     * @var ORMInterface
-     */
     public ORMInterface $orm;
 
-    /**
-     * @var EntityManagerInterface
-     */
     public EntityManagerInterface $em;
 
-    /**
-     * @var DatabaseInterface
-     */
     public DatabaseInterface $db;
 
-    /**
-     * @var object|null
-     */
     public ?object $user = null;
 
     /**
@@ -44,86 +28,71 @@ class CycleRequest
      */
     public array $auth = [];
 
-    /**
-     * @param Request $request
-     */
+    private Request $originalRequest;
+
     public function __construct(Request $request)
     {
         $this->originalRequest = $request;
     }
 
     /**
-     * Encaminha chamadas dinâmicas para o Request original
+     * Encaminha chamadas dinâmicas para o Request original.
      *
-     * @param string $name
      * @param array<int, mixed> $arguments
-     * @return mixed
      */
     public function __call(string $name, array $arguments): mixed
     {
-        return $this->originalRequest->$name(...$arguments);
+        return $this->originalRequest->{$name}(...$arguments);
     }
 
     /**
-     * Encaminha acesso a propriedades para o Request original
-     *
-     * @param string $name
-     * @return mixed
+     * Encaminha acesso a propriedades para o Request original.
      */
     public function __get(string $name): mixed
     {
-        return $this->originalRequest->$name;
+        return $this->originalRequest->{$name};
     }
 
     /**
-     * Encaminha escrita de propriedades para o Request original
-     *
-     * @param string $name
-     * @param mixed $value
-     * @return void
+     * Encaminha escrita de propriedades para o Request original.
      */
     public function __set(string $name, mixed $value): void
     {
-        $this->originalRequest->$name = $value;
+        $this->originalRequest->{$name} = $value;
     }
 
     /**
-     * Retorna o repository de uma entidade
+     * Retorna o repository de uma entidade.
      *
-     * @param object|string $entity
      * @return RepositoryInterface<object>
      */
-    public function repository(object|string $entity): RepositoryInterface /*<object>*/
+    public function repository(object|string $entity): RepositoryInterface /* <object> */
     {
         // Garantir que $entity seja string não vazia ou objeto
-        if (is_string($entity) && $entity === '') {
+        if (is_string($entity) && '' === $entity) {
             throw new \InvalidArgumentException('Entity class name cannot be empty');
         }
+
         return $this->orm->getRepository($entity);
     }
 
     /**
-     * Inicializa uma entidade a partir de dados
+     * Inicializa uma entidade a partir de dados.
      *
-     * @param object|string $entity
      * @param array<string, mixed> $data
-     * @return object
      */
     public function entity(object|string $entity, array $data): object
     {
-        if (is_string($entity) && $entity === '') {
+        if (is_string($entity) && '' === $entity) {
             throw new \InvalidArgumentException('Entity class name cannot be empty');
         }
         $mapper = $this->orm->getMapper($entity);
+
         return $mapper->init($data);
     }
 
     /**
-     * Busca entidade por PK
-     *
-     * @param object|string $entity
-     * @param mixed $id
-     * @return object|null
+     * Busca entidade por PK.
      */
     public function find(object|string $entity, mixed $id): ?object
     {
@@ -131,14 +100,11 @@ class CycleRequest
     }
 
     /**
-     * Paginação de resultados
+     * Paginação de resultados.
      *
-     * @param \Cycle\ORM\Select $query
-     * @param int $page
-     * @param int $perPage
      * @return array<string, mixed>
      */
-    public function paginate(\Cycle\ORM\Select $query, int $page = 1, int $perPage = 15): array
+    public function paginate(Select $query, int $page = 1, int $perPage = 15): array
     {
         $offset = ($page - 1) * $perPage;
         $total = method_exists($query, 'count') ? $query->count() : 0;
@@ -147,6 +113,7 @@ class CycleRequest
         }
         $items = (is_object($query) && method_exists($query, 'fetchAll')) ? $query->fetchAll() : [];
         $lastPage = max(1, (int) ceil($total / $perPage));
+
         return [
             'data' => $items,
             'pagination' => [
@@ -156,15 +123,16 @@ class CycleRequest
                 'last_page' => $lastPage,
                 'from' => $total > 0 ? $offset + 1 : 0,
                 'to' => min($offset + $perPage, $total),
-                'has_more' => $page < $lastPage
-            ]
+                'has_more' => $page < $lastPage,
+            ],
         ];
     }
 
     /**
-     * Validação de entidade
+     * Validação de entidade.
      *
      * @param array<string, mixed> $rules
+     *
      * @return array<string, mixed>
      */
     public function validateEntity(array $rules): array
@@ -173,9 +141,6 @@ class CycleRequest
         return ['valid' => true, 'errors' => []];
     }
 
-    /**
-     * @return Request
-     */
     public function getOriginalRequest(): Request
     {
         return $this->originalRequest;

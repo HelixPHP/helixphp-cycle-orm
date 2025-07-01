@@ -6,7 +6,7 @@ class Select
 {
     public function where(mixed $field, mixed $value): self
     {
-      // Simula encadeamento
+        // Simula encadeamento
         return $this;
     }
 }

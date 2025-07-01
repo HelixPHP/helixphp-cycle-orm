@@ -13,7 +13,7 @@ $_ENV['CYCLE_SCHEMA_CACHE'] = 'false';
 // Preparar diretórios de teste
 $testDirs = [
     __DIR__ . '/temp',
-    __DIR__ . '/Fixtures/Models'
+    __DIR__ . '/Fixtures/Models',
 ];
 
 foreach ($testDirs as $dir) {

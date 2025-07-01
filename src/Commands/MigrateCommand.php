@@ -16,11 +16,11 @@ namespace CAFernandes\ExpressPHP\CycleORM\Commands;
  */
 class MigrateCommand extends BaseCommand
 {
-  /**
-   * Executa o comando principal para migrações.
-   *
-   * @return int Código de status (0 = sucesso, 1 = erro)
-   */
+    /**
+     * Executa o comando principal para migrações.
+     *
+     * @return int Código de status (0 = sucesso, 1 = erro)
+     */
     public function handle(): int
     {
         if ($this->option('rollback')) {
@@ -30,11 +30,11 @@ class MigrateCommand extends BaseCommand
         return $this->migrate();
     }
 
-  /**
-   * Executa as migrações pendentes.
-   *
-   * @return int Código de status (0 = sucesso, 1 = erro)
-   */
+    /**
+     * Executa as migrações pendentes.
+     *
+     * @return int Código de status (0 = sucesso, 1 = erro)
+     */
     private function migrate(): int
     {
         $this->info('Running migrations...');
@@ -44,6 +44,7 @@ class MigrateCommand extends BaseCommand
                 $migrator = app('cycle.migrator');
             } else {
                 $this->error('Application container not available');
+
                 return 1;
             }
 
@@ -53,15 +54,16 @@ class MigrateCommand extends BaseCommand
             return 0;
         } catch (\Exception $e) {
             $this->error('Migration failed: ' . $e->getMessage());
+
             return 1;
         }
     }
 
-  /**
-   * Reverte a última migração executada.
-   *
-   * @return int Código de status (0 = sucesso, 1 = erro)
-   */
+    /**
+     * Reverte a última migração executada.
+     *
+     * @return int Código de status (0 = sucesso, 1 = erro)
+     */
     private function rollback(): int
     {
         $this->info('Rolling back last migration...');
@@ -71,6 +73,7 @@ class MigrateCommand extends BaseCommand
                 $migrator = app('cycle.migrator');
             } else {
                 $this->error('Application container not available');
+
                 return 1;
             }
 
@@ -80,6 +83,7 @@ class MigrateCommand extends BaseCommand
             return 0;
         } catch (\Exception $e) {
             $this->error('Rollback failed: ' . $e->getMessage());
+
             return 1;
         }
     }

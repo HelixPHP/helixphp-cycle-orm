@@ -2,10 +2,10 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Commands;
 
-use Psr\Container\ContainerInterface;
+use Cycle\Migrations\Migrator;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\SchemaInterface;
-use Cycle\Migrations\Migrator;
+use Psr\Container\ContainerInterface;
 
 /**
  * Comando para exibir e sincronizar o schema do Cycle ORM.
@@ -22,24 +22,22 @@ use Cycle\Migrations\Migrator;
  *   - syncSchema(): Sincroniza o schema do banco de dados.
  *   - showSchema(): Exibe informações do schema atual.
  *
- * @property ContainerInterface|object|null $app Instância da aplicação ou container.
+ * @property null|ContainerInterface|object $app Instância da aplicação ou container.
  */
 class SchemaCommand extends BaseCommand
 {
     /**
      * Instância da aplicação ou container.
-     *
-     * @var ContainerInterface|null
      */
-    protected ContainerInterface|null $app;
+    protected ?ContainerInterface $app;
 
     /**
      * Construtor do comando.
      *
-     * @param array<string, mixed> $args Argumentos do comando.
-     * @param ContainerInterface|null $app Instância da aplicação ou container.
+     * @param array<string, mixed>    $args argumentos do comando
+     * @param null|ContainerInterface $app  instância da aplicação ou container
      */
-    public function __construct(array $args = [], ContainerInterface|null $app = null)
+    public function __construct(array $args = [], ?ContainerInterface $app = null)
     {
         parent::__construct($args);
         $this->app = $app;
@@ -55,6 +53,7 @@ class SchemaCommand extends BaseCommand
         if ($this->option('sync')) {
             return $this->syncSchema();
         }
+
         return $this->showSchema();
     }
 
@@ -70,6 +69,7 @@ class SchemaCommand extends BaseCommand
             $migrator = $this->getService('cycle.migrator', Migrator::class);
             if (!$migrator) {
                 $this->error('Serviço cycle.migrator não encontrado no container.');
+
                 return 1;
             }
             if (method_exists($migrator, 'run')) {
@@ -78,6 +78,7 @@ class SchemaCommand extends BaseCommand
                 $result = $migrator->migrate();
             } else {
                 $this->error('O migrator não possui método run() ou migrate().');
+
                 return 1;
             }
             if ($result) {
@@ -85,9 +86,11 @@ class SchemaCommand extends BaseCommand
             } else {
                 $this->info('Schema já está atualizado.');
             }
+
             return 0;
         } catch (\Throwable $e) {
             $this->error('Falha ao sincronizar schema: ' . $e->getMessage());
+
             return 1;
         }
     }
@@ -101,15 +104,17 @@ class SchemaCommand extends BaseCommand
     {
         $this->info('Informações do Cycle ORM Schema');
         try {
-            /** @var ORMInterface|null $orm */
+            /** @var null|ORMInterface $orm */
             $orm = $this->getService('cycle.orm', ORMInterface::class);
             if (!$orm) {
                 $this->error('Serviço cycle.orm não encontrado no container.');
+
                 return 1;
             }
             $schema = $orm->getSchema();
             if (!$schema instanceof SchemaInterface) {
                 $this->error('Schema inválido ou não encontrado.');
+
                 return 1;
             }
             $entities = [];
@@ -118,13 +123,15 @@ class SchemaCommand extends BaseCommand
                     $role,
                     $schema->define($role, SchemaInterface::ENTITY),
                     $schema->define($role, SchemaInterface::TABLE),
-                    $schema->define($role, SchemaInterface::DATABASE)
+                    $schema->define($role, SchemaInterface::DATABASE),
                 ];
             }
             $this->table(['Role', 'Entity', 'Table', 'Database'], $entities);
+
             return 0;
         } catch (\Throwable $e) {
             $this->error('Falha ao exibir schema: ' . $e->getMessage());
+
             return 1;
         }
     }
@@ -132,11 +139,10 @@ class SchemaCommand extends BaseCommand
     /**
      * Obtém um serviço do container, com fallback para métodos Express-PHP e PSR-11.
      *
-     * @param string $service Nome do serviço.
-     * @param class-string|null $expectedClass Classe esperada para validação.
-     * @return object|null
+     * @param string            $service       nome do serviço
+     * @param null|class-string $expectedClass classe esperada para validação
      */
-    private function getService(string $service, ?string $expectedClass = null): object|null
+    private function getService(string $service, ?string $expectedClass = null): ?object
     {
         $container = $this->app;
         if (!$container) {
@@ -158,6 +164,7 @@ class SchemaCommand extends BaseCommand
         if ($expectedClass && !($instance instanceof $expectedClass)) {
             return null;
         }
+
         return $instance;
     }
 }

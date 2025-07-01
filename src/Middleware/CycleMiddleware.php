@@ -2,40 +2,42 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Middleware;
 
+use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
+use Cycle\Database\DatabaseInterface;
+use Cycle\ORM\EntityManagerInterface;
+use Cycle\ORM\ORMInterface;
+use Express\Core\Application;
 use Express\Http\Request;
 use Express\Http\Response;
-use Express\Core\Application;
-use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
-use Cycle\ORM\ORMInterface;
-use Cycle\ORM\EntityManagerInterface;
-use Cycle\Database\DatabaseInterface;
 
 /**
- * Middleware compatível com arquitetura real do Express-PHP
+ * Middleware compatível com arquitetura real do Express-PHP.
  */
 class CycleMiddleware
 {
-    /**
-     * @var Application
-     */
     private Application $app;
 
-    /**
-     * @param Application $app
-     */
     public function __construct(Application $app)
     {
         $this->app = $app;
     }
 
     /**
-     * Middleware principal do Cycle ORM
+     * Tornar o middleware compatível com o padrão callable do Express-PHP.
      *
-     * @param Request $req
-     * @param Response $res
-     * @param callable(Request|CycleRequest, Response):void $next Função next do Express-PHP,
-     *   recebe Request ou CycleRequest e Response.
-     * @return void
+     * @param callable(CycleRequest|Request, Response):void $next função next do Express-PHP,
+     *                                                            recebe Request ou CycleRequest e Response
+     */
+    public function __invoke(Request $req, Response $res, callable $next): void
+    {
+        $this->handle($req, $res, $next);
+    }
+
+    /**
+     * Middleware principal do Cycle ORM.
+     *
+     * @param callable(CycleRequest|Request, Response):void $next função next do Express-PHP,
+     *                                                            recebe Request ou CycleRequest e Response
      */
     public function handle(Request $req, Response $res, callable $next): void
     {
@@ -65,19 +67,5 @@ class CycleMiddleware
             $cycleReq->auth = $req->auth;
         }
         $next($cycleReq, $res);
-    }
-
-    /**
-     * Tornar o middleware compatível com o padrão callable do Express-PHP
-     *
-     * @param Request $req
-     * @param Response $res
-     * @param callable(Request|CycleRequest, Response):void $next Função next do Express-PHP,
-     *   recebe Request ou CycleRequest e Response.
-     * @return void
-     */
-    public function __invoke(Request $req, Response $res, callable $next): void
-    {
-        $this->handle($req, $res, $next);
     }
 }

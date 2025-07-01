@@ -2,25 +2,32 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Tests;
 
-use PHPUnit\Framework\TestCase;
 use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
+use CAFernandes\ExpressPHP\CycleORM\Middleware\CycleMiddleware;
 use Express\Core\Application;
+use Express\Routing\Router;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider
+ *
+ * @internal
  */
 class CycleServiceProviderTest extends TestCase
 {
     private object $container;
-    private \Express\Core\Application $app;
+
+    private Application $app;
+
     private CycleServiceProvider $provider;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->app = new class extends Application {
+        $this->app = new class () extends Application {
             /** @var array<int, callable> */
             private array $bootedCallbacks = [];
+
             public function booted(?callable $callback = null): void
             {
                 if ($callback) {
@@ -52,38 +59,37 @@ class CycleServiceProviderTest extends TestCase
 
     public function testBootMethodDoesNotThrow(): void
     {
-      // Mock do router para garantir que get() aceite qualquer callable
-        $mockRouter = $this->getMockBuilder(\Express\Routing\Router::class)
-        ->disableOriginalConstructor()
-        ->onlyMethods(['get'])
-        ->getMock();
+        // Mock do router para garantir que get() aceite qualquer callable
+        $mockRouter = $this->getMockBuilder(Router::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['get'])
+            ->getMock();
         $mockRouter->expects($this->any())
-        ->method('get')
-        ->willReturnCallback(
-            function ($route, $handler) {
-                $this->assertIsCallable($handler, 'Handler registrado no router deve ser callable');
-            }
-        );
-      // Cria um mock do container que retorna o mockRouter ao chamar get('router')
+            ->method('get')
+            ->willReturnCallback(
+                function ($route, $handler) {
+                    $this->assertIsCallable($handler, 'Handler registrado no router deve ser callable');
+                }
+            );
+        // Cria um mock do container que retorna o mockRouter ao chamar get('router')
         $mockContainer = $this->getMockBuilder(get_class($this->container))
-        ->disableOriginalConstructor()
-        ->onlyMethods(['get'])
-        ->getMock();
+            ->disableOriginalConstructor()
+            ->onlyMethods(['get'])
+            ->getMock();
         $mockContainer->method('get')->willReturnCallback(
             function ($service) use ($mockRouter) {
-                if ($service === 'router') {
+                if ('router' === $service) {
                     return $mockRouter;
                 }
-                return null;
             }
         );
-      // Injeta o mockContainer na app
+        // Injeta o mockContainer na app
         $ref = new \ReflectionObject($this->app);
         $prop = $ref->getProperty('container');
         $prop->setAccessible(true);
         $prop->setValue($this->app, $mockContainer);
-      // Adiciona o middleware CycleMiddleware ao Application
-        $this->app->use(new \CAFernandes\ExpressPHP\CycleORM\Middleware\CycleMiddleware($this->app));
+        // Adiciona o middleware CycleMiddleware ao Application
+        $this->app->use(new CycleMiddleware($this->app));
         $this->expectNotToPerformAssertions();
         $this->provider->boot();
     }
@@ -93,7 +99,7 @@ class CycleServiceProviderTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Missing required database config key');
 
-      // Simular validação de config inválida
+        // Simular validação de config inválida
         $reflection = new \ReflectionClass($this->provider);
         $method = $reflection->getMethod('validateDatabaseConfig');
         $method->setAccessible(true);

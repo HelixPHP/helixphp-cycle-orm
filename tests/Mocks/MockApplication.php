@@ -2,27 +2,33 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Tests\Mocks;
 
-class MockApplication extends \Express\Core\Application
+use Express\Core\Application;
+
+class MockApplication extends Application
 {
     public function __construct()
     {
-      // Não inicializa $container aqui!
+        // Não inicializa $container aqui!
     }
 
-    public function singleton(string $abstract, mixed $concrete = null): \Express\Core\Application
+    public function singleton(string $abstract, mixed $concrete = null): Application
     {
         $this->container->singleton($abstract, $concrete);
+
         return $this;
     }
+
     public function booted(?callable $callback = null): void
     {
         // Mock implementation - não faz nada
     }
-    public function alias(string $alias, string $abstract): \Express\Core\Application
+
+    public function alias(string $alias, string $abstract): Application
     {
         // Mock implementation
         return $this;
     }
+
     public function make(string $abstract): mixed
     {
         // Mock implementation - retorna um objeto genérico
@@ -38,25 +44,26 @@ class MockApplication extends \Express\Core\Application
                 'connections' => [
                     'sqlite' => [
                         'driver' => 'sqlite',
-                        'database' => ':memory:'
-                    ]
-                ]
+                        'database' => ':memory:',
+                    ],
+                ],
             ],
             'cycle.entities' => [
                 'directories' => [__DIR__ . '/../Fixtures/Models'],
-                'namespace' => 'Tests\\Fixtures\\Models'
+                'namespace' => 'Tests\Fixtures\Models',
             ],
             'cycle.schema' => [
                 'cache' => false,
-                'auto_sync' => false
-            ]
+                'auto_sync' => false,
+            ],
         ];
+
         return $config[$key] ?? $default;
     }
 
     public function has(string $service): bool
     {
-      // Para testes, retorna true para serviços conhecidos, false para outros
+        // Para testes, retorna true para serviços conhecidos, false para outros
         $known = [
             'cycle.orm',
             'cycle.em',
@@ -65,8 +72,9 @@ class MockApplication extends \Express\Core\Application
             'db',
             'orm',
             'em',
-            'schema'
+            'schema',
         ];
+
         return in_array($service, $known, true);
     }
 }

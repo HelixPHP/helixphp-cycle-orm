@@ -6,13 +6,10 @@ use Cycle\ORM\ORM;
 use Cycle\ORM\RepositoryInterface;
 
 /**
- * Repository Factory com cache e validação
+ * Repository Factory com cache e validação.
  */
 class RepositoryFactory
 {
-    /**
-     * @var ORM
-     */
     private ORM $orm;
 
     /**
@@ -37,23 +34,24 @@ class RepositoryFactory
      * Obtém o repository de uma entidade, com cache.
      *
      * @param class-string|object $entityClass
+     *
      * @return RepositoryInterface<object>
      */
-    public function getRepository(string|object $entityClass): RepositoryInterface /*<object>*/
+    public function getRepository(object|string $entityClass): RepositoryInterface /* <object> */
     {
         $key = is_object($entityClass) ? get_class($entityClass) : $entityClass;
         if (!isset($this->repositories[$key])) {
             $this->repositories[$key] = $this->orm->getRepository($entityClass);
         }
+
         return $this->repositories[$key];
     }
 
     /**
      * Registra um repository customizado para uma entidade.
      *
-     * @param class-string $entityClass
+     * @param class-string                              $entityClass
      * @param class-string<RepositoryInterface<object>> $repositoryClass
-     * @return void
      */
     public function registerCustomRepository(string $entityClass, string $repositoryClass): void
     {
@@ -72,8 +70,6 @@ class RepositoryFactory
 
     /**
      * Limpa o cache de repositories.
-     *
-     * @return void
      */
     public function clearCache(): void
     {
@@ -90,7 +86,7 @@ class RepositoryFactory
         return [
             'cached_repositories' => count($this->repositories),
             'custom_repositories' => count($this->customRepositories),
-            'entities' => array_keys($this->repositories)
+            'entities' => array_keys($this->repositories),
         ];
     }
 }

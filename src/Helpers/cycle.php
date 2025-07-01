@@ -1,14 +1,12 @@
 <?php
 
-use Express\Http\Request;
 use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
+use Express\Http\Request;
 
 /**
- * Helper para garantir que temos um CycleRequest
+ * Helper para garantir que temos um CycleRequest.
  *
- * @param Request $request
- * @return CycleRequest
- * @throws \RuntimeException Se o request não for um CycleRequest
+ * @throws RuntimeException Se o request não for um CycleRequest
  */
 function cycle(Request $request): CycleRequest
 {

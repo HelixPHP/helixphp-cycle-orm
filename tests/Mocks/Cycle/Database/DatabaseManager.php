@@ -4,5 +4,5 @@ namespace Cycle\Database;
 
 class DatabaseManager
 {
-  // Stub para uso em testes
+    // Stub para uso em testes
 }

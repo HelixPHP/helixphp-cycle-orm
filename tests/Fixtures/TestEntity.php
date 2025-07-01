@@ -2,8 +2,8 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Tests\Fixtures;
 
-use Cycle\Annotated\Annotation\Entity;
 use Cycle\Annotated\Annotation\Column;
+use Cycle\Annotated\Annotation\Entity;
 
 #[Entity(table: 'test_entities')]
 class TestEntity

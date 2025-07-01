@@ -2,22 +2,30 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Tests;
 
-use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
+use CAFernandes\ExpressPHP\CycleORM\Commands\CommandRegistry;
 use CAFernandes\ExpressPHP\CycleORM\Commands\EntityCommand;
 use CAFernandes\ExpressPHP\CycleORM\Commands\SchemaCommand;
-use CAFernandes\ExpressPHP\CycleORM\Commands\CommandRegistry;
+use Cycle\Database\Config\DatabaseConfig;
+use Cycle\Database\DatabaseManager;
+use Cycle\ORM\Factory;
+use Cycle\ORM\Schema;
+use Cycle\Schema\Compiler;
+use Cycle\Schema\Registry;
+use Express\Core\Application;
+use PHPUnit\Framework\TestCase;
 
 /**
+ * @covers \CAFernandes\ExpressPHP\CycleORM\Commands\CommandRegistry
  * @covers \CAFernandes\ExpressPHP\CycleORM\Commands\EntityCommand
  * @covers \CAFernandes\ExpressPHP\CycleORM\Commands\SchemaCommand
- * @covers \CAFernandes\ExpressPHP\CycleORM\Commands\CommandRegistry
+ *
+ * @internal
  */
 class CommandsTest extends TestCase
 {
     public function testEntityCommandRequiresName(): void
     {
-        $app = new \Express\Core\Application();
+        $app = new Application();
         $container = $app->getContainer();
         $command = new EntityCommand([]);
         ob_start();
@@ -30,11 +38,11 @@ class CommandsTest extends TestCase
     public function testEntityCommandWithValidName(): void
     {
         $entityPath = sys_get_temp_dir() . '/cycle_test_models/TestEntity.php';
-      // Limpa antes
+        // Limpa antes
         if (file_exists($entityPath)) {
             unlink($entityPath);
         }
-        $app = new \Express\Core\Application();
+        $app = new Application();
         $container = $app->getContainer();
         $command = new EntityCommand(['name' => 'TestEntity']);
         ob_start();
@@ -43,7 +51,7 @@ class CommandsTest extends TestCase
         $this->assertEquals(0, $result);
         $this->assertStringContainsString('Entity created', $output);
         $this->assertFileExists($entityPath);
-      // Limpa depois
+        // Limpa depois
         if (file_exists($entityPath)) {
             unlink($entityPath);
         }
@@ -51,43 +59,47 @@ class CommandsTest extends TestCase
 
     public function testSchemaCommandShowsInfo(): void
     {
-      // Instancia um ORM real para o teste
+        // Instancia um ORM real para o teste
         $pdo = new \PDO('sqlite::memory:');
-        $dbal = new \Cycle\Database\DatabaseManager(
-            new \Cycle\Database\Config\DatabaseConfig(
+        $dbal = new DatabaseManager(
+            new DatabaseConfig(
                 [
                     'default' => 'default',
                     'databases' => [
-                        'default' => ['connection' => 'sqlite']
+                        'default' => ['connection' => 'sqlite'],
                     ],
                     'connections' => [
                         'sqlite' => [
                             'driver' => 'sqlite',
-                            'database' => ':memory:'
-                        ]
-                    ]
+                            'database' => ':memory:',
+                        ],
+                    ],
                 ]
             )
         );
-        $factory = new \Cycle\ORM\Factory($dbal);
-        $registry = new \Cycle\Schema\Registry($dbal);
-        $schemaArray = (new \Cycle\Schema\Compiler())->compile($registry, []);
-        $schema = new \Cycle\ORM\Schema($schemaArray); // Corrigido: Schema real
+        // @phpstan-ignore-next-line
+        $factory = new Factory($dbal);
+        // @phpstan-ignore-next-line
+        $registry = new Registry($dbal);
+        $schemaArray = (new Compiler())->compile($registry, []);
+        $schema = new Schema($schemaArray); // Corrigido: Schema real
         $orm = new class ($schema) {
             private object $schema;
+
             public function __construct(object $schema)
             {
                 $this->schema = $schema;
             }
+
             public function getSchema(): object
             {
                 return $this->schema;
             }
         };
-      // Application Express-PHP real
-        $app = new \Express\Core\Application();
+        // Application Express-PHP real
+        $app = new Application();
         $container = $app->getContainer();
-        $container->bind('cycle.orm', fn() => $orm);
+        $container->bind('cycle.orm', fn () => $orm);
         $command = new SchemaCommand([], $container);
         ob_start();
         $result = $command->handle();
@@ -115,6 +127,7 @@ class CommandsTest extends TestCase
     }
 
     /** @SuppressWarnings("unused") */
+    // @phpstan-ignore-next-line
     private function recursiveDelete(string $dir): void
     {
         if (!is_dir($dir)) {
@@ -122,7 +135,7 @@ class CommandsTest extends TestCase
         }
 
         $scannedFiles = scandir($dir);
-        if ($scannedFiles === false) {
+        if (false === $scannedFiles) {
             return;
         }
         $files = array_diff($scannedFiles, ['.', '..']);

@@ -4,18 +4,15 @@ namespace CAFernandes\ExpressPHP\CycleORM\Monitoring;
 
 /**
  * Logger básico de queries para Cycle ORM
- * (Exemplo: apenas loga queries no error_log)
+ * (Exemplo: apenas loga queries no error_log).
  */
 class QueryLogger
 {
-  /**
-   * Loga uma query do Cycle ORM
-   *
-   * @param string $query
-   * @param array<int, mixed> $params
-   * @param float $timeMs
-   * @return void
-   */
+    /**
+     * Loga uma query do Cycle ORM.
+     *
+     * @param array<int, mixed> $params
+     */
     public function log(string $query, array $params = [], float $timeMs = 0.0): void
     {
         $msg = sprintf(

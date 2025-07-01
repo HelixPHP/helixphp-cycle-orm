@@ -3,17 +3,14 @@
 namespace CAFernandes\ExpressPHP\CycleORM\Helpers;
 
 /**
- * Helper para variáveis de ambiente
- *
- * @param string $key
- * @param string|false|null $default
- * @return string|false|null
+ * Helper para variáveis de ambiente.
  */
-function env(string $key, string|false|null $default = null): string|false|null
+function env(string $key, null|false|string $default = null): null|false|string
 {
     $value = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
-    if ($value === false) {
+    if (false === $value) {
         return $default;
     }
-    return (string)$value;
+
+    return (string) $value;
 }
