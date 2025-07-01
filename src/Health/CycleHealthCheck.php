@@ -174,12 +174,12 @@ class CycleHealthCheck
                 if (is_object($db) && method_exists($db, 'execute')) {
                     // Tenta executar um SELECT 1
                     $result = $db->execute('SELECT 1');
-                    $hasDatabase = ($result !== false);
+                    $hasDatabase = (false !== $result);
                 } elseif (is_object($db) && method_exists($db, 'getPDO')) {
                     // Fallback: tenta usar PDO diretamente
                     $pdo = $db->getPDO();
                     $stmt = $pdo->query('SELECT 1');
-                    $hasDatabase = ($stmt !== false);
+                    $hasDatabase = (false !== $stmt);
                 } else {
                     $hasDatabase = false;
                     $error = 'Método execute/getPDO não disponível na conexão.';
@@ -196,6 +196,7 @@ class CycleHealthCheck
         if ($error) {
             $status['error'] = $error;
         }
+
         return $status;
     }
 
