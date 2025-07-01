@@ -7,97 +7,97 @@ namespace CAFernandes\ExpressPHP\CycleORM\Monitoring;
  */
 class PerformanceProfiler
 {
-  private static array $profiles = [];
-  private static bool $enabled = false;
+    /**
+     * @var array<string, array<string, mixed>>
+     */
+    private static array $profiles = [];
+    private static bool $enabled = false;
 
-  /**
-   * Habilitar profiling
-   */
-  public static function enable(): void
-  {
-    self::$enabled = true;
-  }
-
-  /**
-   * Desabilitar profiling
-   */
-  public static function disable(): void
-  {
-    self::$enabled = false;
-  }
-
-  /**
-   * Iniciar profile
-   */
-  public static function start(string $name): void
-  {
-    if (!self::$enabled) {
-      return;
+    /**
+     * Habilitar profiling
+     * @return void
+     */
+    public static function enable(): void
+    {
+        self::$enabled = true;
     }
 
-    self::$profiles[$name] = [
-      'start_time' => microtime(true),
-      'start_memory' => memory_get_usage(true),
-      'queries_before' => MetricsCollector::getMetrics()['queries_executed'] ?? 0
-    ];
-  }
-
-  /**
-   * Finalizar profile
-   */
-  public static function end(string $name): array
-  {
-    if (!self::$enabled || !isset(self::$profiles[$name])) {
-      return [];
+    /**
+     * Desabilitar profiling
+     * @return void
+     */
+    public static function disable(): void
+    {
+        self::$enabled = false;
     }
 
-    $start = self::$profiles[$name];
-    $endTime = microtime(true);
-    $endMemory = memory_get_usage(true);
-    $queriesAfter = MetricsCollector::getMetrics()['queries_executed'] ?? 0;
+    /**
+     * Iniciar profile
+     * @param string $name
+     * @return void
+     */
+    public static function start(string $name): void
+    {
+        if (!self::$enabled) {
+            return;
+        }
 
-    $profile = [
-      'name' => $name,
-      'duration_ms' => round(($endTime - $start['start_time']) * 1000, 2),
-      'memory_used_mb' => round(($endMemory - $start['start_memory']) / 1024 / 1024, 2),
-      'queries_executed' => $queriesAfter - $start['queries_before'],
-      'timestamp' => date('c')
-    ];
-
-    unset(self::$profiles[$name]);
-
-    // Log perfis lentos
-    if ($profile['duration_ms'] > 1000) {
-      error_log("Slow Cycle ORM operation: {$name} - {$profile['duration_ms']}ms");
+        self::$profiles[$name] = [
+            'start_time' => microtime(true),
+            'start_memory' => memory_get_usage(true),
+            'queries_before' => 0
+        ];
     }
 
-    return $profile;
-  }
+    /**
+     * Finalizar profile
+     * @param string $name
+     * @return array<string, mixed>
+     */
+    public static function end(string $name): array
+    {
+        if (!self::$enabled || !isset(self::$profiles[$name])) {
+            return [];
+        }
 
-  /**
-   * Obter perfis ativos
-   */
-  public static function getActiveProfiles(): array
-  {
-    return array_keys(self::$profiles);
-  }
+        $start = self::$profiles[$name];
+        $endTime = microtime(true);
+        $endMemory = memory_get_usage(true);
 
-  /**
-   * Profile automático para closures
-   */
-  public static function profile(string $name, callable $callback)
-  {
-    self::start($name);
+        $profile = [
+            'name' => $name,
+            'duration_ms' => round(($endTime - $start['start_time']) * 1000, 2),
+            'memory_used_mb' => round(($endMemory - $start['start_memory']) / 1024 / 1024, 2),
+            'timestamp' => date('c')
+        ];
 
-    try {
-      $result = $callback();
-      return $result;
-    } finally {
-      $profile = self::end($name);
+        unset(self::$profiles[$name]);
 
-      if (!empty($profile) && $profile['duration_ms'] > 100) {
-        error_log("Performance Profile: {$name} took {$profile['duration_ms']}ms");
-      }
+        // Log perfis lentos
+        if ($profile['duration_ms'] > 1000) {
+            error_log("Slow Cycle ORM operation: {$name} - {$profile['duration_ms']}ms");
+        }
+
+        return $profile;
     }
-  }
+
+    /**
+     * Retorna todos os perfis ativos
+     * @return array<string, array<string, mixed>>
+     */
+    public static function getActiveProfiles(): array
+    {
+        return self::$profiles;
+    }
+
+    /**
+     * Registrar um profile manualmente
+     * @param string $name
+     * @param array<string, mixed> $profile
+     * @return void
+     */
+    public static function profile(string $name, array $profile): void
+    {
+        self::$profiles[$name] = $profile;
+    }
 }

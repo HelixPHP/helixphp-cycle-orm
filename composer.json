@@ -42,10 +42,7 @@
   "autoload-dev": {
     "psr-4": {
       "CAFernandes\\ExpressPHP\\CycleORM\\Tests\\": "tests/"
-    },
-    "files": [
-      "tests/Helpers/app.php"
-    ]
+    }
   },
   "extra": {
     "express-php": {

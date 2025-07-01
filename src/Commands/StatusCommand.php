@@ -27,21 +27,35 @@ class StatusCommand extends BaseCommand
     }
   }
 
+  /**
+   * Exibe o status de saúde do Cycle ORM.
+   * @param array<string, mixed> $health
+   */
   private function displayHealthStatus(array $health): void
   {
-    $status = $health['cycle_orm'];
+    $status = '';
+    if (isset($health['cycle_orm']) && is_string($health['cycle_orm'])) {
+      $status = $health['cycle_orm'];
+    }
     $icon = $status === 'healthy' ? '✅' : '❌';
 
+    $responseTime = isset($health['response_time_ms']) ? (string)$health['response_time_ms'] : '';
     $this->line("{$icon} Overall Status: {$status}");
-    $this->line("Response Time: {$health['response_time_ms']}ms");
+    $this->line("Response Time: {$responseTime}ms");
     $this->line('');
 
-    foreach ($health['checks'] as $checkName => $check) {
-      $checkIcon = $check['status'] === 'healthy' ? '✅' : '❌';
-      $this->line("{$checkIcon} {$checkName}: {$check['status']}");
+    if (isset($health['checks']) && is_array($health['checks'])) {
+      foreach ($health['checks'] as $checkName => $check) {
+        if (!is_string($checkName) || !is_array($check) || !isset($check['status']) || !is_string($check['status'])) {
+          continue;
+        }
+        $checkStatus = $check['status'];
+        $checkIcon = $checkStatus === 'healthy' ? '✅' : '❌';
+        $this->line("{$checkIcon} {$checkName}: {$checkStatus}");
 
-      if (isset($check['error'])) {
-        $this->error("  Error: {$check['error']}");
+        if (isset($check['error']) && is_string($check['error'])) {
+          $this->error("  Error: {$check['error']}");
+        }
       }
     }
   }

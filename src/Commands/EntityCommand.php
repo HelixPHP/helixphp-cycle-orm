@@ -3,10 +3,24 @@
 namespace CAFernandes\ExpressPHP\CycleORM\Commands;
 
 /**
- * Comando para gerar entidades - Versão corrigida
+ * Comando para gerar entidades do Cycle ORM.
+ *
+ * Exemplos de uso:
+ *   php bin/console make:entity User
+ *
+ * Métodos:
+ *   - handle(): Executa o comando principal.
+ *   - generateEntityContent(): Gera o conteúdo da classe de entidade.
+ *   - getEntityPath(): Retorna o caminho do arquivo da entidade.
+ *   - getTableName(): Gera o nome da tabela a partir do nome da classe.
  */
 class EntityCommand extends BaseCommand
 {
+  /**
+   * Executa o comando principal para criar uma nova entidade.
+   *
+   * @return int Código de status (0 = sucesso, 1 = erro)
+   */
   public function handle(): int
   {
     $name = $this->argument('name');
@@ -42,6 +56,12 @@ class EntityCommand extends BaseCommand
     }
   }
 
+  /**
+   * Gera o conteúdo PHP da classe de entidade.
+   *
+   * @param string $className Nome da classe da entidade.
+   * @return string Código PHP da entidade.
+   */
   private function generateEntityContent(string $className): string
   {
     $tableName = $this->getTableName($className);
@@ -74,6 +94,12 @@ class {$className}
 PHP;
   }
 
+  /**
+   * Retorna o caminho do arquivo da entidade.
+   *
+   * @param string $className Nome da classe da entidade.
+   * @return string Caminho absoluto do arquivo.
+   */
   private function getEntityPath(string $className): string
   {
     // Se rodando em ambiente de teste, salvar no sys_get_temp_dir()
@@ -92,8 +118,25 @@ PHP;
     return __DIR__ . "/../../../../app/Models/{$className}.php";
   }
 
+  /**
+   * Gera o nome da tabela a partir do nome da classe.
+   *
+   * @param string $className Nome da classe da entidade.
+   * @return string Nome da tabela.
+   */
   private function getTableName(string $className): string
   {
-    return strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $className));
+    return $this->toLower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $className));
+  }
+
+  /**
+   * Exemplo de método que usa strtolower
+   *
+   * @param string $string
+   * @return string
+   */
+  private function toLower(string $string): string
+  {
+    return strtolower($string);
   }
 }

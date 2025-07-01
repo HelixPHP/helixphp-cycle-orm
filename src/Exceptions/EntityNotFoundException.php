@@ -4,15 +4,18 @@ namespace CAFernandes\ExpressPHP\CycleORM\Exceptions;
 
 class EntityNotFoundException extends CycleORMException
 {
-  public function __construct(
-    string $entityClass,
-    $identifier,
-    ?\Throwable $previous = null
-  ) {
-    parent::__construct(
-      "Entity {$entityClass} with identifier {$identifier} not found",
-      ['entity' => $entityClass, 'identifier' => $identifier],
-      $previous
-    );
-  }
+    /**
+     * @param string $entityClass
+     * @param string|int $identifier
+     * @param \Throwable|null $previous
+     */
+    public function __construct(
+        string $entityClass,
+        string|int $identifier,
+        ?\Throwable $previous = null
+    ) {
+        $message = "Entity {$entityClass} with identifier {$identifier} not found";
+        $context = ['entity' => $entityClass, 'identifier' => $identifier];
+        parent::__construct($message, $context, $previous);
+    }
 }

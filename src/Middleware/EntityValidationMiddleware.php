@@ -4,33 +4,31 @@ namespace CAFernandes\ExpressPHP\CycleORM\Middleware;
 
 use Express\Http\Request;
 use Express\Http\Response;
-use Express\Core\Application;
+use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
 
 class EntityValidationMiddleware
 {
-  private Application $app;
-
-  public function __construct(Application $app)
-  {
-    $this->app = $app;
-  }
-
+  /**
+   * Middleware de validação de entidade
+   *
+   * @param Request $req
+   * @param Response $res
+   * @param callable(Request, Response): void $next
+   * @return void
+   */
   public function handle(Request $req, Response $res, callable $next): void
   {
-    $validateEntity = function (object $entity) {
-      return $this->validateEntity($entity);
-    };
-
-    if (method_exists($req, 'setAttribute')) {
-      $req->setAttribute('validateEntity', $validateEntity);
-    } else {
-      $req->validateEntity = $validateEntity;
-    }
-
-    $next();
+    // Garante que o request é um CycleRequest
+    $cycleReq = $req instanceof CycleRequest ? $req : new CycleRequest($req);
+    // validateEntity já está disponível no wrapper
+    $next($cycleReq, $res);
   }
-
-  private function validateEntity(object $entity): array
+  /**
+   * Validação de entidade
+   * @param object $entity Entidade a ser validada
+   * @return array{valid: bool, errors: array<int, string>}
+   */
+  public function validateEntity(object $entity): array
   {
     $errors = [];
 

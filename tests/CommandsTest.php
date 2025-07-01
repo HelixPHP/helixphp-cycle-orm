@@ -3,6 +3,7 @@
 namespace CAFernandes\ExpressPHP\CycleORM\Tests;
 
 use PHPUnit\Framework\TestCase;
+use PSR\Container\ContainerInterface;
 use CAFernandes\ExpressPHP\CycleORM\Commands\EntityCommand;
 use CAFernandes\ExpressPHP\CycleORM\Commands\SchemaCommand;
 use CAFernandes\ExpressPHP\CycleORM\Commands\CommandRegistry;
@@ -16,6 +17,8 @@ class CommandsTest extends TestCase
 {
   public function testEntityCommandRequiresName(): void
   {
+    $app = new \Express\Core\Application();
+    $container = $app->getContainer();
     $command = new EntityCommand([]);
     ob_start();
     $result = $command->handle();
@@ -31,6 +34,8 @@ class CommandsTest extends TestCase
     if (file_exists($entityPath)) {
       unlink($entityPath);
     }
+    $app = new \Express\Core\Application();
+    $container = $app->getContainer();
     $command = new EntityCommand(['name' => 'TestEntity']);
     ob_start();
     $result = $command->handle();
@@ -75,35 +80,16 @@ class CommandsTest extends TestCase
         return $this->schema;
       }
     };
-    // Mock Application com container()->get('cycle.orm')
-    $app = new class($orm) {
-      private $orm;
-      public function __construct($orm)
-      {
-        $this->orm = $orm;
-      }
-      public function container()
-      {
-        return new class($this->orm) {
-          private $orm;
-          public function __construct($orm)
-          {
-            $this->orm = $orm;
-          }
-          public function get($service)
-          {
-            if ($service === 'cycle.orm') return $this->orm;
-            throw new \RuntimeException("Service $service not found");
-          }
-        };
-      }
-    };
-    $command = new SchemaCommand([], $app); // Passa app mockado
+    // Application Express-PHP real
+    $app = new \Express\Core\Application();
+    $container = $app->getContainer();
+    $container->bind('cycle.orm', fn() => $orm);
+    $command = new SchemaCommand([], $container);
     ob_start();
     $result = $command->handle();
     $output = ob_get_clean();
     $this->assertIsInt($result);
-    $this->assertStringContainsString('Cycle ORM Schema Information', $output);
+    $this->assertStringContainsString('Informações do Cycle ORM Schema', $output);
   }
 
   public function testCommandRegistry(): void

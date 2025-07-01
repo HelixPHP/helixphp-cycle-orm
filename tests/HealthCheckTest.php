@@ -4,6 +4,8 @@ namespace CAFernandes\ExpressPHP\CycleORM\Tests;
 
 use PHPUnit\Framework\TestCase;
 use CAFernandes\ExpressPHP\CycleORM\Health\CycleHealthCheck;
+use Cycle\Database\Injection\FragmentInterface;
+use Cycle\Database\Query\QueryParameters;
 use Express\Core\Application;
 
 class HealthCheckTest extends TestCase
@@ -134,9 +136,12 @@ class HealthCheckTest extends TestCase
       public function getQueryCompiler(): \Cycle\Database\Driver\CompilerInterface
       {
         return new class implements \Cycle\Database\Driver\CompilerInterface {
-          public function compile($query, array $params = []): array
-          {
-            return [$query, $params];
+          public function compile(
+            QueryParameters $params,
+            string $prefix,
+            FragmentInterface $fragment
+          ): string {
+            return '';
           }
         };
       }
@@ -259,7 +264,7 @@ class HealthCheckTest extends TestCase
           {
             return [];
           }
-          public function getTableNames(): array
+          public function getTableNames(?string $prefix = null): array
           {
             return [];
           }
@@ -375,7 +380,7 @@ class HealthCheckTest extends TestCase
           {
             return [];
           }
-          public function hasIndex(string $name): bool
+          public function hasIndex(array $columns = []): bool
           {
             return false;
           }
@@ -383,7 +388,7 @@ class HealthCheckTest extends TestCase
           {
             return [];
           }
-          public function hasForeignKey(string $name): bool
+          public function hasForeignKey($name): bool
           {
             return false;
           }

@@ -7,9 +7,20 @@ namespace CAFernandes\ExpressPHP\CycleORM\Commands;
  */
 abstract class BaseCommand
 {
+  /**
+   * Argumentos do comando.
+   * @var array<string, mixed>
+   */
   protected array $arguments = [];
+  /**
+   * Opções do comando.
+   * @var array<string, mixed>
+   */
   protected array $options = [];
 
+  /**
+   * @param array<string, mixed> $args
+   */
   public function __construct(array $args = [])
   {
     $this->parseArguments($args);
@@ -17,9 +28,15 @@ abstract class BaseCommand
 
   abstract public function handle(): int;
 
+  /**
+   * Obtém o argumento pelo nome.
+   * @param string $name
+   * @return string|null
+   */
   protected function argument(string $name): ?string
   {
-    return $this->arguments[$name] ?? null;
+    $value = $this->arguments[$name] ?? null;
+    return is_string($value) ? $value : null;
   }
 
   protected function option(string $name): bool
@@ -42,6 +59,11 @@ abstract class BaseCommand
     echo $message . PHP_EOL;
   }
 
+  /**
+   * Exibe uma tabela no console.
+   * @param array<int, string> $headers
+   * @param array<int, array<int, string>> $rows
+   */
   protected function table(array $headers, array $rows): void
   {
     // Implementação simples de tabela
@@ -52,6 +74,9 @@ abstract class BaseCommand
     }
   }
 
+  /**
+   * @param array<string, mixed> $args
+   */
   private function parseArguments(array $args): void
   {
     foreach ($args as $key => $value) {

@@ -3,10 +3,24 @@
 namespace CAFernandes\ExpressPHP\CycleORM\Commands;
 
 /**
- * Comando para migrações - Versão corrigida
+ * Comando para executar e reverter migrações do Cycle ORM.
+ *
+ * Exemplos de uso:
+ *   php bin/console cycle:migrate
+ *   php bin/console cycle:migrate --rollback
+ *
+ * Métodos:
+ *   - handle(): Executa o comando principal.
+ *   - migrate(): Executa as migrações pendentes.
+ *   - rollback(): Reverte a última migração.
  */
 class MigrateCommand extends BaseCommand
 {
+  /**
+   * Executa o comando principal para migrações.
+   *
+   * @return int Código de status (0 = sucesso, 1 = erro)
+   */
   public function handle(): int
   {
     if ($this->option('rollback')) {
@@ -16,6 +30,11 @@ class MigrateCommand extends BaseCommand
     return $this->migrate();
   }
 
+  /**
+   * Executa as migrações pendentes.
+   *
+   * @return int Código de status (0 = sucesso, 1 = erro)
+   */
   private function migrate(): int
   {
     $this->info('Running migrations...');
@@ -47,6 +66,11 @@ class MigrateCommand extends BaseCommand
     }
   }
 
+  /**
+   * Reverte a última migração executada.
+   *
+   * @return int Código de status (0 = sucesso, 1 = erro)
+   */
   private function rollback(): int
   {
     $this->info('Rolling back last migration...');
@@ -59,10 +83,10 @@ class MigrateCommand extends BaseCommand
         return 1;
       }
 
-      $migration = $migrator->rollback();
+      $migrations = $migrator->run(-1);
 
-      if ($migration) {
-        $this->info('Rolled back: ' . $migration->getState()->getName());
+      if (!empty($migrations)) {
+        $this->info('Rolled back: ' . $migrations[0]->getState()->getName());
       } else {
         $this->info('No migrations to rollback.');
       }

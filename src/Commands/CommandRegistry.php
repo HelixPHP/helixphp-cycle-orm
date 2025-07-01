@@ -4,7 +4,34 @@ namespace CAFernandes\ExpressPHP\CycleORM\Commands;
 
 class CommandRegistry
 {
+  /**
+   * @var array<string, class-string<BaseCommand>>
+   */
   private array $commands = [];
+
+  /**
+   * @param array<string, mixed> $args
+   */
+  public function run(string $commandName, array $args = []): int
+  {
+    if (!$this->hasCommand($commandName)) {
+      echo "Command '{$commandName}' not found.\n";
+      return 1;
+    }
+
+    $commandClass = $this->commands[$commandName];
+    $command = new $commandClass($args);
+
+    return $command->handle();
+  }
+
+  /**
+   * @return array<int, string>
+   */
+  public function getRegisteredCommands(): array
+  {
+    return array_keys($this->commands);
+  }
 
   public function register(string $name, string $commandClass): void
   {
@@ -22,23 +49,5 @@ class CommandRegistry
   public function hasCommand(string $name): bool
   {
     return isset($this->commands[$name]);
-  }
-
-  public function getRegisteredCommands(): array
-  {
-    return array_keys($this->commands);
-  }
-
-  public function run(string $commandName, array $args = []): int
-  {
-    if (!$this->hasCommand($commandName)) {
-      echo "Command '{$commandName}' not found.\n";
-      return 1;
-    }
-
-    $commandClass = $this->commands[$commandName];
-    $command = new $commandClass($args);
-
-    return $command->handle();
   }
 }

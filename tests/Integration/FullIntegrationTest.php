@@ -22,53 +22,21 @@ class FullIntegrationTest extends TestCase
       $this->markTestSkipped('SQLite PDO extension not available');
     }
 
-    $this->app = new class extends Application {
-      private $bootedCallbacks = [];
-      private array $services = [];
-      public function booted($callback = null)
-      {
-        if ($callback) {
-          $this->bootedCallbacks[] = $callback;
-        } else {
-          foreach ($this->bootedCallbacks as $cb) {
-            $cb($this);
-          }
-        }
-      }
-      public function singleton(string $abstract, mixed $concrete = null): self
-      {
-        $this->services[$abstract] = $concrete;
-        return $this;
-      }
-      public function has(string $id): bool
-      {
-        return isset($this->services[$id]);
-      }
-      public function make(string $abstract): mixed
-      {
-        if (!isset($this->services[$abstract])) throw new \RuntimeException("Service $abstract not found");
-        $factory = $this->services[$abstract];
-        return $factory();
-      }
-    };
-    // Registrar o serviço 'config' no mock
-    $this->app->singleton('config', fn() => new class {
+    // Substituir container customizado pelo Application real
+    $this->app = new Application();
+    $container = $this->app->getContainer();
+    // Registrar serviços necessários no container real
+    $container->bind('config', fn() => new class {
       private array $data = [];
-      public function set($key, $value)
-      {
-        $this->data[$key] = $value;
-      }
-      public function get($key, $default = null)
-      {
-        return $this->data[$key] ?? $default;
-      }
+      public function set($key, $value) { $this->data[$key] = $value; }
+      public function get($key, $default = null) { return $this->data[$key] ?? $default; }
     });
     // Usar arquivo temporário SQLite em disco para garantir persistência real
     $sqliteFile = sys_get_temp_dir() . '/cycle_orm_test.sqlite';
     if (file_exists($sqliteFile)) unlink($sqliteFile);
     $pdoShared = new \PDO('sqlite:' . $sqliteFile);
     $GLOBALS['cycle_orm_test_pdo'] = $pdoShared;
-    $this->app->singleton('cycle.database', function () use ($pdoShared) {
+    $container->bind('cycle.database', function () use ($pdoShared) {
       // Mock mínimo de DBAL para SQLite em memória
       return new class($pdoShared) implements \Cycle\Database\DatabaseProviderInterface {
         private $pdo;
@@ -113,12 +81,12 @@ class FullIntegrationTest extends TestCase
                     {
                       return [];
                     }
-                    public function hasTable(string $prefix, string $table): bool
+                    public function hasTable(string $table, string $prefix = ''): bool
                     {
                       return true;
                     }
-                    public function dropTable(string $prefix, string $table): void {}
-                    public function renameTable(string $prefix, string $name, string $newName): void {}
+                    public function dropTable(\Cycle\Database\Schema\AbstractTable $table): void {}
+                    public function renameTable(string $table, string $name): void {}
                     public function getPrimaryKey(string $prefix, string $table): ?string
                     {
                       return 'id';
@@ -135,13 +103,13 @@ class FullIntegrationTest extends TestCase
                     {
                       return [];
                     }
-                    public function createTable(string $prefix, string $table, array $columns, array $primaryKeys = [], array $indexes = [], array $foreignKeys = []): void {}
-                    public function addColumn(string $prefix, string $table, string $column, array $definition): void {}
-                    public function dropColumn(string $prefix, string $table, string $column): void {}
-                    public function addIndex(string $prefix, string $table, string $name, array $columns, bool $unique = false): void {}
-                    public function dropIndex(string $prefix, string $table, string $name): void {}
-                    public function addForeignKey(string $prefix, string $table, string $name, array $columns, string $foreignTable, array $foreignColumns, array $options = []): void {}
-                    public function dropForeignKey(string $prefix, string $table, string $name): void {}
+                    public function createTable(\Cycle\Database\Schema\AbstractTable $table): void {}
+                    public function createColumn(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractColumn $column): void {}
+                    public function dropColumn(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractColumn $column): void {}
+                    public function addIndex(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractIndex $index): void {}
+                    public function dropIndex(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractIndex $index): void {}
+                    public function addForeignKey(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractForeignKey $foreignKey): void {}
+                    public function dropForeignKey(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractForeignKey $foreignKey): void {}
                   };
                 }
                 public function getQueryCompiler(): \Cycle\Database\Driver\CompilerInterface
@@ -419,7 +387,7 @@ class FullIntegrationTest extends TestCase
                 {
                   return [];
                 }
-                public function hasIndex(string $name): bool
+                public function hasIndex(array $columns = []): bool
                 {
                   return false;
                 }
@@ -427,7 +395,7 @@ class FullIntegrationTest extends TestCase
                 {
                   return [];
                 }
-                public function hasForeignKey(string $name): bool
+                public function hasForeignKey(array $columns): bool
                 {
                   return false;
                 }
@@ -601,6 +569,7 @@ class FullIntegrationTest extends TestCase
                       // Se vier string ou outro tipo, transformar em array associativo vazio
                       $row = [];
                     }
+                    $schemaCols = ['id', 'name', 'description', 'active', 'createdAt'];
                     foreach ($schemaCols as $col) {
                       if (!array_key_exists($col, $row) || $row[$col] === null) {
                         if ($col === 'active') $row[$col] = 1;
@@ -761,7 +730,7 @@ class FullIntegrationTest extends TestCase
                     'createdAt' => false
                   ];
                   $schemaCols = array_keys($schema);
-                  $rows = array_map(fn($row) => self::normalizeRow($row, $schemaCols, $pdo), $rows);
+                  $rows = array_map(fn($row) => FullIntegrationTest::normalizeRow($row, $schemaCols, $pdo), $rows);
                   // Filtrar linhas vazias (após delete)
                   $rows = array_filter($rows, fn($row) => !empty($row));
                   fwrite(STDERR, "\nDEBUG fetchAll rows: " . json_encode($rows) . "\n");
@@ -954,7 +923,7 @@ class FullIntegrationTest extends TestCase
     $this->assertArrayHasKey('response_time_ms', $health);
   }
 
-  private static function normalizeRow(array $row, array $schemaCols, \PDO $pdo): array
+  public static function normalizeRow(array $row, array $schemaCols, \PDO $pdo): array
   {
     fwrite(STDERR, "\nDEBUG raw row: " . json_encode($row) . "\n");
     $normalized = [];

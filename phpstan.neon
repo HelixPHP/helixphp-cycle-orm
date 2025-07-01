@@ -10,9 +10,6 @@ parameters:
         - '#Access to an undefined property Express\\.*#'
         - '#Class Express\\.*not found#'
 
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
-
     # Express-PHP specific ignores
     universalObjectCratesClasses:
         - Express\Http\Request

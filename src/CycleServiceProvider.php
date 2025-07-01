@@ -157,6 +157,10 @@ class CycleServiceProvider extends ExtensionServiceProvider
     });
   }
 
+  /**
+   * Retorna a configuração do banco de dados.
+   * @return array<string, mixed>
+   */
   private function getDatabaseConfig(): array
   {
     return config('cycle.database', [
@@ -183,6 +187,10 @@ class CycleServiceProvider extends ExtensionServiceProvider
     ]);
   }
 
+  /**
+   * Retorna a configuração das entidades.
+   * @return array<string, mixed>
+   */
   private function getEntityConfig(): array
   {
     return config('cycle.entities', [
@@ -193,6 +201,10 @@ class CycleServiceProvider extends ExtensionServiceProvider
     ]);
   }
 
+  /**
+   * Valida a configuração do banco de dados.
+   * @param array<string, mixed> $config
+   */
   private function validateDatabaseConfig(array $config): void
   {
     $required = ['default', 'databases', 'connections'];
@@ -209,6 +221,10 @@ class CycleServiceProvider extends ExtensionServiceProvider
     }
   }
 
+  /**
+   * Valida a configuração das entidades.
+   * @param array<string, mixed> $config
+   */
   private function validateEntityConfig(array $config): void
   {
     if (!isset($config['directories']) || empty($config['directories'])) {
@@ -223,5 +239,27 @@ class CycleServiceProvider extends ExtensionServiceProvider
         }
       }
     }
+  }
+
+  /**
+   * Garante que o handler é sempre callable (nunca array)
+   * Use este método ao registrar rotas no router:
+   *   $router->get('/rota', $this->ensureCallableHandler([$controller, 'metodo']));
+   * Assim, evita-se TypeError ao passar array como handler.
+   *
+   * @param mixed $handler
+   * @return callable
+   */
+  protected function ensureCallableHandler($handler): callable
+  {
+    if (is_callable($handler)) {
+      return $handler;
+    }
+    if (is_array($handler) && count($handler) === 2 && is_object($handler[0]) && is_string($handler[1]) && method_exists($handler[0], $handler[1])) {
+      return function (...$args) use ($handler) {
+        return $handler[0]->{$handler[1]}(...$args);
+      };
+    }
+    throw new \InvalidArgumentException('Handler de rota inválido: deve ser callable.');
   }
 }

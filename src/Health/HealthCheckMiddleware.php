@@ -20,7 +20,7 @@ class HealthCheckMiddleware
 
   public function handle(Request $req, Response $res, callable $next): void
   {
-    $path = $req->getPathInfo();
+    $path = $req->pathCallable;
 
     // Verificar se é uma requisição de health check
     if ($path === '/health/cycle' || $path === '/health') {

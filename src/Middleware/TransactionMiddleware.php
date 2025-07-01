@@ -16,16 +16,30 @@ class TransactionMiddleware
     $this->app = $app;
   }
 
+  /**
+   * Middleware de transação para Cycle ORM
+   *
+   * @param Request $req
+   * @param Response $res
+   * @param callable(Request, Response): void $next
+   * @return void
+   */
   public function handle(Request $req, Response $res, callable $next): void
   {
-    if (!$this->app->has('cycle.em')) {
-      // Se não tem EM, apenas prosseguir
-      $next();
-      return;
+    // Use sempre o container PSR-11 para buscar serviços
+    if (method_exists($this->app, 'getContainer')) {
+      $container = $this->app->getContainer();
+      if ($container->has('cycle.em')) {
+        $em = $container->get('cycle.em');
+      } else {
+        $next();
+        return;
+      }
+    } else {
+      // fallback para make (testes antigos)
+      $em = $this->app->make('cycle.em');
     }
 
-    /** @var EntityManager $em */
-    $em = $this->app->make('cycle.em');
     $transactionStarted = false;
 
     try {
@@ -51,6 +65,14 @@ class TransactionMiddleware
     }
   }
 
+  /**
+   * Compatível com padrão callable do Express-PHP
+   *
+   * @param Request $req
+   * @param Response $res
+   * @param callable(Request, Response): void $next
+   * @return void
+   */
   public function __invoke(Request $req, Response $res, callable $next): void
   {
     $this->handle($req, $res, $next);

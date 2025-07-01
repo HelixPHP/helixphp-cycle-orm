@@ -14,74 +14,170 @@ use Cycle\Database\DatabaseInterface;
  */
 class CycleRequest
 {
-  private Request $originalRequest;
-  public ORMInterface $orm;
-  public EntityManagerInterface $em;
-  public DatabaseInterface $db;
-  public mixed $user = null;
-  public array $auth = [];
+    /**
+     * @var Request
+     */
+    private Request $originalRequest;
 
-  public function __construct(Request $request)
-  {
-    $this->originalRequest = $request;
-  }
+    /**
+     * @var ORMInterface
+     */
+    public ORMInterface $orm;
 
-  public function __call(string $name, array $arguments)
-  {
-    return $this->originalRequest->$name(...$arguments);
-  }
+    /**
+     * @var EntityManagerInterface
+     */
+    public EntityManagerInterface $em;
 
-  public function __get(string $name)
-  {
-    return $this->originalRequest->$name;
-  }
+    /**
+     * @var DatabaseInterface
+     */
+    public DatabaseInterface $db;
 
-  public function __set(string $name, $value): void
-  {
-    $this->originalRequest->$name = $value;
-  }
+    /**
+     * @var object|null
+     */
+    public ?object $user = null;
 
-  public function repository(string $entity): RepositoryInterface
-  {
-    return $this->orm->getRepository($entity);
-  }
+    /**
+     * @var array<string, mixed>
+     */
+    public array $auth = [];
 
-  public function entity(string $entity, array $data): object
-  {
-    $mapper = $this->orm->getMapper($entity);
-    return $mapper->init($data);
-  }
+    /**
+     * @param Request $request
+     */
+    public function __construct(Request $request)
+    {
+        $this->originalRequest = $request;
+    }
 
-  public function find(string $entity, mixed $id): ?object
-  {
-    return $this->repository($entity)->findByPK($id);
-  }
+    /**
+     * Encaminha chamadas dinâmicas para o Request original
+     *
+     * @param string $name
+     * @param array<int, mixed> $arguments
+     * @return mixed
+     */
+    public function __call(string $name, array $arguments): mixed
+    {
+        return $this->originalRequest->$name(...$arguments);
+    }
 
-  public function paginate(\Cycle\ORM\Select $query, int $page = 1, int $perPage = 15): array
-  {
-    $total = clone $query;
-    $total = $total->count();
-    $items = $query
-      ->limit($perPage)
-      ->offset(($page - 1) * $perPage)
-      ->fetchAll();
-    return [
-      'data' => $items,
-      'total' => $total,
-      'page' => $page,
-      'per_page' => $perPage,
-      'last_page' => (int) ceil($total / $perPage)
-    ];
-  }
+    /**
+     * Encaminha acesso a propriedades para o Request original
+     *
+     * @param string $name
+     * @return mixed
+     */
+    public function __get(string $name): mixed
+    {
+        return $this->originalRequest->$name;
+    }
 
-  public function validateEntity(object $entity, array $rules = []): array
-  {
-    // Implementação da validação
-    return ['valid' => true, 'errors' => []];
-  }
+    /**
+     * Encaminha escrita de propriedades para o Request original
+     *
+     * @param string $name
+     * @param mixed $value
+     * @return void
+     */
+    public function __set(string $name, mixed $value): void
+    {
+        $this->originalRequest->$name = $value;
+    }
 
-  public function getOriginalRequest(): Request
-  {
-    return $this->originalRequest;
-  }
+    /**
+     * Retorna o repository de uma entidade
+     *
+     * @param object|string $entity
+     * @return RepositoryInterface<object>
+     */
+    public function repository(object|string $entity): RepositoryInterface /*<object>*/
+    {
+        // Garantir que $entity seja string não vazia ou objeto
+        if (is_string($entity) && $entity === '') {
+            throw new \InvalidArgumentException('Entity class name cannot be empty');
+        }
+        return $this->orm->getRepository($entity);
+    }
+
+    /**
+     * Inicializa uma entidade a partir de dados
+     *
+     * @param object|string $entity
+     * @param array<string, mixed> $data
+     * @return object
+     */
+    public function entity(object|string $entity, array $data): object
+    {
+        if (is_string($entity) && $entity === '') {
+            throw new \InvalidArgumentException('Entity class name cannot be empty');
+        }
+        $mapper = $this->orm->getMapper($entity);
+        return $mapper->init($data);
+    }
+
+    /**
+     * Busca entidade por PK
+     *
+     * @param object|string $entity
+     * @param mixed $id
+     * @return object|null
+     */
+    public function find(object|string $entity, mixed $id): ?object
+    {
+        return $this->repository($entity)->findByPK($id);
+    }
+
+    /**
+     * Paginação de resultados
+     *
+     * @param \Cycle\ORM\Select $query
+     * @param int $page
+     * @param int $perPage
+     * @return array<string, mixed>
+     */
+    public function paginate(\Cycle\ORM\Select $query, int $page = 1, int $perPage = 15): array
+    {
+        $offset = ($page - 1) * $perPage;
+        $total = method_exists($query, 'count') ? $query->count() : 0;
+        if (($offset > 0 || $perPage < $total) && method_exists($query, 'limit') && method_exists($query, 'offset')) {
+            $query = $query->limit($perPage)->offset($offset);
+        }
+        $items = method_exists($query, 'fetchAll') ? $query->fetchAll() : [];
+        $lastPage = max(1, (int) ceil($total / $perPage));
+        return [
+            'data' => $items,
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'last_page' => $lastPage,
+                'from' => $total > 0 ? $offset + 1 : 0,
+                'to' => min($offset + $perPage, $total),
+                'has_more' => $page < $lastPage
+            ]
+        ];
+    }
+
+    /**
+     * Validação de entidade
+     *
+     * @param array<string, mixed> $rules
+     * @return array<string, mixed>
+     */
+    public function validateEntity(array $rules): array
+    {
+        // Implementação da validação
+        return ['valid' => true, 'errors' => []];
+    }
+
+    /**
+     * @return Request
+     */
+    public function getOriginalRequest(): Request
+    {
+        return $this->originalRequest;
+    }
 }

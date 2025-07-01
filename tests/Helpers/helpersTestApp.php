@@ -1,6 +1,6 @@
 <?php
-if (!function_exists('app')) {
-  function app($service = null)
+if (!function_exists('helpersTestApp')) {
+  function helpersTestApp($service = null)
   {
     // Retorna um stub de ORM para os testes
     if ($service === 'cycle.orm') {
