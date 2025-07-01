@@ -157,8 +157,9 @@ class HealthCheckTest extends TestCase
             {
                 return null;
             }
-            public static function create(\Cycle\Database\Config\DriverConfig $config): \Cycle\Database\Driver\DriverInterface
-            {
+            public static function create(
+                \Cycle\Database\Config\DriverConfig $config
+            ): \Cycle\Database\Driver\DriverInterface {
                 return new self(null);
             }
             public function lastInsertID(?string $sequence = null)
@@ -494,8 +495,11 @@ class HealthCheckTest extends TestCase
                 };
                 return $query;
             }
-            public function update(string $table = '', array $values = [], array $where = []): \Cycle\Database\Query\UpdateQuery
-            {
+            public function update(
+                string $table = '',
+                array $values = [],
+                array $where = []
+            ): \Cycle\Database\Query\UpdateQuery {
                 $query = new class implements \Cycle\Database\Query\UpdateQuery {
                     public function set(array $values): static
                     {

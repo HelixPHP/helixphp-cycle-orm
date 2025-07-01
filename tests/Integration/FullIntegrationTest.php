@@ -4,12 +4,14 @@ namespace CAFernandes\ExpressPHP\CycleORM\Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
 use Express\Core\Application;
-use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
 use CAFernandes\ExpressPHP\CycleORM\Tests\Fixtures\TestEntity;
+use Cycle\Database\StatementInterface;
+use CAFernandes\ExpressPHP\CycleORM\Tests\Integration\MockSelect1Statement;
 
 /**
  * Teste de integração completa (requer SQLite)
  */
+// phpcs:ignoreFile
 class FullIntegrationTest extends TestCase
 {
     private Application $app;
@@ -25,22 +27,6 @@ class FullIntegrationTest extends TestCase
       // Substituir container customizado pelo Application real
         $this->app = new Application();
         $container = $this->app->getContainer();
-      // Registrar serviços necessários no container real
-        $container->bind(
-            'config',
-            fn() => new class {
-            /** @var array<string, mixed> */
-            private array $data = [];
-            public function set(string $key, mixed $value): void
-            {
-            $this->data[$key] = $value;
-            }
-            public function get(string $key, mixed $default = null): mixed
-            {
-            return $this->data[$key] ?? $default;
-            }
-            }
-        );
       // Usar arquivo temporário SQLite em disco para garantir persistência real
         $sqliteFile = sys_get_temp_dir() . '/cycle_orm_test.sqlite';
         if (file_exists($sqliteFile)) {
@@ -48,6 +34,24 @@ class FullIntegrationTest extends TestCase
         }
         $pdoShared = new \PDO('sqlite:' . $sqliteFile);
         $GLOBALS['cycle_orm_test_pdo'] = $pdoShared;
+
+      // Registrar serviços necessários no container real
+        $container->bind(
+            'config',
+            fn() => new class {
+              /** @var array<string, mixed> */
+              private array $data = [];
+              public function set(string $key, mixed $value): void
+              {
+                  $this->data[$key] = $value;
+              }
+
+              public function get(string $key, mixed $default = null): mixed
+              {
+                  return $this->data[$key] ?? $default;
+              }
+            }
+        );
         $container->bind(
             'cycle.database',
             function () use ($pdoShared) {
@@ -58,6 +62,7 @@ class FullIntegrationTest extends TestCase
                     {
                         $this->pdo = $pdo;
                     }
+
                     public function database(?string $database = null): \Cycle\Database\DatabaseInterface
                     {
                         $pdo = $this->pdo;
@@ -90,59 +95,59 @@ class FullIntegrationTest extends TestCase
                                     }
                                     public function getSchemaHandler(): \Cycle\Database\Driver\HandlerInterface
                                     {
-                                              return new class implements \Cycle\Database\Driver\HandlerInterface {
-                                                public function table(string $prefix, string $table): array
-                                                {
-                                                    return [];
-                                                }
-                                                public function hasTable(string $table, string $prefix = ''): bool
-                                                {
-                                                    return true;
-                                                }
-                                                public function dropTable(\Cycle\Database\Schema\AbstractTable $table): void
-                                                {
-                                                }
-                                                public function renameTable(string $table, string $name): void
-                                                {
-                                                }
-                                                public function getPrimaryKey(string $prefix, string $table): ?string
-                                                {
-                                                    return 'id';
-                                                }
-                                                public function getColumns(string $prefix, string $table): array
-                                                {
-                                                    return [];
-                                                }
-                                                public function getIndexes(string $prefix, string $table): array
-                                                {
-                                                    return [];
-                                                }
-                                                public function getForeignKeys(string $prefix, string $table): array
-                                                {
-                                                    return [];
-                                                }
-                                                public function createTable(\Cycle\Database\Schema\AbstractTable $table): void
-                                                {
-                                                }
-                                                public function createColumn(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractColumn $column): void
-                                                {
-                                                }
-                                                public function dropColumn(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractColumn $column): void
-                                                {
-                                                }
-                                                public function addIndex(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractIndex $index): void
-                                                {
-                                                }
-                                                public function dropIndex(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractIndex $index): void
-                                                {
-                                                }
-                                                public function addForeignKey(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractForeignKey $foreignKey): void
-                                                {
-                                                }
-                                                public function dropForeignKey(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractForeignKey $foreignKey): void
-                                                {
-                                                }
-                                              };
+                                        return new class implements \Cycle\Database\Driver\HandlerInterface {
+                                            public function table(string $prefix, string $table): array
+                                            {
+                                                return [];
+                                            }
+                                            public function hasTable(string $table, string $prefix = ''): bool
+                                            {
+                                                return true;
+                                            }
+                                            public function dropTable(\Cycle\Database\Schema\AbstractTable $table): void
+                                            {
+                                            }
+                                            public function renameTable(string $table, string $name): void
+                                            {
+                                            }
+                                            public function getPrimaryKey(string $prefix, string $table): ?string
+                                            {
+                                                return 'id';
+                                            }
+                                            public function getColumns(string $prefix, string $table): array
+                                            {
+                                                return [];
+                                            }
+                                            public function getIndexes(string $prefix, string $table): array
+                                            {
+                                                return [];
+                                            }
+                                            public function getForeignKeys(string $prefix, string $table): array
+                                            {
+                                                return [];
+                                            }
+                                            public function createTable(\Cycle\Database\Schema\AbstractTable $table): void
+                                            {
+                                            }
+                                            public function createColumn(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractColumn $column): void
+                                            {
+                                            }
+                                            public function dropColumn(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractColumn $column): void
+                                            {
+                                            }
+                                            public function addIndex(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractIndex $index): void
+                                            {
+                                            }
+                                            public function dropIndex(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractIndex $index): void
+                                            {
+                                            }
+                                            public function addForeignKey(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractForeignKey $foreignKey): void
+                                            {
+                                            }
+                                            public function dropForeignKey(\Cycle\Database\Schema\AbstractTable $table, \Cycle\Database\Schema\AbstractForeignKey $foreignKey): void
+                                            {
+                                            }
+                                        };
                                     }
                                     public function getQueryCompiler(): \Cycle\Database\Driver\CompilerInterface
                                     {
@@ -217,7 +222,9 @@ class FullIntegrationTest extends TestCase
                                                         if ($nullable) {
                                                             $row[$col] = null;
                                                         } else {
-                                                            throw new \RuntimeException("Campo obrigatório '$col' ausente no fetch");
+                                                            throw new \RuntimeException(
+                                                                "Campo obrigatório '$col' ausente no fetch"
+                                                            );
                                                         }
                                                     }
                                                 }
@@ -236,11 +243,11 @@ class FullIntegrationTest extends TestCase
                                                 foreach ($rows as &$row) {
                                                     foreach ($schema as $col => $nullable) {
                                                         if (!array_key_exists($col, $row) && $nullable) {
-                                                                $row[$col] = null;
+                                                            $row[$col] = null;
                                                         }
                                                     }
                                                 }
-                                // Filtrar apenas linhas válidas (com todas as colunas do schema)
+                                            // Filtrar apenas linhas válidas (com todas as colunas do schema)
                                                 $schemaCols = ['id', 'name', 'description', 'active', 'createdAt'];
                                                 $rows = array_map(
                                                     function ($row) use ($schemaCols) {
@@ -248,18 +255,26 @@ class FullIntegrationTest extends TestCase
                                                         if (!$pdo) {
                                                             throw new \RuntimeException('PDO global não definido no fetchAll!');
                                                         }
-                                                        fwrite(STDERR, "\nDEBUG raw row: " . json_encode($row) . "\n");
+                                                        fwrite(
+                                                            STDERR,
+                                                            "\nDEBUG raw row: " . json_encode($row) . "\n"
+                                                        );
                                                         $normalized = [];
                                                         // Se vier só índice 0 e description, buscar todos os campos do banco
                                                         if (isset($row[0]) && count($row) <= 2) {
                                                             $id = $row[0];
-                                                            $full = $pdo->query('SELECT * FROM test_entities WHERE id = ' . ((int)$id))->fetch(\PDO::FETCH_ASSOC);
-                                                            fwrite(STDERR, "\nDEBUG full row for id $id: " . json_encode($full) . "\n");
+                                                            $full = $pdo->query(
+                                                                'SELECT * FROM test_entities WHERE id = ' . ((int) $id)
+                                                            )->fetch(\PDO::FETCH_ASSOC);
+                                                            fwrite(
+                                                                STDERR,
+                                                                "\nDEBUG full row for id $id: " . json_encode($full) . "\n"
+                                                            );
                                                             if ($full) {
-                                                                        $row = $full;
+                                                                $row = $full;
                                                             } else {
-                                                                    // Se não encontrar, retornar array vazio para o ORM entender como deletado
-                                                                    return [];
+                                                                // Se não encontrar, retornar array vazio para o ORM entender como deletado
+                                                                return [];
                                                             }
                                                         }
                                                         // Remover índices numéricos
@@ -274,9 +289,9 @@ class FullIntegrationTest extends TestCase
                                                                 $keyNorm = strtolower(str_replace(['_', '-'], '', $k));
                                                                 $schemaNorm = strtolower(str_replace(['_', '-'], '', $schemaCol));
                                                                 if ($keyNorm === $schemaNorm) {
-                                                                      $normalized[$schemaCol] = $v;
-                                                                      $found = true;
-                                                                      break;
+                                                                    $normalized[$schemaCol] = $v;
+                                                                    $found = true;
+                                                                    break;
                                                                 }
                                                             }
                                                             if (!$found && !isset($normalized[$schemaCol])) {
@@ -285,19 +300,23 @@ class FullIntegrationTest extends TestCase
                                                         }
                                                         // Garantir tipos corretos
                                                         if (isset($normalized['id'])) {
-                                                            $normalized['id'] = $normalized['id'] !== null ? (int)$normalized['id'] : null;
+                                                            $normalized['id'] = $normalized['id'] !== null ? (int) $normalized['id'] : null;
                                                         }
                                                         if (isset($normalized['active'])) {
-                                                            $normalized['active'] = $normalized['active'] !== null ? (bool)$normalized['active'] : null;
+                                                            $normalized['active'] = $normalized['active'] !== null ? (bool) $normalized['active'] : null;
                                                         }
-                                                        if (isset($normalized['createdAt']) && $normalized['createdAt'] !== null && !($normalized['createdAt'] instanceof \DateTimeInterface)) {
-                                                            $normalized['createdAt'] = (string)$normalized['createdAt'];
+                                                        if (
+                                                            isset($normalized['createdAt']) &&
+                                                            $normalized['createdAt'] !== null &&
+                                                            !($normalized['createdAt'] instanceof \DateTimeInterface)
+                                                        ) {
+                                                            $normalized['createdAt'] = (string) $normalized['createdAt'];
                                                         }
                                                         return $normalized;
                                                     },
                                                     $rows
                                                 );
-                                              // Filtrar linhas vazias (após delete)
+                                          // Filtrar linhas vazias (após delete)
                                                 $rows = array_filter($rows, fn($row) => !empty($row));
                                                 fwrite(STDERR, "\nDEBUG fetchAll rows: " . json_encode($rows) . "\n");
                                                 return array_values($rows);
@@ -346,9 +365,9 @@ class FullIntegrationTest extends TestCase
                                     }
                                     public function execute(string $query, array $parameters = []): int
                                     {
-                                        $stmt = $this->pdo->prepare($query);
-                                        $stmt->execute($parameters);
-                                        return $stmt->rowCount();
+                                          $stmt = $this->pdo->prepare($query);
+                                          $stmt->execute($parameters);
+                                          return $stmt->rowCount();
                                     }
                                     public function lastInsertID(?string $sequence = null)
                                     {
@@ -382,7 +401,7 @@ class FullIntegrationTest extends TestCase
                             }
                             public function getName(): string
                             {
-                                  return 'default';
+                                return 'default';
                             }
                             public function getPrefix(): string
                             {
@@ -402,11 +421,11 @@ class FullIntegrationTest extends TestCase
                                     private $name;
                                     public function __construct($name)
                                     {
-                                            $this->name = $name;
+                                          $this->name = $name;
                                     }
                                     public function getName(): string
                                     {
-                                          return $this->name;
+                                        return $this->name;
                                     }
                                     public function getColumns(): array
                                     {
@@ -491,9 +510,9 @@ class FullIntegrationTest extends TestCase
                                         foreach ($schema as $col => $nullable) {
                                             if (!array_key_exists($col, $row)) {
                                                 if ($nullable) {
-                                                        $row[$col] = null;
+                                                      $row[$col] = null;
                                                 } else {
-                                                        throw new \RuntimeException("Campo obrigatório '$col' ausente no fetch");
+                                                    throw new \RuntimeException("Campo obrigatório '$col' ausente no fetch");
                                                 }
                                             }
                                         }
@@ -591,14 +610,14 @@ class FullIntegrationTest extends TestCase
                                     protected array $values = [];
                                     public function __construct($pdo, $table)
                                     {
-                                            parent::__construct();
-                                            $this->pdo = $pdo;
-                                            $this->table = $table;
+                                          parent::__construct();
+                                          $this->pdo = $pdo;
+                                          $this->table = $table;
                                     }
                                     public function columns(array|string ...$columns): static
                                     {
-                                          $this->columns = is_array($columns[0]) ? $columns[0] : $columns;
-                                          return $this;
+                                        $this->columns = is_array($columns[0]) ? $columns[0] : $columns;
+                                        return $this;
                                     }
                                     public function values(mixed $rowsets): static
                                     {
@@ -617,7 +636,7 @@ class FullIntegrationTest extends TestCase
                                         }
                                         foreach ($this->values as &$row) {
                                             if (!is_array($row)) {
-                                      // Se vier string ou outro tipo, transformar em array associativo vazio
+                                        // Se vier string ou outro tipo, transformar em array associativo vazio
                                                 $row = [];
                                             }
                                             $schemaCols = ['id', 'name', 'description', 'active', 'createdAt'];
@@ -646,19 +665,25 @@ class FullIntegrationTest extends TestCase
                                             foreach ($this->columns as $col) {
                                                 $v = $row[$col] ?? null;
                                                 if ($v instanceof \DateTimeInterface) {
-                                                        $v = $v->format('Y-m-d H:i:s');
+                                                    $v = $v->format('Y-m-d H:i:s');
                                                 }
                                                 if ($col === 'active') {
-                                                          $v = (int)$v;
+                                                    $v = (int) $v;
                                                 }
                                                 $params[] = $v;
                                             }
                                             $stmt->execute($params);
-                                            fwrite(STDERR, "\nDEBUG insert params: " . json_encode($params) . "\n");
+                                            fwrite(
+                                                STDERR,
+                                                "\nDEBUG insert params: " . json_encode($params) . "\n"
+                                            );
                                             $count++;
                                         }
                                         $debugRows = $this->pdo->query('SELECT * FROM test_entities')->fetchAll(\PDO::FETCH_ASSOC);
-                                        fwrite(STDERR, "\nDEBUG select direto apos insert: " . json_encode($debugRows) . "\n");
+                                        fwrite(
+                                            STDERR,
+                                            "\nDEBUG select direto apos insert: " . json_encode($debugRows) . "\n"
+                                        );
                                         return $count;
                                     }
                                 };
@@ -673,21 +698,27 @@ class FullIntegrationTest extends TestCase
                                     protected array $where;
                                     public function __construct($pdo, $table, $values, $where)
                                     {
-                                            parent::__construct();
-                                            $this->pdo = $pdo;
-                                            $this->table = $table;
-                                            $this->values = $values;
-                                            $this->where = $where;
+                                          parent::__construct();
+                                          $this->pdo = $pdo;
+                                          $this->table = $table;
+                                          $this->values = $values;
+                                          $this->where = $where;
                                     }
                                     public function run(): int
                                     {
-                                          $set = implode(',', array_map(fn($k) => "$k = ?", array_keys($this->values)));
-                                          $where = implode(' AND ', array_map(fn($k) => "$k = ?", array_keys($this->where)));
-                                          $sql = "UPDATE {$this->table} SET $set" . ($where ? " WHERE $where" : '');
-                                          $params = array_merge(array_values($this->values), array_values($this->where));
-                                          $stmt = $this->pdo->prepare($sql);
-                                          $stmt->execute($params);
-                                          return $stmt->rowCount();
+                                        $set = implode(
+                                            ',',
+                                            array_map(fn($k) => "$k = ?", array_keys($this->values))
+                                        );
+                                        $where = implode(
+                                            ' AND ',
+                                            array_map(fn($k) => "$k = ?", array_keys($this->where))
+                                        );
+                                        $sql = "UPDATE {$this->table} SET $set" . ($where ? " WHERE $where" : '');
+                                        $params = array_merge(array_values($this->values), array_values($this->where));
+                                        $stmt = $this->pdo->prepare($sql);
+                                        $stmt->execute($params);
+                                        return $stmt->rowCount();
                                     }
                                 };
                             }
@@ -700,18 +731,18 @@ class FullIntegrationTest extends TestCase
                                     protected array $where;
                                     public function __construct($pdo, $table, $where)
                                     {
-                                            parent::__construct();
-                                            $this->pdo = $pdo;
-                                            $this->table = $table;
-                                            $this->where = $where;
+                                          parent::__construct();
+                                          $this->pdo = $pdo;
+                                          $this->table = $table;
+                                          $this->where = $where;
                                     }
                                     public function run(): int
                                     {
-                                          $where = implode(' AND ', array_map(fn($k) => "$k = ?", array_keys($this->where)));
-                                          $sql = "DELETE FROM {$this->table}" . ($where ? " WHERE $where" : '');
-                                          $stmt = $this->pdo->prepare($sql);
-                                          $stmt->execute(array_values($this->where));
-                                          return $stmt->rowCount();
+                                        $where = implode(' AND ', array_map(fn($k) => "$k = ?", array_keys($this->where)));
+                                        $sql = "DELETE FROM {$this->table}" . ($where ? " WHERE $where" : '');
+                                        $stmt = $this->pdo->prepare($sql);
+                                        $stmt->execute(array_values($this->where));
+                                        return $stmt->rowCount();
                                     }
                                 };
                             }
@@ -723,17 +754,17 @@ class FullIntegrationTest extends TestCase
                                     private $table = '';
                                     public function __construct($driver)
                                     {
-                                            parent::__construct();
-                                            $this->withDriver($driver);
-                                            $this->pdo = $GLOBALS['cycle_orm_test_pdo'] ?? null;
+                                          parent::__construct();
+                                          $this->withDriver($driver);
+                                          $this->pdo = $GLOBALS['cycle_orm_test_pdo'] ?? null;
                                         if (!$this->pdo) {
                                             throw new \RuntimeException('PDO global não definido!');
                                         }
                                     }
                                     public function from(mixed $tables): self
                                     {
-                                          $this->table = is_string($tables) ? $tables : '';
-                                          return $this;
+                                        $this->table = is_string($tables) ? $tables : '';
+                                        return $this;
                                     }
                                     public function distinct(bool|string|\Cycle\Database\Injection\FragmentInterface $distinct = true): self
                                     {
@@ -805,7 +836,7 @@ class FullIntegrationTest extends TestCase
                                         $schema = ['id', 'name', 'description', 'active', 'createdAt'];
                                         foreach ($schema as $col) {
                                             if (!array_key_exists($col, $row)) {
-                                                    $row[$col] = null;
+                                                $row[$col] = null;
                                             }
                                         }
                                         return $row;
@@ -909,23 +940,23 @@ class FullIntegrationTest extends TestCase
         $this->app->singleton(
             'cycle.schema',
             fn() => new class {
-            public function getRoles()
-            {
-              return ['CAFernandes\\ExpressPHP\\CycleORM\\Tests\\Fixtures\\TestEntity'];
-            }
-            public function define($role, $what)
-            {
-              if ($what === \Cycle\ORM\SchemaInterface::ENTITY) {
-            return 'CAFernandes\\ExpressPHP\\CycleORM\\Tests\\Fixtures\\TestEntity';
+              public function getRoles()
+              {
+                return ['CAFernandes\\ExpressPHP\\CycleORM\\Tests\\Fixtures\\TestEntity'];
               }
-              if ($what === \Cycle\ORM\SchemaInterface::TABLE) {
-            return 'test_entities';
+              public function define($role, $what)
+              {
+                if ($what === \Cycle\ORM\SchemaInterface::ENTITY) {
+                  return 'CAFernandes\\ExpressPHP\\CycleORM\\Tests\\Fixtures\\TestEntity';
+                }
+                if ($what === \Cycle\ORM\SchemaInterface::TABLE) {
+                  return 'test_entities';
+                }
+                if ($what === \Cycle\ORM\SchemaInterface::DATABASE) {
+                  return 'default';
+                }
+                return null;
               }
-              if ($what === \Cycle\ORM\SchemaInterface::DATABASE) {
-            return 'default';
-              }
-              return null;
-            }
             }
         );
       // Registrar o serviço 'cycle.migrator' no mock
@@ -949,18 +980,18 @@ class FullIntegrationTest extends TestCase
         $this->assertTrue($this->app->make('cycle.orm') !== null);
         $this->assertTrue($this->app->make('cycle.em') !== null);
 
-      // Criar tabelas
+        // Criar tabelas
         $dbal = $this->app->make('cycle.database');
         $db = $dbal->database();
 
         $db->execute(
             'CREATE TABLE test_entities (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            description TEXT,
-            active INTEGER DEFAULT 1,
-            createdAt DATETIME NOT NULL
-        )'
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                description TEXT,
+                active BOOLEAN NOT NULL,
+                createdAt DATETIME NOT NULL
+            )'
         );
 
       // Testar operações CRUD
@@ -1016,9 +1047,12 @@ class FullIntegrationTest extends TestCase
 
     public static function normalizeRow(array $row, array $schemaCols, \PDO $pdo): array
     {
-        fwrite(STDERR, "\nDEBUG raw row: " . json_encode($row) . "\n");
+        fwrite(
+            STDERR,
+            "\nDEBUG raw row: " . json_encode($row) . "\n"
+        );
         $normalized = [];
-      // Se vier só índice 0 e description, buscar todos os campos do banco
+        // Se vier só índice 0 e description, buscar todos os campos do banco
         if (isset($row[0]) && count($row) <= 2) {
             $id = $row[0];
             $full = $pdo->query('SELECT * FROM test_entities WHERE id = ' . ((int)$id))->fetch(\PDO::FETCH_ASSOC);
@@ -1062,74 +1096,5 @@ class FullIntegrationTest extends TestCase
             $normalized['createdAt'] = (string)$normalized['createdAt'];
         }
         return $normalized;
-    }
-}
-
-use Cycle\Database\StatementInterface;
-
-/**
- * @implements \IteratorAggregate<int, array<string, string>>
- */
-class MockSelect1Statement implements StatementInterface, \IteratorAggregate
-{
-    public const FETCH_ASSOC = 2;
-    /** @param array<mixed> $params */
-    public function execute(array $params = []): bool
-    {
-        fwrite(STDERR, "\nDEBUG execute SELECT 1\n");
-        return true;
-    }
-    public function fetch(int $mode = \Cycle\Database\StatementInterface::FETCH_ASSOC): mixed
-    {
-        fwrite(STDERR, "\nDEBUG fetch SELECT 1\n");
-        return ['1' => '1'];
-    }
-    /** @return array<mixed> */
-    public function fetchAll(int $mode = StatementInterface::FETCH_ASSOC): array
-    {
-        fwrite(STDERR, "\nDEBUG fetchAll SELECT 1\n");
-        return [['1' => '1']];
-    }
-    public function fetchColumn(?int $columnNumber = null): mixed
-    {
-        fwrite(STDERR, "\nMOCK SELECT 1 fetchColumn chamado (INTEGRATION)\n");
-        return '1';
-    }
-    /** @param array<mixed> $args */
-    public function fetchObject(string $className = 'stdClass', array $args = []): object|false
-    {
-        return (object)['1' => '1'];
-    }
-    public function getIterator(): \Traversable
-    {
-        return new \ArrayIterator([['1' => '1']]);
-    }
-    public function rowCount(): int
-    {
-        return 1;
-    }
-    public function columnCount(): int
-    {
-        return 1;
-    }
-    public function closeCursor(): bool
-    {
-        return true;
-    }
-    public function errorCode(): ?string
-    {
-        return null;
-    }
-    /** @return array<mixed> */
-    public function errorInfo(): array
-    {
-        return [];
-    }
-    public function getQueryString(): string
-    {
-        return 'SELECT 1';
-    }
-    public function close(): void
-    {
     }
 }
