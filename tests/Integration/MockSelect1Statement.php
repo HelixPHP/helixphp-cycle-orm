@@ -39,7 +39,12 @@ class MockSelect1Statement implements StatementInterface, \IteratorAggregate
     }
     public function getIterator(): \Traversable
     {
-        return new \ArrayIterator([['1' => '1']]);
+        // Corrige o tipo retornado para array<string, string>
+        return new \ArrayIterator(
+            [
+                ['1' => '1']
+            ]
+        );
     }
     public function rowCount(): int
     {

@@ -22,12 +22,7 @@ class HealthCheckMiddleware
     {
         // Compatível com Express-PHP: prioriza getPathInfo(), depois path, depois pathCallable
         if (method_exists($req, 'getPathInfo') && is_callable([$req, 'getPathInfo'])) {
-            /**
-             * @phpstan-ignore-next-line getPathInfo is not defined in the current type of $req.
-             * Retrieves the path info from the request.
-             *
-             * @var string $path The path information extracted from the request.
-             */
+            // @phpstan-ignore-next-line
             $path = $req->getPathInfo();
         } elseif (property_exists($req, 'path')) {
             $path = $req->path;
