@@ -171,11 +171,11 @@ class CycleHealthCheck
         if ($dbManager && is_object($dbManager) && method_exists($dbManager, 'database')) {
             try {
                 $db = $dbManager->database();
-                if ($db && method_exists($db, 'execute')) {
+                if (is_object($db) && method_exists($db, 'execute')) {
                     // Tenta executar um SELECT 1
                     $result = $db->execute('SELECT 1');
                     $hasDatabase = ($result !== false);
-                } elseif ($db && method_exists($db, 'getPDO')) {
+                } elseif (is_object($db) && method_exists($db, 'getPDO')) {
                     // Fallback: tenta usar PDO diretamente
                     $pdo = $db->getPDO();
                     $stmt = $pdo->query('SELECT 1');
