@@ -17,6 +17,13 @@ namespace CAFernandes\ExpressPHP\CycleORM\Commands;
 class MigrateCommand extends BaseCommand
 {
     /**
+     * Instância da aplicação ou container.
+     *
+     * @var null|object
+     */
+    protected $app;
+
+    /**
      * Executa o comando principal para migrações.
      *
      * @return int Código de status (0 = sucesso, 1 = erro)
@@ -31,6 +38,25 @@ class MigrateCommand extends BaseCommand
     }
 
     /**
+     * Resolve um serviço do container PSR-11 ou via app().
+     */
+    protected function getService(string $id): mixed
+    {
+        // PSR-11: se existir $this->app e for container
+        if (property_exists($this, 'app') && is_object($this->app)) {
+            $container = $this->app;
+            if (method_exists($container, 'has') && $container->has($id)) {
+                return method_exists($container, 'get') ? $container->get($id) : null;
+            }
+        }
+        // Fallback para helper global app()
+        if (function_exists('app')) {
+            return app($id);
+        }
+        throw new \RuntimeException("Service '{$id}' not found in container or app().");
+    }
+
+    /**
      * Executa as migrações pendentes.
      *
      * @return int Código de status (0 = sucesso, 1 = erro)
@@ -40,14 +66,7 @@ class MigrateCommand extends BaseCommand
         $this->info('Running migrations...');
 
         try {
-            if (function_exists('app')) {
-                $migrator = app('cycle.migrator');
-            } else {
-                $this->error('Application container not available');
-
-                return 1;
-            }
-
+            $migrator = $this->getService('cycle.migrator');
             $migrator->run();
             $this->info('Migrations executed successfully.');
 
@@ -69,14 +88,7 @@ class MigrateCommand extends BaseCommand
         $this->info('Rolling back last migration...');
 
         try {
-            if (function_exists('app')) {
-                $migrator = app('cycle.migrator');
-            } else {
-                $this->error('Application container not available');
-
-                return 1;
-            }
-
+            $migrator = $this->getService('cycle.migrator');
             $migrator->run();
             $this->info('Migration rolled back successfully.');
 

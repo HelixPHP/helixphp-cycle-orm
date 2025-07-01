@@ -5,6 +5,7 @@ namespace CAFernandes\ExpressPHP\CycleORM\Exceptions;
 class EntityNotFoundException extends CycleORMException
 {
     private string $entityClass;
+
     private int|string $identifier;
 
     public function __construct(
