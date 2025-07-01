@@ -69,7 +69,8 @@ class CycleServiceProvider extends ExtensionServiceProvider
         if (!$app->getContainer()->has(ClassesInterface::class)) {
           $app->getContainer()->bind(ClassesInterface::class, function() use ($config) {
             $finder = new Finder();
-            $finder->files()->in($config['directories']);
+            $dirs = isset($config['directories']) && (is_array($config['directories']) || is_string($config['directories'])) ? $config['directories'] : [];
+            $finder->files()->in($dirs);
             return new ClassLocator($finder);
           });
         }
@@ -119,7 +120,10 @@ class CycleServiceProvider extends ExtensionServiceProvider
   private function logError(string $message): void
   {
     if ($this->app->getContainer()->has('logger')) {
-      $this->app->getContainer()->get('logger')->error($message);
+      $logger = $this->app->getContainer()->get('logger');
+      if (is_object($logger) && method_exists($logger, 'error')) {
+        $logger->error($message);
+      }
     } else {
       error_log($message);
     }
@@ -204,7 +208,7 @@ class CycleServiceProvider extends ExtensionServiceProvider
    */
   private function getDatabaseConfig(): array
   {
-    return config('cycle.database', [
+    $result = config('cycle.database', [
       'default' => env('DB_CONNECTION', 'mysql'),
       'databases' => [
         'default' => ['connection' => env('DB_CONNECTION', 'mysql')]
@@ -226,6 +230,7 @@ class CycleServiceProvider extends ExtensionServiceProvider
         ]
       ]
     ]);
+    return is_array($result) ? $result : [];
   }
 
   /**
@@ -234,12 +239,13 @@ class CycleServiceProvider extends ExtensionServiceProvider
    */
   private function getEntityConfig(): array
   {
-    return config('cycle.entities', [
+    $result = config('cycle.entities', [
       'directories' => [
         app_path('Models'),
       ],
       'namespace' => 'App\\Models'
     ]);
+    return is_array($result) ? $result : [];
   }
 
   /**
@@ -257,8 +263,9 @@ class CycleServiceProvider extends ExtensionServiceProvider
     }
 
     $default = $config['default'];
-    if (!isset($config['connections'][$default])) {
-      throw new \InvalidArgumentException("Default connection '{$default}' not configured");
+    $defaultStr = (is_string($default) || is_numeric($default)) ? (string)$default : '';
+    if (!isset($config['connections']) || !is_array($config['connections']) || !isset($config['connections'][$defaultStr])) {
+      throw new \InvalidArgumentException("Default connection '" . $defaultStr . "' not configured");
     }
   }
 
@@ -268,11 +275,14 @@ class CycleServiceProvider extends ExtensionServiceProvider
    */
   private function validateEntityConfig(array $config): void
   {
-    if (!isset($config['directories']) || empty($config['directories'])) {
+    if (!isset($config['directories']) || !is_array($config['directories']) || empty($config['directories'])) {
       throw new \InvalidArgumentException('At least one entity directory must be configured');
     }
 
     foreach ($config['directories'] as $dir) {
+      if (!is_string($dir)) {
+        throw new \InvalidArgumentException('Entity directory must be a string');
+      }
       if (!is_dir($dir)) {
         // Criar diretório se não existir
         if (!mkdir($dir, 0755, true) && !is_dir($dir)) {

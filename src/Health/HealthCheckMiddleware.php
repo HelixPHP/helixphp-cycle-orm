@@ -33,7 +33,7 @@ class HealthCheckMiddleware
 
   private function handleHealthCheck(Request $req, Response $res): void
   {
-    $detailed = $req->query['detailed'] ?? false;
+    $detailed = (is_array($req->query) && isset($req->query['detailed'])) ? $req->query['detailed'] : false;
 
     if ($detailed) {
       $health = CycleHealthCheck::detailedCheck($this->app);

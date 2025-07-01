@@ -50,11 +50,15 @@ class TransactionMiddleware
       $next($req, $res);
 
       // Commit apenas se há mudanças
-      $em->run();
+      if (is_object($em) && method_exists($em, 'run')) {
+        $em->run();
+      }
       $this->logDebug('Transaction committed');
     } catch (\Exception $e) {
       try {
-        $em->clean();
+        if (is_object($em) && method_exists($em, 'clean')) {
+          $em->clean();
+        }
         $this->logDebug('Transaction rolled back due to error: ' . $e->getMessage());
       } catch (\Exception $rollbackException) {
         $this->logError('Rollback failed: ' . $rollbackException->getMessage());
@@ -94,9 +98,9 @@ class TransactionMiddleware
   {
     if ($this->app->getContainer()->has('logger')) {
       $logger = $this->app->getContainer()->get('logger');
-      if (method_exists($logger, 'debug')) {
+      if (is_object($logger) && method_exists($logger, 'debug')) {
         $logger->debug($message, []);
-      } elseif (method_exists($logger, 'error')) {
+      } elseif (is_object($logger) && method_exists($logger, 'error')) {
         $logger->error($message, []);
       }
     } else {

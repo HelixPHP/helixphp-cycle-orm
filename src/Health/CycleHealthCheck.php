@@ -82,12 +82,12 @@ class CycleHealthCheck
 
             if ($app instanceof ContainerInterface) {
                 $hasService = $app->has($service);
-            } elseif (method_exists($app, 'has')) {
+            } elseif (is_object($app) && method_exists($app, 'has')) {
                 $hasService = $app->has($service);
             } elseif (method_exists($app, 'getContainer')) {
                 // Para Application do Express PHP
                 $container = $app->getContainer();
-                if ($container && method_exists($container, 'has')) {
+                if (is_object($container) && method_exists($container, 'has')) {
                     $hasService = $container->has($service);
                 }
             }
@@ -123,8 +123,8 @@ class CycleHealthCheck
             $dbManager = method_exists($app, 'make') ? $app->make('cycle.database') : null;
         } elseif (method_exists($app, 'getContainer')) {
             $container = $app->getContainer();
-            if ($container && method_exists($container, 'has') && $container->has('cycle.database')) {
-                $dbManager = method_exists($container, 'get') ? $container->get('cycle.database') : null;
+            if (is_object($container) && method_exists($container, 'has') && $container->has('cycle.database')) {
+                $dbManager = (is_object($container) && method_exists($container, 'get')) ? $container->get('cycle.database') : null;
             }
         }
 
@@ -155,8 +155,8 @@ class CycleHealthCheck
             $orm = method_exists($app, 'make') ? $app->make('cycle.orm') : null;
         } elseif (method_exists($app, 'getContainer')) {
             $container = $app->getContainer();
-            if ($container && method_exists($container, 'has') && $container->has('cycle.orm')) {
-                $orm = method_exists($container, 'get') ? $container->get('cycle.orm') : null;
+            if (is_object($container) && method_exists($container, 'has') && $container->has('cycle.orm')) {
+                $orm = (is_object($container) && method_exists($container, 'get')) ? $container->get('cycle.orm') : null;
             }
         }
 

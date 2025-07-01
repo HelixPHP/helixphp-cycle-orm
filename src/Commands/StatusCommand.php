@@ -39,7 +39,7 @@ class StatusCommand extends BaseCommand
     }
     $icon = $status === 'healthy' ? '✅' : '❌';
 
-    $responseTime = isset($health['response_time_ms']) ? (string)$health['response_time_ms'] : '';
+    $responseTime = isset($health['response_time_ms']) && (is_string($health['response_time_ms']) || is_numeric($health['response_time_ms'])) ? (string)$health['response_time_ms'] : '';
     $this->line("{$icon} Overall Status: {$status}");
     $this->line("Response Time: {$responseTime}ms");
     $this->line('');

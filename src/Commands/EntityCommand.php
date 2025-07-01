@@ -126,7 +126,8 @@ PHP;
    */
   private function getTableName(string $className): string
   {
-    return $this->toLower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $className));
+    $snake = preg_replace('/([a-z])([A-Z])/', '$1_$2', $className);
+    return $this->toLower($snake ?? '');
   }
 
   /**

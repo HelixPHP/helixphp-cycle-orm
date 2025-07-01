@@ -145,7 +145,7 @@ class CycleRequest
         if (($offset > 0 || $perPage < $total) && method_exists($query, 'limit') && method_exists($query, 'offset')) {
             $query = $query->limit($perPage)->offset($offset);
         }
-        $items = method_exists($query, 'fetchAll') ? $query->fetchAll() : [];
+        $items = (is_object($query) && method_exists($query, 'fetchAll')) ? $query->fetchAll() : [];
         $lastPage = max(1, (int) ceil($total / $perPage));
         return [
             'data' => $items,

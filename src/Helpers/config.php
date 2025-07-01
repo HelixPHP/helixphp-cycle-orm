@@ -21,7 +21,7 @@ if (!function_exists('config')) {
           } elseif (method_exists($container, 'make')) {
             $configService = $container->make('config');
           }
-          if (method_exists($configService, 'get')) {
+          if (is_object($configService) && method_exists($configService, 'get')) {
             return $configService->get($key, $default);
           }
         }
