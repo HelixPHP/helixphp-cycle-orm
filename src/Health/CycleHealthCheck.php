@@ -146,6 +146,7 @@ class CycleHealthCheck
     {
         $hasDatabase = false;
         $dbManager = null;
+        $error = null;
 
         if ($app instanceof ContainerInterface && $app->has('cycle.database')) {
             $dbManager = $app->get('cycle.database');
@@ -168,13 +169,34 @@ class CycleHealthCheck
         }
 
         if ($dbManager && is_object($dbManager) && method_exists($dbManager, 'database')) {
-            $db = $dbManager->database();
-            $hasDatabase = $db ? true : false;
+            try {
+                $db = $dbManager->database();
+                if ($db && method_exists($db, 'execute')) {
+                    // Tenta executar um SELECT 1
+                    $result = $db->execute('SELECT 1');
+                    $hasDatabase = ($result !== false);
+                } elseif ($db && method_exists($db, 'getPDO')) {
+                    // Fallback: tenta usar PDO diretamente
+                    $pdo = $db->getPDO();
+                    $stmt = $pdo->query('SELECT 1');
+                    $hasDatabase = ($stmt !== false);
+                } else {
+                    $hasDatabase = false;
+                    $error = 'Método execute/getPDO não disponível na conexão.';
+                }
+            } catch (\Throwable $e) {
+                $hasDatabase = false;
+                $error = $e->getMessage();
+            }
         }
 
-        return [
+        $status = [
             'status' => $hasDatabase ? 'healthy' : 'unhealthy',
         ];
+        if ($error) {
+            $status['error'] = $error;
+        }
+        return $status;
     }
 
     /**

@@ -15,9 +15,7 @@ class CommandRegistry
     public function run(string $commandName, array $args = []): int
     {
         if (!$this->hasCommand($commandName)) {
-            echo "Command '{$commandName}' not found.\n";
-
-            return 1;
+            throw new CommandNotFoundException($commandName);
         }
 
         $commandClass = $this->commands[$commandName];
