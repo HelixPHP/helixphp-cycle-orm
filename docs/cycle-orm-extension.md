@@ -3,7 +3,7 @@
 ## 📁 Estrutura de Diretórios
 
 ```
-express-php/cycle-orm-extension/
+cafernandes/express-php-cycle-orm-extension
 ├── 📄 composer.json
 ├── 📄 README.md
 ├── 📄 LICENSE
@@ -59,12 +59,12 @@ express-php/cycle-orm-extension/
 
 ```bash
 # Em um projeto Express-PHP existente
-composer require express-php/cycle-orm-extension
+composer require cafernandes/express-php-cycle-orm-extension
 
 # Ou para novo projeto
 composer create-project express-php/starter-app my-api
 cd my-api
-composer require express-php/cycle-orm-extension
+composer require cafernandes/express-php-cycle-orm-extension
 ```
 
 ### 2. Configuração Automática
@@ -251,7 +251,7 @@ $app->get('/users/:id', function($req, $res) {
 ```bash
 composer create-project express-php/starter-app blog-api
 cd blog-api
-composer require express-php/cycle-orm-extension
+composer require cafernandes/express-php-cycle-orm-extension
 ```
 
 ### 2. Criar Entidades
@@ -349,7 +349,7 @@ A combinação perfeita entre:
 
 ### 🚀 Next Steps
 
-1. **Instalar** a extensão: `composer require express-php/cycle-orm-extension`
+1. **Instalar** a extensão: `composer require cafernandes/express-php-cycle-orm-extension`
 2. **Criar** primeira entidade: `php express make:entity User`
 3. **Implementar** API REST com ~10 linhas de código
 4. **Deploy** com performance superior ao Laravel/Symfony
@@ -361,8 +361,8 @@ A combinação perfeita entre:
 ## 📞 Suporte & Comunidade
 
 - 📚 **Documentação**: [docs.express-php.dev/cycle-orm](https://docs.express-php.dev/cycle-orm)
-- 💬 **Discord**: [express-php.dev/discord](https://express-php.dev/discord)
-- 🐛 **Issues**: [github.com/express-php/cycle-orm-extension/issues](https://github.com/express-php/cycle-orm-extension/issues)
-- 📧 **Email**: [team@express-php.dev](mailto:team@express-php.dev)
-
+<!-- - 💬 **Discord**: [express-php.dev/discord](https://express-php.dev/discord) -->
+- 🐛 **Issues**: [github.com/CAFernandes/express-php-cycle-orm-extension/issues](https://github.com/CAFernandes/express-php-cycle-orm-extension/issues)
+<!-- - 📧 **Email**: [team@express-php.dev](mailto:team@express-php.dev) -->
+.dev](mailto:team@e
 Made with ❤️ by Express-PHP Team

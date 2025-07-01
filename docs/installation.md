@@ -12,7 +12,7 @@
 ## Composer Installation
 
 ```bash
-composer require express-php/cycle-orm-extension
+composer require cafernandes/express-php-cycle-orm-extension
 ```
 
 ## Environment Setup
