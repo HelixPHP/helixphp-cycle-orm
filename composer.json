@@ -1,5 +1,5 @@
 {
-  "name": "express-php/cycle-orm-extension",
+  "name": "cafernandes/express-php-cycle-orm-extension",
   "description": "Cycle ORM integration for Express-PHP microframework",
   "keywords": [
     "express-php",
