@@ -18,17 +18,29 @@ use Symfony\Component\Finder\Finder;
 use Cycle\Schema\Registry;
 use Cycle\Annotated\Entities as AnnotatedEntities;
 
-// Incluir os helpers necessários
-require_once __DIR__ . '/Helpers/env.php';
-require_once __DIR__ . '/Helpers/config.php';
-require_once __DIR__ . '/Helpers/app_path.php';
-
 class CycleServiceProvider extends ExtensionServiceProvider
 {
   /**
    * @var \Express\Core\Application
    */
     protected \Express\Core\Application $app;
+
+    // Incluir os helpers necessários
+    private static function includeHelpers(): void
+    {
+        require_once __DIR__ . '/Helpers/env.php';
+        require_once __DIR__ . '/Helpers/config.php';
+        require_once __DIR__ . '/Helpers/app_path.php';
+    }
+
+    /**
+     * @param \Express\Core\Application $app
+     */
+    public function __construct(\Express\Core\Application $app)
+    {
+        self::includeHelpers();
+        $this->app = $app;
+    }
 
     public function register(): void
     {
@@ -49,7 +61,9 @@ class CycleServiceProvider extends ExtensionServiceProvider
       // Usa funções globais para evitar problemas de inicialização
         $debug = $_ENV['APP_DEBUG'] ?? $_SERVER['APP_DEBUG'] ?? getenv('APP_DEBUG') ?: false;
         $env = $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? getenv('APP_ENV') ?: 'production';
-        if ($debug || $env === 'development') {
+        if (
+            $debug || $env === 'development'
+        ) {
             $this->enableDevelopmentFeatures();
         }
     }
@@ -81,7 +95,8 @@ class CycleServiceProvider extends ExtensionServiceProvider
                                 $dirs =
                                 isset($config['directories']) &&
                                 (
-                                is_array($config['directories']) || is_string($config['directories'])
+                                    is_array($config['directories']) ||
+                                    is_string($config['directories'])
                                 ) ? $config['directories'] : [];
                                 $finder->files()->in($dirs);
                                 return new ClassLocator($finder);
@@ -150,7 +165,9 @@ class CycleServiceProvider extends ExtensionServiceProvider
     private function enableDevelopmentFeatures(): void
     {
         try {
-            $logQueries = $_ENV['CYCLE_LOG_QUERIES'] ?? $_SERVER['CYCLE_LOG_QUERIES'] ?? getenv('CYCLE_LOG_QUERIES') ?: false;
+            $logQueries = $_ENV['CYCLE_LOG_QUERIES'] ??
+                $_SERVER['CYCLE_LOG_QUERIES'] ??
+                getenv('CYCLE_LOG_QUERIES') ?: false;
             if ($logQueries) {
                 $this->app->getContainer()->bind(
                     'cycle.query_logger',
@@ -164,10 +181,9 @@ class CycleServiceProvider extends ExtensionServiceProvider
         }
 
         try {
-            $profileQueries =
-              $_ENV['CYCLE_PROFILE_QUERIES'] ??
-              $_SERVER['CYCLE_PROFILE_QUERIES'] ??
-              getenv('CYCLE_PROFILE_QUERIES') ?: false;
+            $profileQueries = $_ENV['CYCLE_PROFILE_QUERIES'] ??
+                $_SERVER['CYCLE_PROFILE_QUERIES'] ??
+                getenv('CYCLE_PROFILE_QUERIES') ?: false;
             if ($profileQueries) {
                 $this->app->getContainer()->bind(
                     'cycle.profiler',
@@ -313,9 +329,17 @@ class CycleServiceProvider extends ExtensionServiceProvider
         }
 
         $default = $config['default'];
-        $defaultStr = (is_string($default) || is_numeric($default)) ? (string)$default : '';
-        if (!isset($config['connections']) || !is_array($config['connections']) || !isset($config['connections'][$defaultStr])) {
-            throw new \InvalidArgumentException("Default connection '" . $defaultStr . "' not configured");
+        $defaultStr = (is_string($default) || is_numeric($default))
+            ? (string)$default
+            : '';
+        if (
+            !isset($config['connections']) ||
+            !is_array($config['connections']) ||
+            !isset($config['connections'][$defaultStr])
+        ) {
+            throw new \InvalidArgumentException(
+                "Default connection '" . $defaultStr . "' not configured"
+            );
         }
     }
 
@@ -356,7 +380,13 @@ class CycleServiceProvider extends ExtensionServiceProvider
         if (is_callable($handler)) {
             return $handler;
         }
-        if (is_array($handler) && count($handler) === 2 && is_object($handler[0]) && is_string($handler[1]) && method_exists($handler[0], $handler[1])) {
+        if (
+            is_array($handler) &&
+            count($handler) === 2 &&
+            is_object($handler[0]) &&
+            is_string($handler[1]) &&
+            method_exists($handler[0], $handler[1])
+        ) {
             return function (...$args) use ($handler) {
                 return $handler[0]->{$handler[1]}(...$args);
             };

@@ -3,7 +3,7 @@
 namespace CAFernandes\ExpressPHP\CycleORM\Tests;
 
 use PHPUnit\Framework\TestCase;
-use PSR\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use CAFernandes\ExpressPHP\CycleORM\Commands\EntityCommand;
 use CAFernandes\ExpressPHP\CycleORM\Commands\SchemaCommand;
 use CAFernandes\ExpressPHP\CycleORM\Commands\CommandRegistry;
@@ -22,7 +22,7 @@ class CommandsTest extends TestCase
         $command = new EntityCommand([]);
         ob_start();
         $result = $command->handle();
-        $output = ob_get_clean();
+        $output = ob_get_clean() ?: '';
         $this->assertEquals(1, $result);
         $this->assertStringContainsString('Entity name is required', $output);
     }
@@ -39,7 +39,7 @@ class CommandsTest extends TestCase
         $command = new EntityCommand(['name' => 'TestEntity']);
         ob_start();
         $result = $command->handle();
-        $output = ob_get_clean();
+        $output = ob_get_clean() ?: '';
         $this->assertEquals(0, $result);
         $this->assertStringContainsString('Entity created', $output);
         $this->assertFileExists($entityPath);
@@ -74,12 +74,12 @@ class CommandsTest extends TestCase
         $schemaArray = (new \Cycle\Schema\Compiler())->compile($registry, []);
         $schema = new \Cycle\ORM\Schema($schemaArray); // Corrigido: Schema real
         $orm = new class ($schema) {
-            private $schema;
-            public function __construct($schema)
+            private object $schema;
+            public function __construct(object $schema)
             {
                 $this->schema = $schema;
             }
-            public function getSchema()
+            public function getSchema(): object
             {
                 return $this->schema;
             }
@@ -91,7 +91,7 @@ class CommandsTest extends TestCase
         $command = new SchemaCommand([], $container);
         ob_start();
         $result = $command->handle();
-        $output = ob_get_clean();
+        $output = ob_get_clean() ?: '';
         $this->assertIsInt($result);
         $this->assertStringContainsString('Informações do Cycle ORM Schema', $output);
     }
@@ -114,13 +114,18 @@ class CommandsTest extends TestCase
         $registry->register('invalid', 'NonExistentClass');
     }
 
+    /** @SuppressWarnings("unused") */
     private function recursiveDelete(string $dir): void
     {
         if (!is_dir($dir)) {
             return;
         }
 
-        $files = array_diff(scandir($dir), ['.', '..']);
+        $scannedFiles = scandir($dir);
+        if ($scannedFiles === false) {
+            return;
+        }
+        $files = array_diff($scannedFiles, ['.', '..']);
         foreach ($files as $file) {
             $path = $dir . '/' . $file;
             is_dir($path) ? $this->recursiveDelete($path) : unlink($path);

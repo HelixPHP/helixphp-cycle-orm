@@ -62,7 +62,9 @@ class RepositoryFactory
         }
 
         if (!is_subclass_of($repositoryClass, RepositoryInterface::class)) {
-            throw new \InvalidArgumentException("Repository class {$repositoryClass} must implement RepositoryInterface");
+            throw new \InvalidArgumentException(
+                "Repository class {$repositoryClass} must implement RepositoryInterface"
+            );
         }
 
         $this->customRepositories[$entityClass] = $repositoryClass;

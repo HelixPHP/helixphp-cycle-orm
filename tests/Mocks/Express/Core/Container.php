@@ -4,19 +4,19 @@ namespace Express\Core;
 
 class Container
 {
-    public function singleton(...$args)
+    public function singleton(mixed ...$args): bool
     {
         return true;
     }
-    public function booted()
+    public function booted(): bool
     {
         return true;
     }
-    public function alias(...$args)
+    public function alias(mixed ...$args): bool
     {
         return true;
     }
-    public function make(...$args)
+    public function make(mixed ...$args): object
     {
         return new \stdClass();
     }

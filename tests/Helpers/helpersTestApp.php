@@ -1,15 +1,16 @@
 <?php
 
 if (!function_exists('helpersTestApp')) {
-    function helpersTestApp($service = null)
+    function helpersTestApp(?string $service = null): mixed
     {
       // Retorna um stub de ORM para os testes
         if ($service === 'cycle.orm') {
             return new class {
-                public function getSchema()
+                public function getSchema(): object
                 {
                     return new class {
-                        public function getRoles()
+                        /** @return array<int, string> */
+                        public function getRoles(): array
                         {
                               return ['User', 'Post'];
                         }
@@ -19,7 +20,7 @@ if (!function_exists('helpersTestApp')) {
         }
         if ($service === 'cycle.migrator') {
             return new class {
-                public function run()
+                public function run(): bool
                 {
                     return true;
                 }

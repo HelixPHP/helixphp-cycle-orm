@@ -39,14 +39,22 @@ class StatusCommand extends BaseCommand
         }
         $icon = $status === 'healthy' ? '✅' : '❌';
 
-        $responseTime = isset($health['response_time_ms']) && (is_string($health['response_time_ms']) || is_numeric($health['response_time_ms'])) ? (string)$health['response_time_ms'] : '';
+        $responseTime = isset($health['response_time_ms']) &&
+            (is_string($health['response_time_ms']) || is_numeric($health['response_time_ms']))
+            ? (string)$health['response_time_ms']
+            : '';
         $this->line("{$icon} Overall Status: {$status}");
         $this->line("Response Time: {$responseTime}ms");
         $this->line('');
 
         if (isset($health['checks']) && is_array($health['checks'])) {
             foreach ($health['checks'] as $checkName => $check) {
-                if (!is_string($checkName) || !is_array($check) || !isset($check['status']) || !is_string($check['status'])) {
+                if (
+                    !is_string($checkName) ||
+                    !is_array($check) ||
+                    !isset($check['status']) ||
+                    !is_string($check['status'])
+                ) {
                     continue;
                 }
                 $checkStatus = $check['status'];

@@ -17,7 +17,11 @@ if (!function_exists('config')) {
                 $container = app();
                 if ($container) {
                     $configService = null;
-                    if (method_exists($container, 'has') && $container->has('config') && method_exists($container, 'get')) {
+                    if (
+                        method_exists($container, 'has') &&
+                        $container->has('config') &&
+                        method_exists($container, 'get')
+                    ) {
                         $configService = $container->get('config', []);
                     } elseif (method_exists($container, 'make')) {
                         $configService = $container->make('config');

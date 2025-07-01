@@ -33,7 +33,8 @@ class CycleMiddleware
      *
      * @param Request $req
      * @param Response $res
-     * @param callable(Request|CycleRequest, Response):void $next Função next do Express-PHP, recebe Request ou CycleRequest e Response.
+     * @param callable(Request|CycleRequest, Response):void $next Função next do Express-PHP,
+     *   recebe Request ou CycleRequest e Response.
      * @return void
      */
     public function handle(Request $req, Response $res, callable $next): void
@@ -71,7 +72,8 @@ class CycleMiddleware
      *
      * @param Request $req
      * @param Response $res
-     * @param callable(Request|CycleRequest, Response):void $next Função next do Express-PHP, recebe Request ou CycleRequest e Response.
+     * @param callable(Request|CycleRequest, Response):void $next Função next do Express-PHP,
+     *   recebe Request ou CycleRequest e Response.
      * @return void
      */
     public function __invoke(Request $req, Response $res, callable $next): void

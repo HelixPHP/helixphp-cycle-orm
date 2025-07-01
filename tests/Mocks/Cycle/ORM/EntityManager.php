@@ -4,17 +4,17 @@ namespace Cycle\ORM;
 
 class EntityManager
 {
-    public function hasChanges()
+    public function hasChanges(): bool
     {
         return false;
     }
-    public function beginTransaction()
+    public function beginTransaction(): void
     {
     }
-    public function commit()
+    public function commit(): void
     {
     }
-    public function rollback()
+    public function rollback(): void
     {
     }
 }

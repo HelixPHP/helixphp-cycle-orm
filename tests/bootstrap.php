@@ -5,14 +5,14 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 // Helper functions para testes
 if (!function_exists('env')) {
-    function env(string $key, $default = null)
+    function env(string $key, mixed $default = null): mixed
     {
         return $_ENV[$key] ?? getenv($key) ?: $default;
     }
 }
 
 if (!function_exists('config')) {
-    function config(string $key, $default = null)
+    function config(string $key, mixed $default = null): mixed
     {
       // Mock básico para testes
         static $config = [];

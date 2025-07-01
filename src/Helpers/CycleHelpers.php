@@ -26,7 +26,12 @@ class CycleHelpers
         if (is_object($query) && method_exists($query, 'count')) {
             $count = $query->count();
         }
-        if (($offset > 0 || $perPage < $count) && is_object($query) && method_exists($query, 'limit') && method_exists($query, 'offset')) {
+        if (
+            ($offset > 0 || $perPage < $count)
+            && is_object($query)
+            && method_exists($query, 'limit')
+            && method_exists($query, 'offset')
+        ) {
             $query = $query->limit($perPage)->offset($offset);
         }
         $items = is_object($query) && method_exists($query, 'fetchAll') ? $query->fetchAll() : [];
@@ -67,7 +72,14 @@ class CycleHelpers
                     $query = $query->where($field, 'IN', array_filter($value));
                 } elseif (is_string($value) && strpos($value, '%') !== false) {
                     $query = $query->where($field, 'LIKE', $value);
-                } elseif (is_string($value) && preg_match('/^(\d{4}-\d{2}-\d{2})\.\.(\d{4}-\d{2}-\d{2})$/', $value, $matches)) {
+                } elseif (
+                    is_string($value) &&
+                    preg_match(
+                        '/^(\\d{4}-\\d{2}-\\d{2})\\.\\.(\\d{4}-\\d{2}-\\d{2})$/',
+                        $value,
+                        $matches
+                    )
+                ) {
                     $query = $query->where($field, '>=', $matches[1])
                         ->where($field, '<=', $matches[2]);
                 } else {
@@ -87,8 +99,12 @@ class CycleHelpers
      * @param array<int, string> $allowedFields Campos permitidos
      * @return object Query modificada
      */
-    public static function applySorting(object $query, ?string $sortBy = null, string $direction = 'asc', array $allowedFields = []): object
-    {
+    public static function applySorting(
+        object $query,
+        ?string $sortBy = null,
+        string $direction = 'asc',
+        array $allowedFields = []
+    ): object {
         if (!$sortBy) {
             return $query;
         }

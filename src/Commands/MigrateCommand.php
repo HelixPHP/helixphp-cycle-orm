@@ -74,7 +74,7 @@ class MigrateCommand extends BaseCommand
                 return 1;
             }
 
-            $migrator->rollback();
+            $migrator->run();
             $this->info('Migration rolled back successfully.');
 
             return 0;

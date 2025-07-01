@@ -120,11 +120,20 @@ class CycleHealthCheck
         if ($app instanceof ContainerInterface && $app->has('cycle.database')) {
             $dbManager = $app->get('cycle.database');
         } elseif (method_exists($app, 'has') && $app->has('cycle.database')) {
-            $dbManager = method_exists($app, 'make') ? $app->make('cycle.database') : null;
+            $dbManager = method_exists($app, 'make')
+                ? $app->make('cycle.database')
+                : null;
         } elseif (method_exists($app, 'getContainer')) {
             $container = $app->getContainer();
-            if (is_object($container) && method_exists($container, 'has') && $container->has('cycle.database')) {
-                $dbManager = (is_object($container) && method_exists($container, 'get')) ? $container->get('cycle.database') : null;
+            if (
+                is_object($container) &&
+                method_exists($container, 'has') &&
+                $container->has('cycle.database')
+            ) {
+                $dbManager = (
+                    is_object($container) &&
+                    method_exists($container, 'get')
+                ) ? $container->get('cycle.database') : null;
             }
         }
 
@@ -152,11 +161,20 @@ class CycleHealthCheck
         if ($app instanceof ContainerInterface && $app->has('cycle.orm')) {
             $orm = $app->get('cycle.orm');
         } elseif (method_exists($app, 'has') && $app->has('cycle.orm')) {
-            $orm = method_exists($app, 'make') ? $app->make('cycle.orm') : null;
+            $orm = method_exists($app, 'make')
+                ? $app->make('cycle.orm')
+                : null;
         } elseif (method_exists($app, 'getContainer')) {
             $container = $app->getContainer();
-            if (is_object($container) && method_exists($container, 'has') && $container->has('cycle.orm')) {
-                $orm = (is_object($container) && method_exists($container, 'get')) ? $container->get('cycle.orm') : null;
+            if (
+                is_object($container) &&
+                method_exists($container, 'has') &&
+                $container->has('cycle.orm')
+            ) {
+                $orm = (
+                    is_object($container) &&
+                    method_exists($container, 'get')
+                ) ? $container->get('cycle.orm') : null;
             }
         }
 

@@ -29,12 +29,13 @@ class FullIntegrationTest extends TestCase
         $container->bind(
             'config',
             fn() => new class {
+            /** @var array<string, mixed> */
             private array $data = [];
-            public function set($key, $value)
+            public function set(string $key, mixed $value): void
             {
             $this->data[$key] = $value;
             }
-            public function get($key, $default = null)
+            public function get(string $key, mixed $default = null): mixed
             {
             return $this->data[$key] ?? $default;
             }
@@ -52,8 +53,8 @@ class FullIntegrationTest extends TestCase
             function () use ($pdoShared) {
                 // Mock mínimo de DBAL para SQLite em memória
                 return new class ($pdoShared) implements \Cycle\Database\DatabaseProviderInterface {
-                    private $pdo;
-                    public function __construct($pdo)
+                    private \PDO $pdo;
+                    public function __construct(\PDO $pdo)
                     {
                         $this->pdo = $pdo;
                     }
@@ -61,8 +62,8 @@ class FullIntegrationTest extends TestCase
                     {
                         $pdo = $this->pdo;
                         return new class ($pdo) implements \Cycle\Database\DatabaseInterface {
-                            private $pdo;
-                            public function __construct($pdo)
+                            private \PDO $pdo;
+                            public function __construct(\PDO $pdo)
                             {
                                 $this->pdo = $pdo;
                             }
@@ -70,8 +71,8 @@ class FullIntegrationTest extends TestCase
                             {
                                 $pdo = $this->pdo;
                                 return new class ($pdo) implements \Cycle\Database\Driver\DriverInterface {
-                                    private $pdo;
-                                    public function __construct($pdo)
+                                    private \PDO $pdo;
+                                    public function __construct(\PDO $pdo)
                                     {
                                         $this->pdo = $pdo;
                                     }
@@ -1066,9 +1067,13 @@ class FullIntegrationTest extends TestCase
 
 use Cycle\Database\StatementInterface;
 
+/**
+ * @implements \IteratorAggregate<int, array<string, string>>
+ */
 class MockSelect1Statement implements StatementInterface, \IteratorAggregate
 {
     public const FETCH_ASSOC = 2;
+    /** @param array<mixed> $params */
     public function execute(array $params = []): bool
     {
         fwrite(STDERR, "\nDEBUG execute SELECT 1\n");
@@ -1079,6 +1084,7 @@ class MockSelect1Statement implements StatementInterface, \IteratorAggregate
         fwrite(STDERR, "\nDEBUG fetch SELECT 1\n");
         return ['1' => '1'];
     }
+    /** @return array<mixed> */
     public function fetchAll(int $mode = StatementInterface::FETCH_ASSOC): array
     {
         fwrite(STDERR, "\nDEBUG fetchAll SELECT 1\n");
@@ -1089,6 +1095,7 @@ class MockSelect1Statement implements StatementInterface, \IteratorAggregate
         fwrite(STDERR, "\nMOCK SELECT 1 fetchColumn chamado (INTEGRATION)\n");
         return '1';
     }
+    /** @param array<mixed> $args */
     public function fetchObject(string $className = 'stdClass', array $args = []): object|false
     {
         return (object)['1' => '1'];
@@ -1113,6 +1120,7 @@ class MockSelect1Statement implements StatementInterface, \IteratorAggregate
     {
         return null;
     }
+    /** @return array<mixed> */
     public function errorInfo(): array
     {
         return [];

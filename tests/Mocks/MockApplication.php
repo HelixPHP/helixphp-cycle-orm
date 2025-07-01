@@ -9,24 +9,27 @@ class MockApplication extends \Express\Core\Application
       // Não inicializa $container aqui!
     }
 
-    public function singleton(...$args)
+    public function singleton(string $abstract, mixed $concrete = null): \Express\Core\Application
     {
-        return $this->container->singleton(...$args);
+        $this->container->singleton($abstract, $concrete);
+        return $this;
     }
-    public function booted()
+    public function booted(?callable $callback = null): void
     {
-        return $this->container->booted();
+        // Mock implementation - não faz nada
     }
-    public function alias(...$args)
+    public function alias(string $alias, string $abstract): \Express\Core\Application
     {
-        return $this->container->alias(...$args);
+        // Mock implementation
+        return $this;
     }
-    public function make(...$args)
+    public function make(string $abstract): mixed
     {
-        return $this->container->make(...$args);
+        // Mock implementation - retorna um objeto genérico
+        return new \stdClass();
     }
 
-    public function config($key, $default = null)
+    public function config(?string $key = null, mixed $default = null): mixed
     {
         $config = [
             'cycle.database' => [
@@ -51,7 +54,7 @@ class MockApplication extends \Express\Core\Application
         return $config[$key] ?? $default;
     }
 
-    public function has($service)
+    public function has(string $service): bool
     {
       // Para testes, retorna true para serviços conhecidos, false para outros
         $known = [

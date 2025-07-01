@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists('config')) {
-    function config($key = null, $default = null)
+    function config(?string $key = null, mixed $default = null): mixed
     {
       // Retorne valores de configuração fake conforme necessário
         $configs = [

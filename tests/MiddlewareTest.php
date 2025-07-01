@@ -11,9 +11,9 @@ use Express\Core\Application;
 
 class MiddlewareTest extends TestCase
 {
-    private $app;
-    private $request;
-    private $response;
+    private object $app;
+    private object $request;
+    private object $response;
 
     protected function setUp(): void
     {
@@ -136,7 +136,7 @@ class MiddlewareTest extends TestCase
         );
     }
 
-    private function createRealAppWithEM($em)
+    private function createRealAppWithEM(object $em): \Express\Core\Application
     {
         $app = new \Express\Core\Application();
         $app->singleton('cycle.em', fn() => $em);

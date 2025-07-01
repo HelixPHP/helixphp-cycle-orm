@@ -11,16 +11,17 @@ use Express\Core\Application;
  */
 class CycleServiceProviderTest extends TestCase
 {
-    private $container;
-    private $app;
+    private object $container;
+    private \Express\Core\Application $app;
     private CycleServiceProvider $provider;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->app = new class extends Application {
-            private $bootedCallbacks = [];
-            public function booted($callback = null)
+            /** @var array<int, callable> */
+            private array $bootedCallbacks = [];
+            public function booted(?callable $callback = null): void
             {
                 if ($callback) {
                     $this->bootedCallbacks[] = $callback;

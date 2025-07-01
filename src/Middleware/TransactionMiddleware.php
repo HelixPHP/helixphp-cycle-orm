@@ -83,7 +83,9 @@ class TransactionMiddleware
     private function getRouteInfo(Request $req): string
     {
         $method = property_exists($req, 'method') ? $req->method : 'Unknown';
-        $uri = property_exists($req, 'pathCallable') ? $req->pathCallable : (property_exists($req, 'path') ? $req->path : 'Unknown');
+        $uri = property_exists($req, 'pathCallable')
+            ? $req->pathCallable
+            : (property_exists($req, 'path') ? $req->path : 'Unknown');
         return "{$method} {$uri}";
     }
 
