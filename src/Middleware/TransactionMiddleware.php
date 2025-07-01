@@ -21,7 +21,7 @@ class TransactionMiddleware
    *
    * @param Request $req
    * @param Response $res
-   * @param callable(Request, Response): void $next
+   * @param callable(Request, Response):void $next Função next do Express-PHP, recebe Request e Response.
    * @return void
    */
   public function handle(Request $req, Response $res, callable $next): void
@@ -32,7 +32,7 @@ class TransactionMiddleware
       if ($container->has('cycle.em')) {
         $em = $container->get('cycle.em');
       } else {
-        $next();
+        $next($req, $res);
         return;
       }
     } else {
@@ -47,19 +47,17 @@ class TransactionMiddleware
       $transactionStarted = true;
       $this->logDebug('Transaction started for route: ' . $this->getRouteInfo($req));
 
-      $next();
+      $next($req, $res);
 
       // Commit apenas se há mudanças
       $em->run();
       $this->logDebug('Transaction committed');
     } catch (\Exception $e) {
-      if ($transactionStarted) {
-        try {
-          $em->clean();
-          $this->logDebug('Transaction rolled back due to error: ' . $e->getMessage());
-        } catch (\Exception $rollbackException) {
-          $this->logError('Rollback failed: ' . $rollbackException->getMessage());
-        }
+      try {
+        $em->clean();
+        $this->logDebug('Transaction rolled back due to error: ' . $e->getMessage());
+      } catch (\Exception $rollbackException) {
+        $this->logError('Rollback failed: ' . $rollbackException->getMessage());
       }
       throw $e;
     }
@@ -70,7 +68,7 @@ class TransactionMiddleware
    *
    * @param Request $req
    * @param Response $res
-   * @param callable(Request, Response): void $next
+   * @param callable(Request, Response):void $next Função next do Express-PHP, recebe Request e Response.
    * @return void
    */
   public function __invoke(Request $req, Response $res, callable $next): void

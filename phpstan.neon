@@ -1,5 +1,6 @@
 parameters:
     level: 8
+    treatPhpDocTypesAsCertain: false
     paths:
         - src
         - tests
@@ -7,8 +8,10 @@ parameters:
         - tests/Fixtures
     ignoreErrors:
         - '#Call to an undefined method Express\\.*#'
-        - '#Access to an undefined property Express\\.*#'
-        - '#Class Express\\.*not found#'
+        - '#Class Cycle\\Database\\DatabaseManager does not have a constructor#'
+        - '#Class Cycle\\ORM\\ORM does not have a constructor#'
+        - '#Class Cycle\\ORM\\EntityManager does not have a constructor#'
+        - '#Call to an undefined method Cycle\\ORM\\ORM::getRepository#'
 
     # Express-PHP specific ignores
     universalObjectCratesClasses:

@@ -15,7 +15,6 @@ class EntityNotFoundException extends CycleORMException
         ?\Throwable $previous = null
     ) {
         $message = "Entity {$entityClass} with identifier {$identifier} not found";
-        $context = ['entity' => $entityClass, 'identifier' => $identifier];
-        parent::__construct($message, $context, $previous);
+        parent::__construct($message, 0, $previous);
     }
 }

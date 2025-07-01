@@ -33,53 +33,37 @@ class CycleMiddleware
      *
      * @param Request $req
      * @param Response $res
-     * @param callable(Request, Response): void $next
+     * @param callable(Request|CycleRequest, Response):void $next Função next do Express-PHP, recebe Request ou CycleRequest e Response.
      * @return void
      */
     public function handle(Request $req, Response $res, callable $next): void
     {
-        try {
-            // Se já é um CycleRequest, apenas segue
-            if ($req instanceof CycleRequest) {
-                $next($req, $res);
-                return;
-            }
-            // Verificar se serviços estão disponíveis
-            $container = $this->app->getContainer();
-            if (!$container->has('cycle.orm')) {
-                throw new \RuntimeException('Cycle ORM not properly registered');
-            }
-            // Criar wrapper
-            $cycleReq = new CycleRequest($req);
-            $orm = $container->get('cycle.orm');
-            $em = $container->get('cycle.em');
-            $db = $container->get('cycle.database');
-            if ($orm instanceof ORMInterface) {
-                $cycleReq->orm = $orm;
-            }
-            if ($em instanceof EntityManagerInterface) {
-                $cycleReq->em = $em;
-            }
-            if ($db instanceof DatabaseInterface) {
-                $cycleReq->db = $db;
-            }
-            // Copiar propriedades customizadas
-            if (isset($req->user) && (is_object($req->user) || is_null($req->user))) {
-                $cycleReq->user = $req->user;
-            }
-            if (isset($req->auth) && is_array($req->auth)) {
-                $cycleReq->auth = $req->auth;
-            }
-            $next($cycleReq, $res);
-        } catch (\Exception $e) {
-            if ($this->app->getContainer()->has('logger')) {
-                $logger = $this->app->getContainer()->get('logger');
-                if (method_exists($logger, 'error')) {
-                    $logger->error('Cycle middleware error: ' . $e->getMessage(), []);
-                }
-            }
-            throw $e;
+        // Remove instanceof sempre falso
+        // Sempre cria o wrapper CycleRequest
+        $container = $this->app->getContainer();
+        if (!$container->has('cycle.orm')) {
+            throw new \RuntimeException('Cycle ORM not properly registered');
         }
+        $cycleReq = new CycleRequest($req);
+        $orm = $container->get('cycle.orm');
+        $em = $container->get('cycle.em');
+        $db = $container->get('cycle.database');
+        if ($orm instanceof ORMInterface) {
+            $cycleReq->orm = $orm;
+        }
+        if ($em instanceof EntityManagerInterface) {
+            $cycleReq->em = $em;
+        }
+        if ($db instanceof DatabaseInterface) {
+            $cycleReq->db = $db;
+        }
+        if (isset($req->user) && (is_object($req->user) || is_null($req->user))) {
+            $cycleReq->user = $req->user;
+        }
+        if (isset($req->auth) && is_array($req->auth)) {
+            $cycleReq->auth = $req->auth;
+        }
+        $next($cycleReq, $res);
     }
 
     /**
@@ -87,7 +71,7 @@ class CycleMiddleware
      *
      * @param Request $req
      * @param Response $res
-     * @param callable(Request, Response): void $next
+     * @param callable(Request|CycleRequest, Response):void $next Função next do Express-PHP, recebe Request ou CycleRequest e Response.
      * @return void
      */
     public function __invoke(Request $req, Response $res, callable $next): void

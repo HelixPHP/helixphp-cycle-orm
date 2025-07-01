@@ -13,13 +13,13 @@ class EntityValidationMiddleware
    *
    * @param Request $req
    * @param Response $res
-   * @param callable(Request, Response): void $next
+   * @param callable(Request|CycleRequest, Response):void $next Função next do Express-PHP, recebe Request ou CycleRequest e Response.
    * @return void
    */
   public function handle(Request $req, Response $res, callable $next): void
   {
-    // Garante que o request é um CycleRequest
-    $cycleReq = $req instanceof CycleRequest ? $req : new CycleRequest($req);
+    // Sempre cria o wrapper CycleRequest
+    $cycleReq = new CycleRequest($req);
     // validateEntity já está disponível no wrapper
     $next($cycleReq, $res);
   }
@@ -48,7 +48,7 @@ class EntityValidationMiddleware
 
         // Validação de tipos básicos
         if ($value !== null && $type) {
-          $typeName = $type->getName();
+          $typeName = $type instanceof \ReflectionNamedType ? $type->getName() : (string)$type;
           if ($typeName === 'string' && !is_string($value)) {
             $errors[] = "Field {$property->getName()} must be a string";
           } elseif ($typeName === 'int' && !is_int($value)) {

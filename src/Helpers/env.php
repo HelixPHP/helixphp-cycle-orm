@@ -12,8 +12,8 @@ namespace CAFernandes\ExpressPHP\CycleORM\Helpers;
 function env(string $key, string|false|null $default = null): string|false|null
 {
     $value = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
-    if ($value === false || $value === null || $value === '') {
+    if ($value === false) {
         return $default;
     }
-    return is_string($value) || $value === false ? $value : (string)$value;
+    return (string)$value;
 }

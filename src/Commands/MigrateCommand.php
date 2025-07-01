@@ -47,17 +47,8 @@ class MigrateCommand extends BaseCommand
         return 1;
       }
 
-      $migrations = $migrator->run();
-
-      if (empty($migrations)) {
-        $this->info('No pending migrations.');
-        return 0;
-      }
-
-      $this->info('Executed migrations:');
-      foreach ($migrations as $migration) {
-        $this->line('- ' . $migration->getState()->getName());
-      }
+      $migrator->run();
+      $this->info('Migrations executed successfully.');
 
       return 0;
     } catch (\Exception $e) {
@@ -83,13 +74,8 @@ class MigrateCommand extends BaseCommand
         return 1;
       }
 
-      $migrations = $migrator->run(-1);
-
-      if (!empty($migrations)) {
-        $this->info('Rolled back: ' . $migrations[0]->getState()->getName());
-      } else {
-        $this->info('No migrations to rollback.');
-      }
+      $migrator->rollback();
+      $this->info('Migration rolled back successfully.');
 
       return 0;
     } catch (\Exception $e) {

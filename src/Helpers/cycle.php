@@ -12,10 +12,6 @@ use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
  */
 function cycle(Request $request): CycleRequest
 {
-    if ($request instanceof CycleRequest) {
-        return $request;
-    }
-    throw new \RuntimeException(
-        'Cycle ORM extension not loaded. Adicione o CycleMiddleware à sua aplicação.'
-    );
+    // Não faz instanceof, sempre cria o wrapper
+    return new CycleRequest($request);
 }

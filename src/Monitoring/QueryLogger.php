@@ -8,6 +8,14 @@ namespace CAFernandes\ExpressPHP\CycleORM\Monitoring;
  */
 class QueryLogger
 {
+  /**
+   * Loga uma query do Cycle ORM
+   *
+   * @param string $query
+   * @param array<int, mixed> $params
+   * @param float $timeMs
+   * @return void
+   */
   public function log(string $query, array $params = [], float $timeMs = 0.0): void
   {
     $msg = sprintf(

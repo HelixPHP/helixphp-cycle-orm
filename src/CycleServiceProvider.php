@@ -21,6 +21,7 @@ use Cycle\Annotated\Entities as AnnotatedEntities;
 // Incluir os helpers necessários
 require_once __DIR__ . '/Helpers/env.php';
 require_once __DIR__ . '/Helpers/config.php';
+require_once __DIR__ . '/Helpers/app_path.php';
 
 class CycleServiceProvider extends ExtensionServiceProvider
 {
@@ -179,8 +180,19 @@ class CycleServiceProvider extends ExtensionServiceProvider
     $this->app->getContainer()->bind('cycle.migrator', function ($app) {
       // Retorna um migrator básico ou mock para desenvolvimento
       return new class {
+        /**
+         * @return array{pending: array<int, mixed>, executed: array<int, mixed>}
+         */
         public function getStatus(): array {
           return ['pending' => [], 'executed' => []];
+        }
+
+        public function run(): void {
+          // Mock implementation
+        }
+
+        public function rollback(): void {
+          // Mock implementation
         }
       };
     });
