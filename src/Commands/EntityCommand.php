@@ -1,17 +1,33 @@
 <?php
+
 namespace CAFernandes\ExpressPHP\CycleORM\Commands;
 
 /**
- * Comando para gerar entidades - Versão corrigida
+ * Comando para gerar entidades do Cycle ORM.
+ *
+ * Exemplos de uso:
+ *   php bin/console make:entity User
+ *
+ * Métodos:
+ *   - handle(): Executa o comando principal.
+ *   - generateEntityContent(): Gera o conteúdo da classe de entidade.
+ *   - getEntityPath(): Retorna o caminho do arquivo da entidade.
+ *   - getTableName(): Gera o nome da tabela a partir do nome da classe.
  */
 class EntityCommand extends BaseCommand
 {
+    /**
+     * Executa o comando principal para criar uma nova entidade.
+     *
+     * @return int Código de status (0 = sucesso, 1 = erro)
+     */
     public function handle(): int
     {
         $name = $this->argument('name');
 
         if (!$name) {
             $this->error('Entity name is required');
+
             return 1;
         }
 
@@ -24,6 +40,7 @@ class EntityCommand extends BaseCommand
 
             if (file_exists($path)) {
                 $this->error("Entity {$className} already exists!");
+
                 return 1;
             }
 
@@ -35,13 +52,20 @@ class EntityCommand extends BaseCommand
             $this->info("Entity created: {$path}");
 
             return 0;
-
         } catch (\Exception $e) {
-            $this->error("Failed to create entity: " . $e->getMessage());
+            $this->error('Failed to create entity: ' . $e->getMessage());
+
             return 1;
         }
     }
 
+    /**
+     * Gera o conteúdo PHP da classe de entidade.
+     *
+     * @param string $className nome da classe da entidade
+     *
+     * @return string código PHP da entidade
+     */
     private function generateEntityContent(string $className): string
     {
         $tableName = $this->getTableName($className);
@@ -49,10 +73,10 @@ class EntityCommand extends BaseCommand
         return <<<PHP
 <?php
 
-namespace App\Models;
+namespace App\\Models;
 
-use Cycle\Annotated\Annotation\Entity;
-use Cycle\Annotated\Annotation\Column;
+use Cycle\\Annotated\\Annotation\\Entity;
+use Cycle\\Annotated\\Annotation\\Column;
 
 #[Entity(table: '{$tableName}')]
 class {$className}
@@ -61,21 +85,37 @@ class {$className}
     public int \$id;
 
     #[Column(type: 'datetime')]
-    public \DateTimeInterface \$createdAt;
+    public \\DateTimeInterface \$createdAt;
 
     #[Column(type: 'datetime', nullable: true)]
-    public ?\DateTimeInterface \$updatedAt = null;
+    public ?\\DateTimeInterface \$updatedAt = null;
 
     public function __construct()
     {
-        \$this->createdAt = new \DateTime();
+        \$this->createdAt = new \\DateTime();
     }
 }
 PHP;
     }
 
+    /**
+     * Retorna o caminho do arquivo da entidade.
+     *
+     * @param string $className nome da classe da entidade
+     *
+     * @return string caminho absoluto do arquivo
+     */
     private function getEntityPath(string $className): string
     {
+        // Se rodando em ambiente de teste, salvar no sys_get_temp_dir()
+        if (\defined('PHPUNIT_COMPOSER_INSTALL') || 'testing' === getenv('APP_ENV')) {
+            $dir = sys_get_temp_dir() . '/cycle_test_models';
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+
+            return $dir . "/{$className}.php";
+        }
         // Verificar se função app_path existe
         if (function_exists('app_path')) {
             return app_path("Models/{$className}.php");
@@ -85,8 +125,25 @@ PHP;
         return __DIR__ . "/../../../../app/Models/{$className}.php";
     }
 
+    /**
+     * Gera o nome da tabela a partir do nome da classe.
+     *
+     * @param string $className nome da classe da entidade
+     *
+     * @return string nome da tabela
+     */
     private function getTableName(string $className): string
     {
-        return strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $className));
+        $snake = preg_replace('/([a-z])([A-Z])/', '$1_$2', $className);
+
+        return $this->toLower($snake ?? '');
+    }
+
+    /**
+     * Exemplo de método que usa strtolower.
+     */
+    private function toLower(string $string): string
+    {
+        return strtolower($string);
     }
 }

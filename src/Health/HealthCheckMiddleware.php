@@ -1,12 +1,13 @@
 <?php
+
 namespace CAFernandes\ExpressPHP\CycleORM\Health;
 
+use Express\Core\Application;
 use Express\Http\Request;
 use Express\Http\Response;
-use Express\Core\Application;
 
 /**
- * Middleware para expor endpoint de health check
+ * Middleware para expor endpoint de health check.
  */
 class HealthCheckMiddleware
 {
@@ -19,11 +20,21 @@ class HealthCheckMiddleware
 
     public function handle(Request $req, Response $res, callable $next): void
     {
-        $path = $req->getPathInfo();
+        // Compatível com Express-PHP: prioriza getPathInfo(), depois path, depois pathCallable
+        if (method_exists($req, 'getPathInfo') && is_callable([$req, 'getPathInfo'])) {
+            $path = $req->getPathInfo();
+        } elseif (property_exists($req, 'path')) {
+            $path = $req->path;
+        } elseif (property_exists($req, 'pathCallable')) {
+            $path = $req->pathCallable;
+        } else {
+            $path = null;
+        }
 
         // Verificar se é uma requisição de health check
-        if ($path === '/health/cycle' || $path === '/health') {
+        if ('/health/cycle' === $path || '/health' === $path) {
             $this->handleHealthCheck($req, $res);
+
             return;
         }
 
@@ -32,7 +43,7 @@ class HealthCheckMiddleware
 
     private function handleHealthCheck(Request $req, Response $res): void
     {
-        $detailed = $req->query['detailed'] ?? false;
+        $detailed = (is_array($req->query) && isset($req->query['detailed'])) ? $req->query['detailed'] : false;
 
         if ($detailed) {
             $health = CycleHealthCheck::detailedCheck($this->app);
@@ -40,11 +51,12 @@ class HealthCheckMiddleware
             $health = CycleHealthCheck::check($this->app);
         }
 
-        $statusCode = $health['cycle_orm'] === 'healthy' ? 200 : 503;
+        $statusCode = 'healthy' === $health['cycle_orm'] ? 200 : 503;
 
         $res->status($statusCode)
-           ->header('Content-Type', 'application/json')
-           ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-           ->json($health);
+            ->header('Content-Type', 'application/json')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->json($health)
+        ;
     }
 }

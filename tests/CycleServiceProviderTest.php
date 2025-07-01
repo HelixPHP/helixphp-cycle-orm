@@ -1,58 +1,48 @@
 <?php
+
 namespace CAFernandes\ExpressPHP\CycleORM\Tests;
 
-use PHPUnit\Framework\TestCase;
 use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
+use CAFernandes\ExpressPHP\CycleORM\Middleware\CycleMiddleware;
 use Express\Core\Application;
-use Cycle\ORM\ORM;
-use Cycle\ORM\EntityManager;
-use Cycle\Database\DatabaseManager;
+use Express\Routing\Router;
+use PHPUnit\Framework\TestCase;
 
+/**
+ * @covers \CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider
+ *
+ * @internal
+ */
 class CycleServiceProviderTest extends TestCase
 {
+    private object $container;
+
     private Application $app;
+
     private CycleServiceProvider $provider;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->app = new class() extends Application {
+            /** @var array<int, callable> */
+            private array $bootedCallbacks = [];
 
-        // Mock da aplicação Express-PHP
-        $this->app = $this->createMock(Application::class);
-
-        // Configurar mocks básicos
-        $this->app->method('config')
-            ->willReturnCallback(function($key, $default = null) {
-                $config = [
-                    'cycle.database' => [
-                        'default' => 'sqlite',
-                        'databases' => ['default' => ['connection' => 'sqlite']],
-                        'connections' => [
-                            'sqlite' => [
-                                'driver' => 'sqlite',
-                                'database' => ':memory:'
-                            ]
-                        ]
-                    ],
-                    'cycle.entities' => [
-                        'directories' => [__DIR__ . '/Fixtures/Models'],
-                        'namespace' => 'Tests\\Fixtures\\Models'
-                    ],
-                    'cycle.schema' => [
-                        'cache' => false,
-                        'auto_sync' => false
-                    ]
-                ];
-                return $config[$key] ?? $default;
-            });
-
-        $this->app->method('has')->willReturn(false);
-        $this->app->method('singleton')->willReturn(true);
-        $this->app->method('alias')->willReturn(true);
-        $this->app->method('make')->willReturnCallback(function($abstract) {
-            return new \stdClass();
-        });
-
+            public function booted(?callable $callback = null): void
+            {
+                if ($callback) {
+                    $this->bootedCallbacks[] = $callback;
+                } else {
+                    foreach ($this->bootedCallbacks as $cb) {
+                        $cb($this);
+                    }
+                }
+            }
+        };
+        $ref = new \ReflectionObject($this->app);
+        $prop = $ref->getProperty('container');
+        $prop->setAccessible(true);
+        $this->container = $prop->getValue($this->app);
         $this->provider = new CycleServiceProvider($this->app);
     }
 
@@ -69,6 +59,40 @@ class CycleServiceProviderTest extends TestCase
 
     public function testBootMethodDoesNotThrow(): void
     {
+        // Mock do router para garantir que get() aceite qualquer callable
+        $mockRouter = $this->getMockBuilder(Router::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['get'])
+            ->getMock()
+        ;
+        $mockRouter->expects($this->any())
+            ->method('get')
+            ->willReturnCallback(
+                function ($route, $handler) {
+                    $this->assertIsCallable($handler, 'Handler registrado no router deve ser callable');
+                }
+            )
+        ;
+        // Cria um mock do container que retorna o mockRouter ao chamar get('router')
+        $mockContainer = $this->getMockBuilder(get_class($this->container))
+            ->disableOriginalConstructor()
+            ->onlyMethods(['get'])
+            ->getMock()
+        ;
+        $mockContainer->method('get')->willReturnCallback(
+            function ($service) use ($mockRouter) {
+                if ('router' === $service) {
+                    return $mockRouter;
+                }
+            }
+        );
+        // Injeta o mockContainer na app
+        $ref = new \ReflectionObject($this->app);
+        $prop = $ref->getProperty('container');
+        $prop->setAccessible(true);
+        $prop->setValue($this->app, $mockContainer);
+        // Adiciona o middleware CycleMiddleware ao Application
+        $this->app->use(new CycleMiddleware($this->app));
         $this->expectNotToPerformAssertions();
         $this->provider->boot();
     }

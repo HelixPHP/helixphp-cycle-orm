@@ -1,10 +1,10 @@
 <?php
+
 namespace CAFernandes\ExpressPHP\CycleORM\Middleware;
 
+use Express\Core\Application;
 use Express\Http\Request;
 use Express\Http\Response;
-use Express\Core\Application;
-use Cycle\ORM\EntityManager;
 
 class TransactionMiddleware
 {
@@ -15,16 +15,38 @@ class TransactionMiddleware
         $this->app = $app;
     }
 
+    /**
+     * Compatível com padrão callable do Express-PHP.
+     *
+     * @param callable(Request, Response):void $next função next do Express-PHP, recebe Request e Response
+     */
+    public function __invoke(Request $req, Response $res, callable $next): void
+    {
+        $this->handle($req, $res, $next);
+    }
+
+    /**
+     * Middleware de transação para Cycle ORM.
+     *
+     * @param callable(Request, Response):void $next função next do Express-PHP, recebe Request e Response
+     */
     public function handle(Request $req, Response $res, callable $next): void
     {
-        if (!$this->app->has('cycle.em')) {
-            // Se não tem EM, apenas prosseguir
-            $next();
-            return;
+        // Use sempre o container PSR-11 para buscar serviços
+        if (method_exists($this->app, 'getContainer')) {
+            $container = $this->app->getContainer();
+            if ($container->has('cycle.em')) {
+                $em = $container->get('cycle.em');
+            } else {
+                $next($req, $res);
+
+                return;
+            }
+        } else {
+            // fallback para make (testes antigos)
+            $em = $this->app->make('cycle.em');
         }
 
-        /** @var EntityManager $em */
-        $em = $this->app->make('cycle.em');
         $transactionStarted = false;
 
         try {
@@ -32,24 +54,25 @@ class TransactionMiddleware
             $transactionStarted = true;
             $this->logDebug('Transaction started for route: ' . $this->getRouteInfo($req));
 
-            $next();
+            $next($req, $res);
 
             // Commit apenas se há mudanças
-            if ($em->hasChanges()) {
+            if (is_object($em) && method_exists($em, 'commitTransaction')) {
+                $em->commitTransaction();
+            } elseif (is_object($em) && method_exists($em, 'run')) {
                 $em->run();
-                $this->logDebug('Transaction committed with changes');
-            } else {
-                $this->logDebug('Transaction completed without changes');
             }
-
+            $this->logDebug('Transaction committed');
         } catch (\Exception $e) {
-            if ($transactionStarted) {
-                try {
+            try {
+                if (is_object($em) && method_exists($em, 'rollbackTransaction')) {
+                    $em->rollbackTransaction();
+                } elseif (is_object($em) && method_exists($em, 'clean')) {
                     $em->clean();
-                    $this->logDebug('Transaction rolled back due to error: ' . $e->getMessage());
-                } catch (\Exception $rollbackException) {
-                    $this->logError('Rollback failed: ' . $rollbackException->getMessage());
                 }
+                $this->logDebug('Transaction rolled back due to error: ' . $e->getMessage());
+            } catch (\Exception $rollbackException) {
+                $this->logError('Rollback failed: ' . $rollbackException->getMessage());
             }
             throw $e;
         }
@@ -57,8 +80,11 @@ class TransactionMiddleware
 
     private function getRouteInfo(Request $req): string
     {
-        $method = method_exists($req, 'getMethod') ? $req->getMethod() : 'Unknown';
-        $uri = method_exists($req, 'getUri') ? $req->getUri() : 'Unknown';
+        $method = property_exists($req, 'method') ? $req->method : 'Unknown';
+        $uri = property_exists($req, 'pathCallable')
+            ? $req->pathCallable
+            : (property_exists($req, 'path') ? $req->path : 'Unknown');
+
         return "{$method} {$uri}";
     }
 
@@ -71,8 +97,13 @@ class TransactionMiddleware
 
     private function logError(string $message): void
     {
-        if (method_exists($this->app, 'logger') && $this->app->has('logger')) {
-            $this->app->logger()->debug($message);
+        if ($this->app->getContainer()->has('logger')) {
+            $logger = $this->app->getContainer()->get('logger');
+            if (is_object($logger) && method_exists($logger, 'debug')) {
+                $logger->debug($message, []);
+            } elseif (is_object($logger) && method_exists($logger, 'error')) {
+                $logger->error($message, []);
+            }
         } else {
             error_log($message);
         }

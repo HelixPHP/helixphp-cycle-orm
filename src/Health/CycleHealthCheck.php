@@ -2,25 +2,27 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Health;
 
-use Express\Core\Application;
-use Cycle\ORM\ORM;
-use Cycle\Database\DatabaseManager;
+use Psr\Container\ContainerInterface;
 
 /**
- * Sistema de Health Check para Cycle ORM
+ * Sistema de Health Check para Cycle ORM.
  */
 class CycleHealthCheck
 {
     /**
-     * Verificar saúde geral do sistema Cycle ORM
+     * Verificar saúde geral do sistema Cycle ORM.
+     *
+     * @param object $app Container da aplicação
+     *
+     * @return array<string, mixed>
      */
-    public static function check(Application $app): array
+    public static function check(object $app): array
     {
         $startTime = microtime(true);
         $status = [
             'cycle_orm' => 'healthy',
             'timestamp' => date('c'),
-            'checks' => []
+            'checks' => [],
         ];
 
         try {
@@ -39,14 +41,13 @@ class CycleHealthCheck
             // Status geral
             $allHealthy = true;
             foreach ($status['checks'] as $check) {
-                if ($check['status'] !== 'healthy') {
+                if ('healthy' !== $check['status']) {
                     $allHealthy = false;
                     break;
                 }
             }
 
             $status['cycle_orm'] = $allHealthy ? 'healthy' : 'unhealthy';
-
         } catch (\Exception $e) {
             $status['cycle_orm'] = 'unhealthy';
             $status['error'] = $e->getMessage();
@@ -58,9 +59,40 @@ class CycleHealthCheck
     }
 
     /**
-     * Verificar serviços registrados
+     * Health check detalhado para debugging.
+     *
+     * @return array<string, mixed>
      */
-    private static function checkServices(Application $app): array
+    public static function detailedCheck(object $app): array
+    {
+        $basicCheck = self::check($app);
+
+        // Adicionar informações detalhadas
+        $basicCheck['detailed'] = [
+            'php_version' => PHP_VERSION,
+            'cycle_version' => self::getCycleVersion(),
+            'pdo_drivers' => \PDO::getAvailableDrivers(),
+            'loaded_extensions' => self::getRelevantExtensions(),
+            'configuration' => self::getConfiguration($app),
+            'environment' => [
+                'app_env' => function_exists('env') ? env('APP_ENV', 'unknown') : (getenv('APP_ENV') ?: 'unknown'),
+                'debug_mode' => function_exists('env') ? env('APP_DEBUG', false) : (getenv('APP_DEBUG') ?: false),
+                'memory_limit' => ini_get('memory_limit'),
+                'max_execution_time' => ini_get('max_execution_time'),
+            ],
+        ];
+
+        return $basicCheck;
+    }
+
+    /**
+     * Verificar serviços registrados.
+     *
+     * @param ContainerInterface|object $app
+     *
+     * @return array<string, mixed>
+     */
+    private static function checkServices(object $app): array
     {
         $services = [
             'cycle.database' => 'Database Manager',
@@ -68,14 +100,28 @@ class CycleHealthCheck
             'cycle.em' => 'Entity Manager',
             'cycle.schema' => 'Schema',
             'cycle.migrator' => 'Migrator',
-            'cycle.repository' => 'Repository Factory'
+            'cycle.repository' => 'Repository Factory',
         ];
 
         $registered = [];
         $missing = [];
 
         foreach ($services as $service => $name) {
-            if ($app->has($service)) {
+            $hasService = false;
+
+            if ($app instanceof ContainerInterface) {
+                $hasService = $app->has($service);
+            } elseif (is_object($app) && method_exists($app, 'has')) {
+                $hasService = $app->has($service);
+            } elseif (method_exists($app, 'getContainer')) {
+                // Para Application do Express PHP
+                $container = $app->getContainer();
+                if (is_object($container) && method_exists($container, 'has')) {
+                    $hasService = $container->has($service);
+                }
+            }
+
+            if ($hasService) {
                 $registered[] = $name;
             } else {
                 $missing[] = $name;
@@ -83,111 +129,125 @@ class CycleHealthCheck
         }
 
         return [
-            'status' => empty($missing) ? 'healthy' : 'unhealthy',
             'registered' => $registered,
             'missing' => $missing,
-            'total_services' => count($services)
+            'status' => empty($missing) ? 'healthy' : 'unhealthy',
         ];
     }
 
     /**
-     * Verificar conexão com database
+     * Verificar conexão com database.
+     *
+     * @param ContainerInterface|object $app
+     *
+     * @return array<string, mixed>
      */
-    private static function checkDatabase(Application $app): array
+    private static function checkDatabase(object $app): array
     {
-        try {
-            if (!$app->has('cycle.database')) {
-                return [
-                    'status' => 'unhealthy',
-                    'error' => 'Database manager not available'
-                ];
+        $hasDatabase = false;
+        $dbManager = null;
+        $error = null;
+
+        if ($app instanceof ContainerInterface && $app->has('cycle.database')) {
+            $dbManager = $app->get('cycle.database');
+        } elseif (method_exists($app, 'has') && $app->has('cycle.database')) {
+            $dbManager = method_exists($app, 'make')
+                ? $app->make('cycle.database')
+                : null;
+        } elseif (method_exists($app, 'getContainer')) {
+            $container = $app->getContainer();
+            if (
+                is_object($container)
+                && method_exists($container, 'has')
+                && $container->has('cycle.database')
+            ) {
+                $dbManager = (
+                    is_object($container)
+                    && method_exists($container, 'get')
+                ) ? $container->get('cycle.database') : null;
             }
-
-            /** @var DatabaseManager $dbal */
-            $dbal = $app->make('cycle.database');
-            $db = $dbal->database();
-
-            // Testar conexão
-            $startTime = microtime(true);
-            $pdo = $db->getDriver()->getPDO();
-            $connectionTime = round((microtime(true) - $startTime) * 1000, 2);
-
-            // Informações da conexão
-            $driver = $db->getDriver();
-            $version = $pdo->getAttribute(\PDO::ATTR_SERVER_VERSION);
-
-            // Testar query simples
-            $startTime = microtime(true);
-            $result = $pdo->query('SELECT 1')->fetchColumn();
-            $queryTime = round((microtime(true) - $startTime) * 1000, 2);
-
-            return [
-                'status' => $result === '1' ? 'healthy' : 'unhealthy',
-                'driver' => $driver->getType(),
-                'version' => $version,
-                'connection_time_ms' => $connectionTime,
-                'query_time_ms' => $queryTime
-            ];
-
-        } catch (\Exception $e) {
-            return [
-                'status' => 'unhealthy',
-                'error' => $e->getMessage()
-            ];
         }
+
+        if ($dbManager && is_object($dbManager) && method_exists($dbManager, 'database')) {
+            try {
+                $db = $dbManager->database();
+                if (is_object($db) && method_exists($db, 'execute')) {
+                    // Tenta executar um SELECT 1
+                    $result = $db->execute('SELECT 1');
+                    $hasDatabase = (false !== $result);
+                } elseif (is_object($db) && method_exists($db, 'getPDO')) {
+                    // Fallback: tenta usar PDO diretamente
+                    $pdo = $db->getPDO();
+                    $stmt = $pdo->query('SELECT 1');
+                    $hasDatabase = (false !== $stmt);
+                } else {
+                    $hasDatabase = false;
+                    $error = 'Método execute/getPDO não disponível na conexão.';
+                }
+            } catch (\Throwable $e) {
+                $hasDatabase = false;
+                $error = $e->getMessage();
+            }
+        }
+
+        $status = [
+            'status' => $hasDatabase ? 'healthy' : 'unhealthy',
+        ];
+        if ($error) {
+            $status['error'] = $error;
+        }
+
+        return $status;
     }
 
     /**
-     * Verificar schema
+     * Verificar schema.
+     *
+     * @param ContainerInterface|object $app
+     *
+     * @return array<string, mixed>
      */
-    private static function checkSchema(Application $app): array
+    private static function checkSchema(object $app): array
     {
-        try {
-            if (!$app->has('cycle.orm')) {
-                return [
-                    'status' => 'unhealthy',
-                    'error' => 'ORM not available'
-                ];
-            }
+        $hasSchema = false;
+        $orm = null;
 
-            /** @var ORM $orm */
-            $orm = $app->make('cycle.orm');
+        if ($app instanceof ContainerInterface && $app->has('cycle.orm')) {
+            $orm = $app->get('cycle.orm');
+        } elseif (method_exists($app, 'has') && $app->has('cycle.orm')) {
+            $orm = method_exists($app, 'make')
+                ? $app->make('cycle.orm')
+                : null;
+        } elseif (method_exists($app, 'getContainer')) {
+            $container = $app->getContainer();
+            if (
+                is_object($container)
+                && method_exists($container, 'has')
+                && $container->has('cycle.orm')
+            ) {
+                $orm = (
+                    is_object($container)
+                    && method_exists($container, 'get')
+                ) ? $container->get('cycle.orm') : null;
+            }
+        }
+
+        if ($orm && is_object($orm) && method_exists($orm, 'getSchema')) {
             $schema = $orm->getSchema();
-
-            $roles = $schema->getRoles();
-            $entitiesInfo = [];
-
-            foreach ($roles as $role) {
-                $entityClass = $schema->define($role, \Cycle\ORM\SchemaInterface::ENTITY);
-                $table = $schema->define($role, \Cycle\ORM\SchemaInterface::TABLE);
-                $database = $schema->define($role, \Cycle\ORM\SchemaInterface::DATABASE) ?? 'default';
-
-                $entitiesInfo[] = [
-                    'role' => $role,
-                    'entity' => $entityClass,
-                    'table' => $table,
-                    'database' => $database
-                ];
-            }
-
-            return [
-                'status' => 'healthy',
-                'entities_count' => count($roles),
-                'entities' => $entitiesInfo
-            ];
-
-        } catch (\Exception $e) {
-            return [
-                'status' => 'unhealthy',
-                'error' => $e->getMessage()
-            ];
+            $hasSchema = $schema ? true : false;
         }
+
+        return [
+            'status' => $hasSchema ? 'healthy' : 'unhealthy',
+        ];
     }
 
     /**
-     * Verificar performance
+     * Verificar performance.
+     *
+     * @return array<string, mixed>
      */
-    private static function checkPerformance(Application $app, float $startTime): array
+    private static function checkPerformance(object $app, float $startTime): array
     {
         $performance = [
             'status' => 'healthy',
@@ -220,69 +280,55 @@ class CycleHealthCheck
     }
 
     /**
-     * Health check detalhado para debugging
-     */
-    public static function detailedCheck(Application $app): array
-    {
-        $basicCheck = self::check($app);
-
-        // Adicionar informações detalhadas
-        $basicCheck['detailed'] = [
-            'php_version' => PHP_VERSION,
-            'cycle_version' => self::getCycleVersion(),
-            'pdo_drivers' => \PDO::getAvailableDrivers(),
-            'loaded_extensions' => self::getRelevantExtensions(),
-            'configuration' => self::getConfiguration($app),
-            'environment' => [
-                'app_env' => env('APP_ENV', 'unknown'),
-                'debug_mode' => env('APP_DEBUG', false),
-                'memory_limit' => ini_get('memory_limit'),
-                'max_execution_time' => ini_get('max_execution_time')
-            ]
-        ];
-
-        return $basicCheck;
-    }
-
-    /**
-     * Obter versão do Cycle ORM
+     * Retorna a versão do Cycle ORM.
      */
     private static function getCycleVersion(): string
     {
-        try {
-            $composerLock = json_decode(file_get_contents(base_path('composer.lock')), true);
-
-            foreach ($composerLock['packages'] as $package) {
-                if ($package['name'] === 'cycle/orm') {
-                    return $package['version'];
-                }
-            }
-
-            return 'unknown';
-        } catch (\Exception $e) {
-            return 'unknown';
+        $composer = @file_get_contents(__DIR__ . '/../../composer.lock');
+        if (!is_string($composer)) {
+            return '';
         }
+        $json = json_decode($composer, true);
+        if (!is_array($json) || !isset($json['packages'])) {
+            return '';
+        }
+        foreach ($json['packages'] as $package) {
+            if (isset($package['name']) && str_starts_with($package['name'], 'cycle/')) {
+                return (string) ($package['version'] ?? '');
+            }
+        }
+
+        return '';
     }
 
     /**
-     * Obter extensões PHP relevantes
+     * Retorna extensões relevantes.
+     *
+     * @return array<int, string>
      */
     private static function getRelevantExtensions(): array
     {
-        $relevant = ['pdo', 'pdo_mysql', 'pdo_pgsql', 'pdo_sqlite', 'json', 'mbstring', 'openssl'];
-        $loaded = [];
-
-        foreach ($relevant as $ext) {
-            $loaded[$ext] = extension_loaded($ext);
+        $exts = [
+            'pdo_mysql' => \extension_loaded('pdo_mysql'),
+            'pdo_pgsql' => \extension_loaded('pdo_pgsql'),
+            'pdo_sqlite' => \extension_loaded('pdo_sqlite'),
+        ];
+        $result = [];
+        foreach ($exts as $ext => $loaded) {
+            if ($loaded) {
+                $result[] = $ext;
+            }
         }
 
-        return $loaded;
+        return $result;
     }
 
     /**
-     * Obter configuração relevante
+     * Retorna configuração do Cycle ORM.
+     *
+     * @return array<string, mixed>
      */
-    private static function getConfiguration(Application $app): array
+    private static function getConfiguration(object $app): array
     {
         $config = [];
 
@@ -308,8 +354,10 @@ class CycleHealthCheck
 // ============================================================================
 
 if (!function_exists('base_path')) {
-    function base_path(string $path = ''): string {
+    function base_path(string $path = ''): string
+    {
         $basePath = dirname(__DIR__, 4);
+
         return $basePath . ($path ? '/' . ltrim($path, '/') : '');
     }
 }
