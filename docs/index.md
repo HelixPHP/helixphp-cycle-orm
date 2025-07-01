@@ -1,5 +1,7 @@
 # Documentação Express-PHP Cycle ORM Extension
 
+> Consulte o [Guia Técnico e Quick Start](./guia-tecnico-quickstart.md) para um resumo completo e exemplos práticos.
+
 ## Índice de Documentos
 
 - [Instalação](installation.md)

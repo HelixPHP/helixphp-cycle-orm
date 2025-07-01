@@ -246,6 +246,21 @@ make ci
 - 🎯 [Examples](examples/) - Exemplos práticos
 - 🧪 [Testing Guide](docs/testing.md) - Como testar
 
+---
+
+## 📚 Guia Técnico e Quick Start
+
+Consulte o arquivo [`docs/guia-tecnico-quickstart.md`](docs/guia-tecnico-quickstart.md) para um guia completo das funcionalidades, exemplos de uso, dicas de integração e melhores práticas com o Express-PHP + Cycle ORM Extension.
+
+Principais tópicos:
+- Funcionalidades detalhadas da extensão
+- Quick start para integração com Express-PHP
+- Exemplos de CRUD, queries avançadas, validação, transações e mais
+- Dicas de performance e troubleshooting
+- Links para suporte e comunidade
+
+---
+
 ## 🛡️ Requisitos
 
 - **PHP**: 8.1 ou superior
@@ -300,7 +315,7 @@ Este projeto está licenciado sob a **MIT License** - veja o arquivo [LICENSE](L
 
 - 🐛 **Issues**: [GitHub Issues](https://github.com/CAFernandes/express-php-cycle-orm-extension/issues)
 - 💬 **Discussões**: [GitHub Discussions](https://github.com/CAFernandes/express-php-cycle-orm-extension/discussions)
-- 📧 **Email**: caio@express-php.dev
+<!-- - 📧 **Email**: caio@express-php.dev -->
 
 ---
 

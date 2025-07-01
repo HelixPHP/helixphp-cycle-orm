@@ -1,19 +1,20 @@
 # Usage Guide - Express-PHP Cycle ORM Extension
 
+> **Dica:** Consulte também o [Guia Técnico e Quick Start](./guia-tecnico-quickstart.md) para um resumo completo das funcionalidades, exemplos e melhores práticas.
+
 ## 🚀 Quick Start
 
-### 1. Installation
+### 1. Instalação
 
 ```bash
-composer require cafernandes/express-php-cycle-orm-extension
+composer require express-php/cycle-orm-extension
 ```
 
-### 2. Environment Configuration
+### 2. Configuração do Ambiente
 
-Create or update your `.env` file:
+Crie ou edite o arquivo `.env`:
 
 ```env
-# Database Configuration
 DB_CONNECTION=mysql
 DB_HOST=localhost
 DB_PORT=3306
@@ -21,20 +22,19 @@ DB_DATABASE=express_api
 DB_USERNAME=root
 DB_PASSWORD=
 
-# Cycle ORM Settings
 CYCLE_SCHEMA_CACHE=true
 CYCLE_AUTO_SYNC=false
 CYCLE_SCHEMA_STRICT=false
 CYCLE_LOG_QUERIES=false
 ```
 
-### 3. Create Your First Entity
+### 3. Gerar Primeira Entidade
 
 ```bash
 php express make:entity User
 ```
 
-This creates `app/Models/User.php`:
+Isso cria `app/Models/User.php`:
 
 ```php
 <?php
@@ -65,13 +65,13 @@ class User
 }
 ```
 
-### 4. Sync Database Schema
+### 4. Sincronizar o Schema
 
 ```bash
 php express cycle:schema --sync
 ```
 
-### 5. Basic API Implementation
+### 5. Implementação Básica de API
 
 ```php
 <?php
@@ -82,26 +82,17 @@ use App\Models\User;
 
 $app = new Application();
 
-// List users
+// Listar usuários
 $app->get('/api/users', function($req, $res) {
     $users = $req->repository(User::class)->findAll();
     $res->json(['users' => $users]);
 });
 
-// Create user
+// Criar usuário
 $app->post('/api/users', function($req, $res) {
     $user = $req->entity(User::class, $req->body);
     $req->em->persist($user);
     $res->status(201)->json(['user' => $user]);
-});
-
-// Get user by ID
-$app->get('/api/users/:id', function($req, $res) {
-    $user = $req->find(User::class, $req->params['id']);
-    if (!$user) {
-        return $res->status(404)->json(['error' => 'User not found']);
-    }
-    $res->json(['user' => $user]);
 });
 
 $app->run();

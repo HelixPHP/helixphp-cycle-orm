@@ -1,5 +1,7 @@
 # Integração Cycle ORM Extension para Express-PHP
 
+> Consulte também o [Guia Técnico e Quick Start](./guia-tecnico-quickstart.md) para visão geral, exemplos e integração rápida.
+
 ## Visão Geral
 A extensão injeta recursos do Cycle ORM no seu projeto Express-PHP de forma **opcional, segura e sem acoplamento** ao core do framework, utilizando um wrapper inteligente: `CycleRequest`.
 

@@ -1,5 +1,7 @@
 # Advanced Usage - Express-PHP Cycle ORM Extension
 
+> Consulte também o [Guia Técnico e Quick Start](./guia-tecnico-quickstart.md) para exemplos de uso avançado, dicas de performance e integração.
+
 ## 🏗️ Custom Repositories
 
 ### Creating Custom Repositories
