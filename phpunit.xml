@@ -9,9 +9,23 @@
   executionOrder="depends,defects"
   beStrictAboutOutputDuringTests="true"
 >
+  <groups>
+    <exclude>
+      <group>integration</group>
+    </exclude>
+  </groups>
   <testsuites>
     <testsuite name="Unit">
-      <directory suffix="Test.php">./tests</directory>
+      <directory suffix="Test.php">./tests/Unit</directory>
+    </testsuite>
+    <testsuite name="Feature">
+      <directory suffix="Test.php">./tests/Feature</directory>
+    </testsuite>
+    <testsuite name="Integration">
+      <directory suffix="Test.php">./tests/Integration</directory>
+    </testsuite>
+    <testsuite name="Database">
+      <directory suffix="Test.php">./tests/Database</directory>
     </testsuite>
   </testsuites>
 

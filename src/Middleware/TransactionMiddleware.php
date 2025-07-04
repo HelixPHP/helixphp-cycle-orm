@@ -80,17 +80,19 @@ class TransactionMiddleware
 
     private function getRouteInfo(Request $req): string
     {
-        $method = property_exists($req, 'method') ? $req->method : 'Unknown';
-        $uri = property_exists($req, 'pathCallable')
-            ? $req->pathCallable
-            : (property_exists($req, 'path') ? $req->path : 'Unknown');
+        $method = property_exists($req, 'method') && (is_string($req->method) || is_numeric($req->method)) ? (string) $req->method : 'Unknown';
+        $uri = property_exists($req, 'pathCallable') && (is_string($req->pathCallable) || is_numeric($req->pathCallable))
+            ? (string) $req->pathCallable
+            : (property_exists($req, 'path') && (is_string($req->path) || is_numeric($req->path)) ? (string) $req->path : 'Unknown');
 
         return "{$method} {$uri}";
     }
 
     private function logDebug(string $message): void
     {
-        if (config('app.debug', false)) {
+        // Fallback para verificar debug sem usar config helper
+        $debug = $_ENV['APP_DEBUG'] ?? $_ENV['app_debug'] ?? false;
+        if ($debug) {
             $this->logError($message); // Usar mesmo método para simplicidade
         }
     }

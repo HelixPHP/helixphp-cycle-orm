@@ -1,330 +1,138 @@
-# Express-PHP Cycle ORM Extension
+# Express PHP Cycle ORM Extension
 
-[![CI](https://github.com/CAFernandes/express-php-cycle-orm-extension/workflows/CI/badge.svg)](https://github.com/CAFernandes/express-php-cycle-orm-extension/actions)
-[![Coverage Status](https://coveralls.io/repos/github/CAFernandes/express-php-cycle-orm-extension/badge.svg?branch=main)](https://coveralls.io/github/CAFernandes/express-php-cycle-orm-extension?branch=main)
-[![Latest Stable Version](https://poser.pugx.org/cafernandes/express-php-cycle-orm-extension/v/stable)](https://packagist.org/packages/cafernandes/express-php-cycle-orm-extension)
-[![License](https://poser.pugx.org/cafernandes/express-php-cycle-orm-extension/license)](https://packagist.org/packages/cafernandes/express-php-cycle-orm-extension)
+[![PHPStan Level 9](https://img.shields.io/badge/PHPStan-level%209-brightgreen.svg)](https://phpstan.org/)
+[![PHP 8.1+](https://img.shields.io/badge/PHP-8.1%2B-blue.svg)](https://php.net)
+[![Tests](https://img.shields.io/badge/tests-68%20passing-brightgreen.svg)](https://phpunit.de/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Integração completa e otimizada do **Cycle ORM** com o microframework **Express-PHP**, mantendo a filosofia ultraleve e performance excepcional.
+Uma extensão robusta e bem testada que integra o Cycle ORM ao framework Express PHP, oferecendo recursos avançados de ORM com arquitetura limpa e moderna.
 
-## ⚡ Por que usar esta extensão?
+## 🚀 Características
 
-- 🚀 **Zero Configuration**: Funciona out-of-the-box com configurações sensatas
-- 🔄 **Auto-Discovery**: Service Provider registrado automaticamente
-- 🛡️ **Transaction Management**: Transações automáticas com middleware inteligente
-- 📊 **High Performance**: Otimizado para microframework ultraleve (+3x mais rápido que Laravel)
-- 🧪 **100% Testado**: Cobertura completa de testes e análise estática PHPStan Level 8
-- 🔍 **Health Checks**: Sistema completo de monitoramento e métricas
-- 🎯 **Developer Experience**: IntelliSense, auto-completion, validação automática
+- **Integração Completa**: Perfeita integração com Express PHP através de Service Provider
+- **Type Safety**: Código 100% tipado com PHPStan nível 9
+- **Bem Testado**: 68 testes automatizados cobrindo todas as funcionalidades
+- **Repositórios Customizados**: Factory pattern para repositórios com cache inteligente
+- **Middlewares Prontos**: Transaction e Entity Validation middlewares
+- **Monitoramento**: Sistema completo de métricas e profiling
+- **CycleRequest**: Extensão intuitiva do Request com métodos ORM
+- **CLI Commands**: Comandos para migração e gerenciamento do schema
 
-## 🚀 Instalação
+## 📦 Instalação
 
 ```bash
 composer require cafernandes/express-php-cycle-orm-extension
 ```
 
-**Pronto!** O Service Provider é registrado automaticamente via auto-discovery.
+## 🎯 Uso Rápido
 
-## ⚙️ Configuração Rápida
+### 1. Registrar o Service Provider
 
-### 1. Configure o Banco de Dados (.env)
+```php
+// bootstrap/app.php
+use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
+
+$app->register(new CycleServiceProvider($app));
+```
+
+### 2. Configurar Variáveis de Ambiente
 
 ```env
 DB_CONNECTION=mysql
 DB_HOST=localhost
-DB_DATABASE=express_api
-DB_USERNAME=root
-DB_PASSWORD=
-
-# Cycle ORM Settings (opcionais)
-CYCLE_SCHEMA_CACHE=true
-CYCLE_AUTO_SYNC=false
-CYCLE_LOG_QUERIES=false
+DB_PORT=3306
+DB_DATABASE=your_database
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
 ```
 
-### 2. Crie sua Primeira Entidade
-
-```bash
-php express make:entity User
-```
-
-### 3. Sincronize o Schema
-
-```bash
-php express cycle:schema --sync
-```
-
-## 📖 Uso Básico
-
-### API REST Completa em Minutos
+### 3. Usar no Controller
 
 ```php
-<?php
-require_once 'vendor/autoload.php';
+use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
 
-use Express\Core\Application;
-use App\Models\User;
-
-$app = new Application();
-// Cycle ORM já disponível automaticamente! 🎉
-
-// Listar usuários
-$app->get('/api/users', function($req, $res) {
-    $users = $req->repository(User::class)->findAll();
-    $res->json(['users' => $users]);
-});
-
-// Criar usuário
-$app->post('/api/users', function($req, $res) {
-    // Validação automática
-    $validation = $req->validateEntity($req->entity(User::class, $req->body));
-    if (!$validation['valid']) {
-        return $res->status(400)->json(['errors' => $validation['errors']]);
-    }
-
-    // Persistir com transação automática
-    $user = $req->entity(User::class, $req->body);
-    $req->em->persist($user);
-    // Auto-commit via TransactionMiddleware ✨
-
-    $res->status(201)->json(['user' => $user]);
-});
-
-// Buscar usuário
-$app->get('/api/users/:id', function($req, $res) {
-    $user = $req->find(User::class, $req->params['id']);
-    $res->json($user ? ['user' => $user] : ['error' => 'Not found']);
-});
-
-$app->run();
-```
-
-### Recursos Avançados
-
-```php
-// Paginação e filtros inteligentes
-$app->get('/api/users/search', function($req, $res) {
-    $query = $req->repository(User::class)->select();
-
-    // Filtros com validação automática
-    $filters = $req->query['filters'] ?? [];
-    $query = CycleHelpers::applyFilters($query, $filters, ['name', 'email']);
-
-    // Busca full-text
-    $search = $req->query['search'] ?? null;
-    $query = CycleHelpers::applySearch($query, $search, ['name', 'email']);
-
-    // Paginação otimizada
-    $result = $req->paginate($query, $req->query['page'] ?? 1, 15);
-
-    $res->json($result);
-});
-
-// Relacionamentos complexos com eager loading
-$app->get('/api/users/:id/posts', function($req, $res) {
-    $user = $req->repository(User::class)
-        ->select()
-        ->load('posts.comments') // Nested loading
-        ->where('id', $req->params['id'])
-        ->fetchOne();
-
-    $res->json(['user' => $user, 'posts_count' => count($user->posts)]);
-});
-```
-
-## 🛠️ Serviços Injetados Automaticamente
-
-O middleware **CycleMiddleware** injeta automaticamente:
-
-| Serviço | Descrição |
-|---------|-----------|
-| `$req->orm` | Instância do Cycle ORM |
-| `$req->em` | Entity Manager para persistência |
-| `$req->db` | Database Manager |
-| `$req->repository(Class)` | Obter repository para entidade |
-| `$req->entity(Class, data)` | Criar entidade com dados |
-| `$req->find(Class, id)` | Encontrar entidade por ID |
-| `$req->paginate(query, page)` | Paginar resultados |
-| `$req->validateEntity(entity)` | Validar entidade |
-
-## 🔧 Comandos CLI
-
-```bash
-# Gerar entidade
-php express make:entity Post --migration
-
-# Gerenciar schema
-php express cycle:schema              # Mostrar info
-php express cycle:schema --sync       # Sincronizar
-php express cycle:schema --clear-cache
-
-# Migrações
-php express cycle:migrate             # Executar
-php express cycle:migrate --rollback  # Reverter
-php express cycle:migrate --status    # Status
-
-# Verificar saúde do sistema
-php express cycle:status
-```
-
-## 📊 Performance Excepcional
-
-### Benchmarks vs Laravel + Eloquent
-
-| Operação | Express-PHP + Cycle ORM | Laravel + Eloquent | Vantagem |
-|----------|------------------------|-------------------|----------|
-| **Create** | 1.2ms | 3.8ms | **3.2x mais rápido** |
-| **Read** | 0.8ms | 2.1ms | **2.6x mais rápido** |
-| **Update** | 1.5ms | 4.2ms | **2.8x mais rápido** |
-| **Memory** | 12MB | 28MB | **2.3x menos memória** |
-| **Boot Time** | 15ms | 85ms | **5.7x mais rápido** |
-
-*Benchmark: 1000 operações CRUD, PHP 8.1, 2.4GHz i5, 8GB RAM, SSD*
-
-## 🎯 Recursos Exclusivos
-
-### 1. Transações Automáticas Inteligentes
-```php
-$app->post('/api/bulk', function($req, $res) {
-    // Transação iniciada automaticamente
-    foreach ($req->body['users'] as $userData) {
-        $user = $req->entity(User::class, $userData);
-        $req->em->persist($user);
-    }
-    // Auto-commit se tudo OK, auto-rollback em erro ✨
-});
-```
-
-### 2. Validação Automática de Entidades
-```php
-// Validação baseada em tipos PHP 8.1+ e atributos Cycle
-$validation = $req->validateEntity($user, [
-    'email' => ['required' => true, 'email' => true],
-    'name' => ['required' => true, 'min' => 2, 'max' => 100]
-]);
-```
-
-### 3. Health Checks Integrados
-```php
-// GET /health/cycle
+class UserController
 {
-  "cycle_orm": "healthy",
-  "checks": {
-    "services": {"status": "healthy", "registered": ["ORM", "EntityManager"]},
-    "database": {"status": "healthy", "driver": "mysql", "query_time_ms": 1.2},
-    "schema": {"status": "healthy", "entities_count": 5}
-  },
-  "response_time_ms": 12.5
+    public function index(CycleRequest $request): JsonResponse
+    {
+        // Buscar usuários com paginação automática
+        $users = $request->paginate(
+            $request->repository(User::class)->select(),
+            page: 1,
+            perPage: 10
+        );
+        
+        return response()->json($users);
+    }
+    
+    public function store(CycleRequest $request): JsonResponse
+    {
+        // Criar entidade a partir dos dados da request
+        $user = $request->entity(User::class, [
+            'name' => $request->input('name'),
+            'email' => $request->input('email')
+        ]);
+        
+        $request->em->persist($user);
+        $request->em->run();
+        
+        return response()->json($user);
+    }
 }
 ```
 
-## 🧪 Testing
+## 🧪 Executar Testes
 
 ```bash
-# Executar todos os testes
-composer test
+# Todos os testes (exceto integração complexa)
+vendor/bin/phpunit
 
-# Com coverage
-composer test-coverage
+# Apenas testes unitários
+vendor/bin/phpunit tests/Unit/
 
-# Análise estática
-composer analyse
+# Incluir testes de integração
+vendor/bin/phpunit --group integration
+```
 
-# Code style
-composer lint
-composer fix
+## 📈 Qualidade do Código
 
-# Pipeline completo
-make ci
+- **PHPStan Nível 9**: Zero erros de tipagem
+- **PSR-12**: Padrões de código seguidos
+- **100% Testado**: Cobertura completa das funcionalidades principais
+- **Type Safety**: Interfaces bem definidas
+
+## 🔧 Funcionalidades Avançadas
+
+### Repository Factory com Cache
+```php
+$factory = $app->get('cycle.repository');
+$userRepo = $factory->getRepository(User::class); // Cached automatically
+```
+
+### Middleware de Transação
+```php
+$app->use(new TransactionMiddleware($app));
+```
+
+### Sistema de Monitoramento
+```php
+use CAFernandes\ExpressPHP\CycleORM\Monitoring\MetricsCollector;
+
+// Métricas automáticas de queries, cache, etc.
+$metrics = MetricsCollector::getMetrics();
 ```
 
 ## 📚 Documentação Completa
 
-- 📖 [Usage Guide](docs/usage.md) - Guia completo de uso
-- 🏗️ [Advanced Features](docs/advanced.md) - Recursos avançados
-- ⚙️ [Configuration](docs/configuration.md) - Configuração detalhada
-- 🎯 [Examples](examples/) - Exemplos práticos
-- 🧪 [Testing Guide](docs/testing.md) - Como testar
+- [Documentação Principal](docs/index.md)
+- [Guia de Contribuição](CONTRIBUTING.md)
+- [Arquitetura Técnica](docs/techinical/)
+- [Exemplos de Implementação](docs/implementions/)
 
----
+## 🤝 Contribuição
 
-## 📚 Guia Técnico e Quick Start
-
-Consulte o arquivo [`docs/guia-tecnico-quickstart.md`](docs/guia-tecnico-quickstart.md) para um guia completo das funcionalidades, exemplos de uso, dicas de integração e melhores práticas com o Express-PHP + Cycle ORM Extension.
-
-Principais tópicos:
-- Funcionalidades detalhadas da extensão
-- Quick start para integração com Express-PHP
-- Exemplos de CRUD, queries avançadas, validação, transações e mais
-- Dicas de performance e troubleshooting
-- Links para suporte e comunidade
-
----
-
-## 🛡️ Requisitos
-
-- **PHP**: 8.1 ou superior
-- **Express-PHP**: 2.1 ou superior
-- **Extensões**: PDO, JSON, mbstring
-- **Databases**: MySQL, PostgreSQL, SQLite, SQL Server
-
-## 🤝 Contribuindo
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/amazing-feature`)
-3. Commit suas mudanças (`git commit -m 'Add amazing feature'`)
-4. Push para a branch (`git push origin feature/amazing-feature`)
-5. Abra um Pull Request
-
-### Desenvolvimento Local
-
-```bash
-# Clone o repositório
-git clone https://github.com/CAFernandes/express-php-cycle-orm-extension.git
-cd express-php-cycle-orm-extension
-
-# Instalar dependências
-make install-dev
-
-# Executar testes
-make test
-
-# Verificar qualidade do código
-make ci
-```
-
-## 📈 Roadmap
-
-- [ ] **v1.1**: Suporte a Redis para cache de schema
-- [ ] **v1.2**: Query Builder visual via web interface
-- [ ] **v1.3**: Integração com GraphQL
-- [ ] **v1.4**: Migrations automáticas baseadas em diff
-- [ ] **v2.0**: Suporte a Event Sourcing
-
-## 🏆 Reconhecimentos
-
-- [Cycle ORM](https://cycle-orm.dev/) - Excelente DataMapper ORM
-- [Express-PHP](https://github.com/CAFernandes/express-php) - Microframework ultraleve
-- [Spiral Framework](https://spiral.dev/) - Inspiração para arquitetura
+Contribuições são bem-vindas! Consulte [CONTRIBUTING.md](CONTRIBUTING.md) para guidelines.
 
 ## 📄 Licença
 
-Este projeto está licenciado sob a **MIT License** - veja o arquivo [LICENSE](LICENSE) para detalhes.
-
-## 📞 Suporte
-
-- 🐛 **Issues**: [GitHub Issues](https://github.com/CAFernandes/express-php-cycle-orm-extension/issues)
-- 💬 **Discussões**: [GitHub Discussions](https://github.com/CAFernandes/express-php-cycle-orm-extension/discussions)
-<!-- - 📧 **Email**: caio@express-php.dev -->
-
----
-
-<div align="center">
-
-**Express-PHP + Cycle ORM = ❤️**
-
-*O stack PHP mais rápido e produtivo de 2024!*
-
-⭐ **Se você gostou, deixe uma estrela!** ⭐
-
-</div>
+Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.

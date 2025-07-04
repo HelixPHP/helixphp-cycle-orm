@@ -12,6 +12,9 @@ use Express\Http\Request;
 /**
  * Wrapper que estende dinamicamente o Request original
  * Mantém 100% de compatibilidade com Express\Http\Request.
+ * 
+ * @method mixed getMethod() Forwards to original request
+ * @property mixed $foo Dynamic property forwarding
  */
 class CycleRequest
 {
@@ -87,8 +90,16 @@ class CycleRequest
             throw new \InvalidArgumentException('Entity class name cannot be empty');
         }
         $mapper = $this->orm->getMapper($entity);
+        $entity = $mapper->init($data);
+        
+        // Apply data manually if mapper didn't populate properly
+        foreach ($data as $property => $value) {
+            if (property_exists($entity, $property)) {
+                $entity->$property = $value;
+            }
+        }
 
-        return $mapper->init($data);
+        return $entity;
     }
 
     /**
@@ -102,6 +113,8 @@ class CycleRequest
     /**
      * Paginação de resultados.
      *
+     * @template TEntity of object
+     * @param Select<TEntity> $query
      * @return array<string, mixed>
      */
     public function paginate(Select $query, int $page = 1, int $perPage = 15): array
