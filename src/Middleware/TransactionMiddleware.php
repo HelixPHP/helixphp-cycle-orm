@@ -5,6 +5,7 @@ namespace CAFernandes\ExpressPHP\CycleORM\Middleware;
 use Express\Core\Application;
 use Express\Http\Request;
 use Express\Http\Response;
+use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
 
 class TransactionMiddleware
 {
@@ -18,9 +19,9 @@ class TransactionMiddleware
     /**
      * Compatível com padrão callable do Express-PHP.
      *
-     * @param callable(Request, Response):void $next função next do Express-PHP, recebe Request e Response
+     * @param callable($req, Response):void $next função next do Express-PHP, recebe Request e Response
      */
-    public function __invoke(Request $req, Response $res, callable $next): void
+    public function __invoke($req, Response $res, callable $next): void
     {
         $this->handle($req, $res, $next);
     }
@@ -30,7 +31,7 @@ class TransactionMiddleware
      *
      * @param callable(Request, Response):void $next função next do Express-PHP, recebe Request e Response
      */
-    public function handle(Request $req, Response $res, callable $next): void
+    public function handle(Request|CycleRequest $req, Response $res, callable $next): void
     {
         // Use sempre o container PSR-11 para buscar serviços
         if (method_exists($this->app, 'getContainer')) {
@@ -54,7 +55,13 @@ class TransactionMiddleware
             $transactionStarted = true;
             $this->logDebug('Transaction started for route: ' . $this->getRouteInfo($req));
 
-            $next($req, $res);
+            // If we have a CycleRequest, pass the original request to the next middleware
+            // to ensure compatibility with the route handler
+            if ($req instanceof CycleRequest) {
+                $next($req->getOriginalRequest(), $res);
+            } else {
+                $next($req, $res);
+            }
 
             // Commit apenas se há mudanças
             if (is_object($em) && method_exists($em, 'commitTransaction')) {
@@ -78,7 +85,7 @@ class TransactionMiddleware
         }
     }
 
-    private function getRouteInfo(Request $req): string
+    private function getRouteInfo(Request|CycleRequest $req): string
     {
         $method = property_exists($req, 'method') && (is_string($req->method) || is_numeric($req->method)) ? (string) $req->method : 'Unknown';
         $uri = property_exists($req, 'pathCallable') && (is_string($req->pathCallable) || is_numeric($req->pathCallable))
