@@ -3,7 +3,6 @@
 namespace CAFernandes\ExpressPHP\CycleORM\Middleware;
 
 use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
-use CAFernandes\ExpressPHP\CycleORM\RepositoryFactory;
 use Cycle\Database\DatabaseInterface;
 use Cycle\ORM\EntityManagerInterface;
 use Cycle\ORM\ORMInterface;
@@ -45,100 +44,30 @@ class CycleMiddleware
             throw new \RuntimeException('Cycle ORM not properly registered');
         }
 
-        // Adiciona os serviços do Cycle ORM como atributos dinâmicos no request
+        // Cria o CycleRequest wrapper
+        $cycleRequest = new CycleRequest($req);
+
+        // Obtém os serviços do Cycle ORM do container
         $orm = $container->get('cycle.orm');
         $em = $container->get('cycle.em');
         $db = $container->get('cycle.database');
         $repository = $container->get('cycle.repository');
 
+        // Injeta os serviços diretamente no CycleRequest
         if ($orm instanceof ORMInterface) {
-            $req->setAttribute('orm', $orm);
-            $req->setAttribute('cycle.orm', $orm); // Alias para compatibilidade
+            $cycleRequest->orm = $orm;
         }
 
         if ($em instanceof EntityManagerInterface) {
-            $req->setAttribute('em', $em);
-            $req->setAttribute('cycle.em', $em); // Alias para compatibilidade
+            $cycleRequest->em = $em;
         }
 
         if ($db instanceof DatabaseInterface) {
-            $req->setAttribute('db', $db);
-            $req->setAttribute('cycle.database', $db); // Alias para compatibilidade
+            $cycleRequest->db = $db;
         }
 
-        // Adiciona o repository factory
-        $req->setAttribute('repository', $repository);
-        $req->setAttribute('cycle.repository', $repository); // Alias para compatibilidade
-
-        // Adiciona métodos helper do Cycle ORM
-        if (
-            $orm instanceof ORMInterface
-            && $em instanceof EntityManagerInterface
-            && $repository instanceof RepositoryFactory
-        ) {
-            $this->addCycleHelpers($req, $orm, $em, $repository);
-        }
-
-        $next($req, $res);
+        // Passa o CycleRequest wrapper para o próximo handler
+        $next($cycleRequest, $res);
     }
 
-    /**
-     * Adiciona métodos helper do Cycle ORM como closures no request.
-     */
-    private function addCycleHelpers(
-        Request $req,
-        ORMInterface $orm,
-        EntityManagerInterface $em,
-        RepositoryFactory $repository
-    ): void {
-        // Helper para obter repository de uma entidade
-        $req->setAttribute(
-            'getRepository',
-            function (string $entityClass) use ($repository) {
-            /** @var class-string $entityClass */
-                return $repository->getRepository($entityClass);
-            }
-        );
-
-        // Helper para criar entidade a partir de dados
-        $req->setAttribute(
-            'createEntity',
-            function (string $entityClass, array $data) {
-                $entity = new $entityClass();
-                foreach ($data as $key => $value) {
-                    if (property_exists($entity, $key)) {
-                        $entity->$key = $value;
-                    }
-                }
-                return $entity;
-            }
-        );
-
-        // Helper para buscar entidade por ID
-        $req->setAttribute(
-            'findEntity',
-            function (string $entityClass, $id) use ($repository) {
-            /** @var class-string $entityClass */
-                return $repository->getRepository($entityClass)->findByPK($id);
-            }
-        );
-
-        // Helper para persistir entidade
-        $req->setAttribute(
-            'persistEntity',
-            function ($entity) use ($em) {
-                $em->persist($entity);
-                return $entity;
-            }
-        );
-
-        // Helper para remover entidade
-        $req->setAttribute(
-            'removeEntity',
-            function ($entity) use ($em) {
-                $em->delete($entity);
-                return $entity;
-            }
-        );
-    }
 }
