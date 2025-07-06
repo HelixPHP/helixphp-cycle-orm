@@ -1,3 +1,15 @@
+#!/bin/bash
+
+echo "=== Updating composer.json for Production (Packagist) ==="
+echo ""
+
+cd /home/cfernandes/helixphp/helixphp-cycle-orm || exit 1
+
+# Backup current composer.json
+cp composer.json composer.json.local
+
+# Update composer.json to use Packagist version
+cat > composer.json << 'EOF'
 {
   "name": "helixphp/cycle-orm",
   "description": "Robust and well-tested Cycle ORM integration for HelixPHP microframework with type safety and comprehensive testing",
@@ -78,3 +90,20 @@
   "minimum-stability": "stable",
   "prefer-stable": true
 }
+EOF
+
+echo "✅ composer.json updated to use Packagist dependencies"
+echo ""
+echo "📊 Changes made:"
+echo "  • Removed local path repository"
+echo "  • Changed helixphp/core from @dev to ^1.0"
+echo "  • Changed minimum-stability from dev to stable"
+echo "  • Backup saved as composer.json.local"
+echo ""
+echo "🔄 Next steps:"
+echo "  1. Remove composer.lock: rm -f composer.lock"
+echo "  2. Update dependencies: composer update"
+echo "  3. Run tests: composer test"
+echo ""
+echo "💡 To restore local development setup:"
+echo "  cp composer.json.local composer.json"
