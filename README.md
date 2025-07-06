@@ -3,19 +3,21 @@
 [![PHPStan Level 9](https://img.shields.io/badge/PHPStan-level%209-brightgreen.svg)](https://phpstan.org/)
 [![PHP 8.1+](https://img.shields.io/badge/PHP-8.1%2B-blue.svg)](https://php.net)
 [![Tests](https://img.shields.io/badge/tests-68%20passing-brightgreen.svg)](https://phpunit.de/)
+[![PSR-12](https://img.shields.io/badge/PSR-12-blue.svg)](https://www.php-fig.org/psr/psr-12/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Uma extensão robusta e bem testada que integra o Cycle ORM ao framework Express PHP, oferecendo recursos avançados de ORM com arquitetura limpa e moderna.
+Uma extensão robusta e bem testada que integra o Cycle ORM ao framework Express PHP, oferecendo recursos avançados de ORM com arquitetura limpa e moderna. Fornece integração transparente através do CycleRequest, permitindo acesso direto aos serviços ORM em suas rotas.
 
 ## 🚀 Características
 
 - **Integração Completa**: Perfeita integração com Express PHP através de Service Provider
-- **Type Safety**: Código 100% tipado com PHPStan nível 9
+- **CycleRequest**: Wrapper inteligente que adiciona métodos ORM ao Request padrão
+- **Type Safety**: Código 100% tipado com PHPStan nível 9 e PSR-12
 - **Bem Testado**: 68 testes automatizados cobrindo todas as funcionalidades
 - **Repositórios Customizados**: Factory pattern para repositórios com cache inteligente
-- **Middlewares Prontos**: Transaction e Entity Validation middlewares
-- **Monitoramento**: Sistema completo de métricas e profiling
-- **CycleRequest**: Extensão intuitiva do Request com métodos ORM
+- **Middlewares Prontos**: CycleMiddleware, Transaction e Entity Validation
+- **Monitoramento**: Sistema completo de métricas, profiling e logging de queries
+- **Compatibilidade**: PHP 8.1+ (recomendado PHP 8.3 para evitar avisos)
 - **CLI Commands**: Comandos para migração e gerenciamento do schema
 
 ## 📦 Instalação
@@ -26,19 +28,31 @@ composer require cafernandes/express-php-cycle-orm-extension
 
 ## 🎯 Uso Rápido
 
-### 1. Registrar o Service Provider
+### 1. Configuração Inicial
 
 ```php
-// bootstrap/app.php
+// public/index.php
 use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
+use CAFernandes\ExpressPHP\CycleORM\Middleware\CycleMiddleware;
 
-// Configure as variáveis de ambiente antes do registro
+// IMPORTANTE: Define o diretório de trabalho
+chdir(dirname(__DIR__));
+
+// Configure as variáveis de ambiente
 $_ENV['DB_CONNECTION'] = 'sqlite';
-$_ENV['DB_DATABASE'] = __DIR__ . '/database/database.sqlite';
+$_ENV['DB_DATABASE'] = __DIR__ . '/../database/database.sqlite';
 
 // Registre o provider
 $app->register(new CycleServiceProvider($app));
+
+// Adicione o CycleMiddleware para usar CycleRequest
+$app->use(new CycleMiddleware($app));
 ```
+
+### ⚠️ Importante
+- Sempre defina o diretório de trabalho com `chdir()`
+- Crie o diretório `app/Entities` mesmo se não usar entidades anotadas
+- Use PHP 8.1 ou 8.3 para evitar avisos de depreciação do Spiral Core
 
 ### 2. Configurar Variáveis de Ambiente
 
@@ -56,29 +70,39 @@ DB_USERNAME=your_username
 DB_PASSWORD=your_password
 ```
 
-### 3. Uso Básico - Acesso Direto ao Database
+### 3. Uso com CycleRequest (Recomendado)
+
+Com o CycleMiddleware ativo, todas as rotas recebem um CycleRequest com métodos ORM:
 
 ```php
-// Acesso direto para queries simples
-$app->get('/api/users', function ($req, $res) use ($app) {
-    $database = $app->make('cycle.database');
-    $users = $database->database()->query('SELECT * FROM users')->fetchAll();
+// Listar usuários usando CycleRequest
+$app->get('/api/users', function ($req, $res) {
+    // $req é agora um CycleRequest
+    $db = $req->getContainer()->get('cycle.database');
+    $users = $db->database()->query('SELECT * FROM users')->fetchAll();
     
-    return $res->json(['data' => $users]);
+    return $res->json([
+        'data' => $users,
+        'request_type' => get_class($req) // CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest
+    ]);
 });
 
-// Inserção com query builder
-$app->post('/api/users', function ($req, $res) use ($app) {
-    $database = $app->make('cycle.database');
-    $data = $req->getParsedBody();
+// Métodos disponíveis no CycleRequest
+$app->get('/api/example', function ($req, $res) {
+    // Repositório para entidade
+    $userRepo = $req->repository(User::class);
     
-    $database->database()->insert('users')->values([
-        'name' => $data['name'],
-        'email' => $data['email'],
-        'created_at' => date('Y-m-d H:i:s')
-    ])->run();
+    // Criar nova entidade
+    $user = $req->entity(User::class, ['name' => 'John']);
     
-    return $res->json(['message' => 'User created']);
+    // Paginação
+    $paginated = $req->paginate(User::class, 20, 1);
+    
+    // Propriedades ORM disponíveis
+    $orm = $req->orm;  // Instância do ORM
+    $em = $req->em;    // Entity Manager
+    
+    return $res->json(['message' => 'CycleRequest features']);
 });
 ```
 
@@ -145,22 +169,25 @@ class UserController
 ## 🧪 Executar Testes
 
 ```bash
-# Todos os testes (exceto integração complexa)
-vendor/bin/phpunit
+# Todos os testes
+composer test
 
-# Apenas testes unitários
-vendor/bin/phpunit tests/Unit/
+# Com relatório de cobertura
+composer test-coverage
 
-# Incluir testes de integração
-vendor/bin/phpunit --group integration
+# Verificar qualidade do código
+composer phpstan       # PHPStan nível 9
+composer cs:check      # PSR-12 compliance
+composer cs:fix        # Corrigir PSR-12
 ```
 
 ## 📈 Qualidade do Código
 
-- **PHPStan Nível 9**: Zero erros de tipagem
-- **PSR-12**: Padrões de código seguidos
-- **100% Testado**: Cobertura completa das funcionalidades principais
-- **Type Safety**: Interfaces bem definidas
+- **PHPStan Nível 9**: Zero erros de tipagem em análise estática
+- **PSR-12**: Conformidade total com padrões de código
+- **68 Testes**: Cobertura completa com PHPUnit
+- **Type Safety**: Interfaces e tipos bem definidos
+- **CI/CD**: GitHub Actions para testes automatizados
 
 ## 🔧 Funcionalidades Avançadas
 
@@ -293,11 +320,12 @@ A extensão suporta diferentes níveis de complexidade:
 
 ## 📚 Documentação Completa
 
+- [Guia de Integração Completo](docs/integration-guide.md) 🆕
 - [Guia Completo - Do Básico ao Avançado](docs/guia-completo.md)
 - [Documentação Principal](docs/index.md)
+- [Resolução de Problemas](docs/integration-guide.md#resolução-de-problemas)
+- [Exemplos Práticos](docs/integration-guide.md#exemplos-práticos)
 - [Guia de Contribuição](CONTRIBUTING.md)
-- [Arquitetura Técnica](docs/techinical/)
-- [Exemplos de Implementação](docs/implementions/)
 
 ## 🤝 Contribuição
 

@@ -2,7 +2,40 @@
 
 Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 
-## [1.0.2] - 2025-07-04
+O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
+e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
+
+## [1.1.0] - 2025-01-06
+
+### Adicionado
+- **Guia de Integração Completo**: Nova documentação detalhada em `docs/integration-guide.md`
+- **Compatibilidade PHP 8.4**: Documentação sobre avisos de depreciação e soluções
+- **Badge PSR-12**: Indicador de conformidade com padrões no README
+- **Exemplos CRUD**: Implementação completa de API REST com todos os verbos HTTP
+- **Troubleshooting**: Seção dedicada para resolução de problemas comuns
+
+### Alterado
+- **CycleMiddleware**: Agora cria corretamente o wrapper CycleRequest antes de passar para o próximo handler
+- **QueryLogger**: Método `clear()` renomeado para `clearLogs()` (mantendo alias para retrocompatibilidade)
+- **Documentação**: README atualizado com instruções claras sobre `chdir()` e estrutura de diretórios
+- **GitHub Actions**: Workflow CI atualizado para refletir comandos do ambiente local
+
+### Corrigido
+- **CycleORMException**: Removido 4º parâmetro do construtor (context array)
+- **Type Checking**: Alterado de `instanceof ORM` para `instanceof ORMInterface` para maior flexibilidade
+- **Table Annotations**: Corrigida sintaxe de anotações nas entidades de teste
+- **CycleRequest**: Adicionados métodos `getAttribute()` e `setAttribute()` com tipos corretos
+
+### Removido
+- **validateEntity()**: Método stub não utilizado removido do CycleRequest
+
+### Melhorias de Qualidade
+- **PSR-12**: Conformidade total validada com phpcs
+- **PHPStan**: Nível 9 sem erros ou avisos
+- **Testes**: 68 testes passando com sucesso
+- **Documentação**: Guias práticos e exemplos de uso real
+
+## [1.0.2] - 2025-01-04
 ### Adicionado
 - **Sistema de Testes Completo**: 68 testes automatizados (Unit, Feature, Database)
 - **PHPStan Nível 9**: Zero erros de tipagem estática
