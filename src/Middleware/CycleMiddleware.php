@@ -25,8 +25,7 @@ class CycleMiddleware
     /**
      * Tornar o middleware compatível com o padrão callable do Express-PHP.
      *
-     * @param callable(CycleRequest|Request, Response):void $next função next do Express-PHP,
-     *                                                            recebe Request ou CycleRequest e Response
+     * @param callable(Request, Response):void $next função next do Express-PHP
      */
     public function __invoke(Request $req, Response $res, callable $next): void
     {
@@ -36,36 +35,38 @@ class CycleMiddleware
     /**
      * Middleware principal do Cycle ORM.
      *
-     * @param callable(CycleRequest|Request, Response):void $next função next do Express-PHP,
-     *                                                            recebe Request ou CycleRequest e Response
+     * @param callable(Request, Response):void $next função next do Express-PHP
      */
     public function handle(Request $req, Response $res, callable $next): void
     {
-        // Remove instanceof sempre falso
-        // Sempre cria o wrapper CycleRequest
         $container = $this->app->getContainer();
         if (!$container->has('cycle.orm')) {
             throw new \RuntimeException('Cycle ORM not properly registered');
         }
-        $cycleReq = new CycleRequest($req);
+
+        // Cria o CycleRequest wrapper
+        $cycleRequest = new CycleRequest($req);
+
+        // Obtém os serviços do Cycle ORM do container
         $orm = $container->get('cycle.orm');
         $em = $container->get('cycle.em');
         $db = $container->get('cycle.database');
+        $repository = $container->get('cycle.repository');
+
+        // Injeta os serviços diretamente no CycleRequest
         if ($orm instanceof ORMInterface) {
-            $cycleReq->orm = $orm;
+            $cycleRequest->orm = $orm;
         }
+
         if ($em instanceof EntityManagerInterface) {
-            $cycleReq->em = $em;
+            $cycleRequest->em = $em;
         }
+
         if ($db instanceof DatabaseInterface) {
-            $cycleReq->db = $db;
+            $cycleRequest->db = $db;
         }
-        if (isset($req->user) && (is_object($req->user) || is_null($req->user))) {
-            $cycleReq->user = $req->user;
-        }
-        if (isset($req->auth) && is_array($req->auth)) {
-            $cycleReq->auth = $req->auth;
-        }
-        $next($cycleReq, $res);
+
+        // Passa o CycleRequest wrapper para o próximo handler
+        $next($cycleRequest, $res);
     }
 }

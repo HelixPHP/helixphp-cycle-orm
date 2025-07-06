@@ -39,6 +39,11 @@ class EntityValidationMiddleware
 
             foreach ($reflection->getProperties() as $property) {
                 $property->setAccessible(true);
+                // Evita erro fatal em propriedades tipadas não inicializadas
+                if (method_exists($property, 'isInitialized') && !$property->isInitialized($entity)) {
+                    $errors[] = "Field {$property->getName()} is required (not initialized)";
+                    continue;
+                }
                 $value = $property->getValue($entity);
 
                 // Verificar required fields (convenção: não nullable)

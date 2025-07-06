@@ -3,6 +3,7 @@
 namespace CAFernandes\ExpressPHP\CycleORM;
 
 use Cycle\ORM\ORM;
+use Cycle\ORM\ORMInterface;
 use Cycle\ORM\RepositoryInterface;
 
 /**
@@ -10,7 +11,7 @@ use Cycle\ORM\RepositoryInterface;
  */
 class RepositoryFactory
 {
-    private ORM $orm;
+    private ORMInterface $orm;
 
     /**
      * @var array<string, RepositoryInterface<object>> Cache de repositories
@@ -23,9 +24,9 @@ class RepositoryFactory
     private array $customRepositories = [];
 
     /**
-     * @param ORM $orm ORM do Cycle
+     * @param ORMInterface $orm ORM do Cycle
      */
-    public function __construct(ORM $orm)
+    public function __construct(ORMInterface $orm)
     {
         $this->orm = $orm;
     }

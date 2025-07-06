@@ -12,6 +12,9 @@ use Express\Http\Request;
 /**
  * Wrapper que estende dinamicamente o Request original
  * Mantém 100% de compatibilidade com Express\Http\Request.
+ *
+ * @method mixed getMethod() Forwards to original request
+ * @property mixed $foo Dynamic property forwarding
  */
 class CycleRequest
 {
@@ -87,8 +90,16 @@ class CycleRequest
             throw new \InvalidArgumentException('Entity class name cannot be empty');
         }
         $mapper = $this->orm->getMapper($entity);
+        $entity = $mapper->init($data);
 
-        return $mapper->init($data);
+        // Apply data manually if mapper didn't populate properly
+        foreach ($data as $property => $value) {
+            if (property_exists($entity, $property)) {
+                $entity->$property = $value;
+            }
+        }
+
+        return $entity;
     }
 
     /**
@@ -102,6 +113,8 @@ class CycleRequest
     /**
      * Paginação de resultados.
      *
+     * @template TEntity of object
+     * @param Select<TEntity> $query
      * @return array<string, mixed>
      */
     public function paginate(Select $query, int $page = 1, int $perPage = 15): array
@@ -128,21 +141,26 @@ class CycleRequest
         ];
     }
 
-    /**
-     * Validação de entidade.
-     *
-     * @param array<string, mixed> $rules
-     *
-     * @return array<string, mixed>
-     */
-    public function validateEntity(array $rules): array
-    {
-        // Implementação da validação
-        return ['valid' => true, 'errors' => []];
-    }
 
     public function getOriginalRequest(): Request
     {
         return $this->originalRequest;
+    }
+
+    /**
+     * Encaminha getAttribute para o Request original.
+     */
+    public function getAttribute(string $name, mixed $default = null): mixed
+    {
+        return $this->originalRequest->getAttribute($name, $default);
+    }
+
+    /**
+     * Encaminha setAttribute para o Request original.
+     */
+    public function setAttribute(string $name, mixed $value): self
+    {
+        $this->originalRequest->setAttribute($name, $value);
+        return $this;
     }
 }

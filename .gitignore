@@ -37,3 +37,7 @@ Thumbs.db
 # Composer
 composer.lock
 vendor/
+
+#User
+CLAUDE.md
+.claude

@@ -22,7 +22,7 @@ class MetricsCollector
     ];
 
     /**
-     * @var array<int, array<string, mixed>>
+     * @var array<int, array{query: string, time_ms: float, timestamp: int}>
      */
     private static array $slowQueries = [];
 
@@ -33,6 +33,16 @@ class MetricsCollector
     {
         if (isset(self::$metrics[$metric])) {
             self::$metrics[$metric] += $value;
+        }
+    }
+
+    /**
+     * Adicionar tempo a uma métrica.
+     */
+    public static function addTime(string $metric, float $timeMs): void
+    {
+        if (isset(self::$metrics[$metric])) {
+            self::$metrics[$metric] += $timeMs;
         }
     }
 
@@ -83,10 +93,28 @@ class MetricsCollector
     /**
      * Retorna queries lentas.
      *
-     * @return array<int, array<string, mixed>>
+     * @return array<int, array{query: string, time_ms: float, timestamp: int}>
      */
     public static function getSlowQueries(): array
     {
         return self::$slowQueries;
+    }
+
+    /**
+     * Reiniciar métricas (usado em testes unitários).
+     */
+    public static function reset(): void
+    {
+        self::$metrics = [
+            'queries_executed' => 0,
+            'queries_failed' => 0,
+            'total_query_time' => 0.0,
+            'entities_persisted' => 0,
+            'entities_loaded' => 0,
+            'cache_hits' => 0,
+            'cache_misses' => 0,
+            'slow_queries' => 0,
+        ];
+        self::$slowQueries = [];
     }
 }

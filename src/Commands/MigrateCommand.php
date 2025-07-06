@@ -40,7 +40,7 @@ class MigrateCommand extends BaseCommand
     /**
      * Resolve um serviço do container PSR-11 ou via app().
      */
-    protected function getService(string $id): mixed
+    protected function getService(string $id): object
     {
         // PSR-11: se existir $this->app e for container
         if (property_exists($this, 'app') && is_object($this->app)) {
@@ -67,7 +67,11 @@ class MigrateCommand extends BaseCommand
 
         try {
             $migrator = $this->getService('cycle.migrator');
-            $migrator->run();
+            if (is_object($migrator) && method_exists($migrator, 'run')) {
+                $migrator->run();
+            } else {
+                throw new \RuntimeException('Migrator service is invalid.');
+            }
             $this->info('Migrations executed successfully.');
 
             return 0;
@@ -89,7 +93,11 @@ class MigrateCommand extends BaseCommand
 
         try {
             $migrator = $this->getService('cycle.migrator');
-            $migrator->run();
+            if (is_object($migrator) && method_exists($migrator, 'run')) {
+                $migrator->run();
+            } else {
+                throw new \RuntimeException('Migrator service is invalid.');
+            }
             $this->info('Migration rolled back successfully.');
 
             return 0;
