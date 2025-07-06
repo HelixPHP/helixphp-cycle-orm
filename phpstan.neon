@@ -8,14 +8,14 @@ parameters:
     bootstrapFiles:
         - vendor/autoload.php
     ignoreErrors:
-        - '#Parameter \#1 of callable .* expects Express\\Http\\Request, .* given#'
+        - '#Parameter \#1 of callable .* expects Helix\\Http\\Request, .* given#'
 
-    # Express-PHP specific ignores
+    # HelixPHP specific ignores
     universalObjectCratesClasses:
-        - Express\Http\Request
-        - Express\Http\Response
-        - Express\Core\Application
+        - Helix\Http\Request
+        - Helix\Http\Response
+        - Helix\Core\Application
     
     # Stub files for better type inference
     stubFiles:
-        - vendor/cafernandes/express-php/src/Http/Request.php
+        - vendor/helixphp/core/src/Http/Request.php
