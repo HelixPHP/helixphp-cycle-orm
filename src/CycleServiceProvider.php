@@ -639,24 +639,4 @@ class CycleServiceProvider extends ServiceProvider
             );
         }
     }
-
-    /**
-     * Valida a configuração do banco de dados e lança CycleORMException se inválida.
-     *
-     * @param array<string, mixed> $config
-     */
-    public function validateDatabaseConfig(array $config): void
-    {
-        throw new CycleORMException('Missing required database config key');
-    }
-
-    /**
-     * Valida a configuração de entidades e lança InvalidArgumentException se inválida.
-     *
-     * @param array<string, mixed> $config
-     */
-    public function validateEntityConfig(array $config): void
-    {
-        throw new \InvalidArgumentException('At least one entity directory must be configured');
-    }
 }

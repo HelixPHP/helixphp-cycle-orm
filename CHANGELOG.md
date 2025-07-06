@@ -28,6 +28,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ### Removido
 - **validateEntity()**: Método stub não utilizado removido do CycleRequest
+- **validateDatabaseConfig()** e **validateEntityConfig()**: Métodos stub não utilizados removidos do CycleServiceProvider
 
 ### Melhorias de Qualidade
 - **PSR-12**: Conformidade total validada com phpcs
