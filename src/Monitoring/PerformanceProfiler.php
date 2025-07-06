@@ -1,6 +1,6 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Monitoring;
+namespace Helix\CycleORM\Monitoring;
 
 /**
  * Profiler de performance para Cycle ORM.

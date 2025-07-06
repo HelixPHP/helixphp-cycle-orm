@@ -1,9 +1,9 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Monitoring;
+namespace Helix\CycleORM\Tests\Monitoring;
 
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\PerformanceProfiler;
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\MetricsCollector;
+use Helix\CycleORM\Monitoring\PerformanceProfiler;
+use Helix\CycleORM\Monitoring\MetricsCollector;
 use PHPUnit\Framework\TestCase;
 
 class PerformanceProfilerTest extends TestCase

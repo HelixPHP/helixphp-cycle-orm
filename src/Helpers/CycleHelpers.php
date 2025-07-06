@@ -1,6 +1,6 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Helpers;
+namespace Helix\CycleORM\Helpers;
 
 class CycleHelpers
 {

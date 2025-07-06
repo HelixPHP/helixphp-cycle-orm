@@ -1,11 +1,11 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Middleware;
+namespace Helix\CycleORM\Middleware;
 
-use Express\Core\Application;
-use Express\Http\Request;
-use Express\Http\Response;
-use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
+use Helix\Core\Application;
+use Helix\Http\Request;
+use Helix\Http\Response;
+use Helix\CycleORM\Http\CycleRequest;
 
 class TransactionMiddleware
 {

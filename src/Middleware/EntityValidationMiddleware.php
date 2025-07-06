@@ -1,10 +1,10 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Middleware;
+namespace Helix\CycleORM\Middleware;
 
-use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
-use Express\Http\Request;
-use Express\Http\Response;
+use Helix\CycleORM\Http\CycleRequest;
+use Helix\Http\Request;
+use Helix\Http\Response;
 
 class EntityValidationMiddleware
 {

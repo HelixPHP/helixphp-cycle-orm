@@ -1,6 +1,6 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM;
+namespace Helix\CycleORM;
 
 use Cycle\Annotated\Entities as AnnotatedEntities;
 use Cycle\Database\Config\DatabaseConfig;
@@ -17,12 +17,12 @@ use Cycle\ORM\Schema;
 use Cycle\Schema\Compiler;
 use Cycle\Schema\Generator;
 use Cycle\Schema\Registry;
-use Express\Core\Application;
-use Express\Providers\ServiceProvider;
+use Helix\Core\Application;
+use Helix\Providers\ServiceProvider;
 use Symfony\Component\Finder\Finder;
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\QueryLogger;
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\PerformanceProfiler;
-use CAFernandes\ExpressPHP\CycleORM\Exceptions\CycleORMException;
+use Helix\CycleORM\Monitoring\QueryLogger;
+use Helix\CycleORM\Monitoring\PerformanceProfiler;
+use Helix\CycleORM\Exceptions\CycleORMException;
 use Spiral\Tokenizer\ClassesInterface;
 use Spiral\Tokenizer\ClassLocator;
 use Cycle\Annotated\Locator\TokenizerEntityLocator;

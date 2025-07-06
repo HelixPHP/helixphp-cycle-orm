@@ -1,10 +1,10 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Health;
+namespace Helix\CycleORM\Health;
 
-use Express\Core\Application;
-use Express\Http\Request;
-use Express\Http\Response;
+use Helix\Core\Application;
+use Helix\Http\Request;
+use Helix\Http\Response;
 
 /**
  * Middleware para expor endpoint de health check.

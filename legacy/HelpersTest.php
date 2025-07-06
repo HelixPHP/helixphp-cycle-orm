@@ -1,10 +1,10 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests;
+namespace Helix\CycleORM\Tests;
 
-use CAFernandes\ExpressPHP\CycleORM\Helpers\CycleHelpers;
-use CAFernandes\ExpressPHP\CycleORM\Helpers\EnvironmentHelper;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Fixtures\TestEntity;
+use Helix\CycleORM\Helpers\CycleHelpers;
+use Helix\CycleORM\Helpers\EnvironmentHelper;
+use Helix\CycleORM\Tests\Fixtures\TestEntity;
 use Cycle\Database\Config\DatabaseConfig;
 use Cycle\Database\Config\SQLite\MemoryConnectionConfig;
 use Cycle\Database\Config\SQLiteDriverConfig;
@@ -18,8 +18,8 @@ use Cycle\ORM\Select;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \CAFernandes\ExpressPHP\CycleORM\Helpers\CycleHelpers
- * @covers \CAFernandes\ExpressPHP\CycleORM\Helpers\EnvironmentHelper
+ * @covers \Helix\CycleORM\Helpers\CycleHelpers
+ * @covers \Helix\CycleORM\Helpers\EnvironmentHelper
  *
  * @internal
  */

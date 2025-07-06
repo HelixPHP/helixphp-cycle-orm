@@ -1,11 +1,11 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Support;
+namespace Helix\CycleORM\Tests\Support;
 
-use CAFernandes\ExpressPHP\CycleORM\Tests\Mocks\MockContainer;
+use Helix\CycleORM\Tests\Mocks\MockContainer;
 
 /**
- * Simple test application that mimics Express\Core\Application interface
+ * Simple test application that mimics Helix\Core\Application interface
  * without complex inheritance issues
  */
 class TestApplication

@@ -1,6 +1,6 @@
 # Padrões de Uso - Projeto valida_conceito
 
-Este documento descreve os padrões de implementação encontrados no projeto `valida_conceito`, que demonstra o uso prático da extensão Express PHP Cycle ORM.
+Este documento descreve os padrões de implementação encontrados no projeto `valida_conceito`, que demonstra o uso prático da extensão HelixPHP Cycle ORM.
 
 ## Visão Geral
 
@@ -432,7 +432,7 @@ public function testCreateUserUseCase()
 
 ## Conclusão
 
-O projeto `valida_conceito` demonstra que a extensão Express PHP Cycle ORM é flexível o suficiente para suportar tanto implementações simples quanto arquiteturas complexas. A escolha entre os padrões depende dos requisitos do projeto:
+O projeto `valida_conceito` demonstra que a extensão HelixPHP Cycle ORM é flexível o suficiente para suportar tanto implementações simples quanto arquiteturas complexas. A escolha entre os padrões depende dos requisitos do projeto:
 
 - Use o **Padrão Básico** para: MVPs, prototipagem, APIs simples
 - Use o **Padrão Clean Architecture** para: Aplicações empresariais, sistemas complexos, quando testabilidade é crucial

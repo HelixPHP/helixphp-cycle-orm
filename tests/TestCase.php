@@ -1,8 +1,8 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests;
+namespace Helix\CycleORM\Tests;
 
-use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
+use Helix\CycleORM\CycleServiceProvider;
 use Cycle\Database\DatabaseManager;
 use Cycle\Database\Config\DatabaseConfig;
 use Cycle\Database\Config\SQLite\FileConnectionConfig;
@@ -11,9 +11,9 @@ use Cycle\ORM\EntityManager;
 use Cycle\ORM\ORM;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Schema;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Support\TestApplication;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Entities\User;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Entities\Post;
+use Helix\CycleORM\Tests\Support\TestApplication;
+use Helix\CycleORM\Tests\Entities\User;
+use Helix\CycleORM\Tests\Entities\Post;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase

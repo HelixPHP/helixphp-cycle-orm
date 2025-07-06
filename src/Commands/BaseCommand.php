@@ -1,6 +1,6 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Commands;
+namespace Helix\CycleORM\Commands;
 
 /**
  * Command base que funciona independente do sistema de console.

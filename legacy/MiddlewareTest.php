@@ -1,18 +1,18 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests;
+namespace Helix\CycleORM\Tests;
 
-use CAFernandes\ExpressPHP\CycleORM\Middleware\CycleMiddleware;
-use CAFernandes\ExpressPHP\CycleORM\Middleware\TransactionMiddleware;
+use Helix\CycleORM\Middleware\CycleMiddleware;
+use Helix\CycleORM\Middleware\TransactionMiddleware;
 use Cycle\Database\Config\DatabaseConfig;
 use Cycle\Database\DatabaseManager;
 use Cycle\ORM\EntityManager;
 use Cycle\ORM\Factory;
 use Cycle\ORM\ORM;
 use Cycle\ORM\Schema;
-use Express\Core\Application;
-use Express\Http\Request;
-use Express\Http\Response;
+use Helix\Core\Application;
+use Helix\Http\Request;
+use Helix\Http\Response;
 use PHPUnit\Framework\TestCase;
 
 /**

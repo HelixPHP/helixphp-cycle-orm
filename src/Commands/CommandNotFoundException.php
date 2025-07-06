@@ -1,6 +1,6 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Commands;
+namespace Helix\CycleORM\Commands;
 
 class CommandNotFoundException extends \RuntimeException
 {

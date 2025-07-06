@@ -1,10 +1,10 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Middleware;
+namespace Helix\CycleORM\Tests\Middleware;
 
-use CAFernandes\ExpressPHP\CycleORM\Middleware\EntityValidationMiddleware;
-use Express\Http\Request;
-use Express\Http\Response;
+use Helix\CycleORM\Middleware\EntityValidationMiddleware;
+use Helix\Http\Request;
+use Helix\Http\Response;
 use PHPUnit\Framework\TestCase;
 
 class EntityValidationMiddlewareTest extends TestCase

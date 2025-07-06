@@ -1,14 +1,14 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Middleware;
+namespace Helix\CycleORM\Middleware;
 
-use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
+use Helix\CycleORM\Http\CycleRequest;
 use Cycle\Database\DatabaseInterface;
 use Cycle\ORM\EntityManagerInterface;
 use Cycle\ORM\ORMInterface;
-use Express\Core\Application;
-use Express\Http\Request;
-use Express\Http\Response;
+use Helix\Core\Application;
+use Helix\Http\Request;
+use Helix\Http\Response;
 
 /**
  * Middleware compatível com arquitetura real do Express-PHP.

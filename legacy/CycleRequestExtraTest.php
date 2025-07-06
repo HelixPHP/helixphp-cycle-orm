@@ -1,9 +1,9 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Http;
+namespace Helix\CycleORM\Tests\Http;
 
-use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
-use Express\Http\Request;
+use Helix\CycleORM\Http\CycleRequest;
+use Helix\Http\Request;
 use PHPUnit\Framework\TestCase;
 
 class CycleRequestExtraTest extends TestCase

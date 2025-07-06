@@ -1,13 +1,13 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Repository;
+namespace Helix\CycleORM\Tests\Repository;
 
-use CAFernandes\ExpressPHP\CycleORM\RepositoryFactory;
+use Helix\CycleORM\RepositoryFactory;
 use Cycle\ORM\RepositoryInterface;
 use Cycle\ORM\ORM;
 use PHPUnit\Framework\TestCase;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Repository\FakeFactory;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Repository\FakeSchema;
+use Helix\CycleORM\Tests\Repository\FakeFactory;
+use Helix\CycleORM\Tests\Repository\FakeSchema;
 
 class RepositoryFactoryTest extends TestCase
 {

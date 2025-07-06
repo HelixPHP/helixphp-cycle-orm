@@ -1,6 +1,6 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Health;
+namespace Helix\CycleORM\Health;
 
 use Psr\Container\ContainerInterface;
 

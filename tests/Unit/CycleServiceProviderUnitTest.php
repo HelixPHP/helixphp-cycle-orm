@@ -1,9 +1,9 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Unit;
+namespace Helix\CycleORM\Tests\Unit;
 
-use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Support\TestApplication;
+use Helix\CycleORM\CycleServiceProvider;
+use Helix\CycleORM\Tests\Support\TestApplication;
 use PHPUnit\Framework\TestCase;
 
 class CycleServiceProviderUnitTest extends TestCase
@@ -41,7 +41,7 @@ class CycleServiceProviderUnitTest extends TestCase
 
         // Test that the class extends the Express ServiceProvider
         $this->assertTrue($reflection->getParentClass() !== false);
-        $this->assertEquals('Express\Providers\ServiceProvider', $reflection->getParentClass()->getName());
+        $this->assertEquals('Helix\Providers\ServiceProvider', $reflection->getParentClass()->getName());
     }
 
     public function testHelperFunctionsWork(): void

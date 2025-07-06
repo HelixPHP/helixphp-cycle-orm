@@ -1,9 +1,9 @@
 # Guia Técnico: CycleServiceProvider
 
-O `CycleServiceProvider` é o principal ponto de integração entre o Express PHP e o Cycle ORM. Ele gerencia o ciclo de vida dos serviços relacionados ao ORM, banco de dados, middlewares e comandos CLI.
+O `CycleServiceProvider` é o principal ponto de integração entre o HelixPHP e o Cycle ORM. Ele gerencia o ciclo de vida dos serviços relacionados ao ORM, banco de dados, middlewares e comandos CLI.
 
 ## Propriedades e Responsabilidades
-- **Application $app**: Instância principal da aplicação Express PHP.
+- **Application $app**: Instância principal da aplicação HelixPHP.
 
 ## Métodos Públicos
 - `__construct(Application $app)`: Inicializa o provider e inclui helpers necessários.

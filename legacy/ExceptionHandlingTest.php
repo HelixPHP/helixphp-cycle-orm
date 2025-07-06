@@ -1,9 +1,9 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Exceptions;
+namespace Helix\CycleORM\Tests\Exceptions;
 
-use CAFernandes\ExpressPHP\CycleORM\Exceptions\EntityNotFoundException;
-use CAFernandes\ExpressPHP\CycleORM\Exceptions\CycleORMException;
+use Helix\CycleORM\Exceptions\EntityNotFoundException;
+use Helix\CycleORM\Exceptions\CycleORMException;
 use PHPUnit\Framework\TestCase;
 
 class ExceptionHandlingTest extends TestCase

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CAFernandes\ExpressPHP\CycleORM\Exceptions;
+namespace Helix\CycleORM\Exceptions;
 
 use Exception;
 use Throwable;

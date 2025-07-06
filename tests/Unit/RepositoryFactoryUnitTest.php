@@ -1,9 +1,9 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Unit;
+namespace Helix\CycleORM\Tests\Unit;
 
-use CAFernandes\ExpressPHP\CycleORM\RepositoryFactory;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Entities\User;
+use Helix\CycleORM\RepositoryFactory;
+use Helix\CycleORM\Tests\Entities\User;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\RepositoryInterface;
 use PHPUnit\Framework\TestCase;

@@ -2,7 +2,7 @@
 
 require_once 'vendor/autoload.php';
 
-use Express\Core\Application;
+use Helix\Core\Application;
 use App\Models\User;
 use App\Models\Post;
 use App\Models\Comment;

@@ -1,13 +1,13 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Http;
+namespace Helix\CycleORM\Http;
 
 use Cycle\Database\DatabaseInterface;
 use Cycle\ORM\EntityManagerInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\RepositoryInterface;
 use Cycle\ORM\Select;
-use Express\Http\Request;
+use Helix\Http\Request;
 
 /**
  * Wrapper que estende dinamicamente o Request original

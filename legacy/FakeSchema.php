@@ -1,5 +1,5 @@
 <?php
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Repository;
+namespace Helix\CycleORM\Tests\Repository;
 
 use Cycle\ORM\SchemaInterface;
 

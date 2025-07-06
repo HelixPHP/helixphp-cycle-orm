@@ -1,12 +1,12 @@
-# Guia de Integração Express PHP + Cycle ORM
+# Guia de Integração HelixPHP + Cycle ORM
 
-Este guia detalha como integrar corretamente a Express PHP Cycle ORM Extension em seu projeto.
+Este guia detalha como integrar corretamente a HelixPHP Cycle ORM Extension em seu projeto.
 
 ## 📋 Pré-requisitos
 
 - PHP 8.1 ou superior
 - Composer
-- Express PHP 2.1.1+
+- HelixPHP 2.1.1+
 - SQLite ou MySQL
 
 ## 🚀 Instalação Rápida
@@ -16,7 +16,7 @@ Este guia detalha como integrar corretamente a Express PHP Cycle ORM Extension e
 mkdir meu-projeto && cd meu-projeto
 
 # 2. Instalar dependências
-composer require cafernandes/express-php cafernandes/express-php-cycle-orm-extension
+composer require helixphp/core helixphp/core-cycle-orm-extension
 
 # 3. Criar estrutura de diretórios
 mkdir -p public src/{Controllers,Entities,Repositories} database app/Entities bin
@@ -32,7 +32,7 @@ mkdir -p public src/{Controllers,Entities,Repositories} database app/Entities bi
 declare(strict_types=1);
 
 use Express\Core\Application;
-use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
+use CAFernandes\HelixPHP\CycleORM\CycleServiceProvider;
 use Dotenv\Dotenv;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
@@ -138,8 +138,8 @@ CYCLE_PROFILE_QUERIES=true
     "type": "project",
     "require": {
         "php": "^8.1",
-        "cafernandes/express-php": "^2.1.1",
-        "cafernandes/express-php-cycle-orm-extension": "^1.0.2",
+        "helixphp/core": "^2.1.1",
+        "helixphp/core-cycle-orm-extension": "^1.0.2",
         "vlucas/phpdotenv": "^5.6"
     },
     "autoload": {
@@ -398,10 +398,10 @@ $app->run();
 declare(strict_types=1);
 
 use Express\Core\Application;
-use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
-use CAFernandes\ExpressPHP\CycleORM\Commands\SchemaCommand;
-use CAFernandes\ExpressPHP\CycleORM\Commands\MigrateCommand;
-use CAFernandes\ExpressPHP\CycleORM\Commands\StatusCommand;
+use CAFernandes\HelixPHP\CycleORM\CycleServiceProvider;
+use CAFernandes\HelixPHP\CycleORM\Commands\SchemaCommand;
+use CAFernandes\HelixPHP\CycleORM\Commands\MigrateCommand;
+use CAFernandes\HelixPHP\CycleORM\Commands\StatusCommand;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -561,9 +561,9 @@ $app->register(new CycleServiceProvider($app));
 
 ## 📚 Recursos Adicionais
 
-- [Documentação do Express PHP](https://github.com/cafernandes/express-php)
+- [Documentação do HelixPHP](https://github.com/helixphp/core)
 - [Documentação do Cycle ORM](https://cycle-orm.dev)
-- [Exemplos de código](https://github.com/cafernandes/express-php-cycle-orm-extension/tree/main/examples)
+- [Exemplos de código](https://github.com/helixphp/core-cycle-orm-extension/tree/main/examples)
 
 ## 🤝 Suporte
 
@@ -571,4 +571,4 @@ Se encontrar problemas:
 
 1. Verifique os logs em `storage/logs/`
 2. Ative o debug: `APP_DEBUG=true`
-3. Abra uma issue no [GitHub](https://github.com/cafernandes/express-php-cycle-orm-extension/issues)
+3. Abra uma issue no [GitHub](https://github.com/helixphp/core-cycle-orm-extension/issues)

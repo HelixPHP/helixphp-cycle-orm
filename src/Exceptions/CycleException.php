@@ -1,6 +1,6 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Exceptions;
+namespace Helix\CycleORM\Exceptions;
 
 class CycleORMException extends \Exception
 {

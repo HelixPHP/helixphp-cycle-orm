@@ -1,6 +1,6 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Commands;
+namespace Helix\CycleORM\Commands;
 
 use Cycle\Migrations\Migrator;
 use Cycle\ORM\ORMInterface;

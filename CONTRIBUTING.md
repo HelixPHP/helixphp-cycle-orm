@@ -1,4 +1,4 @@
-# Contribuindo com o Express PHP Cycle ORM Extension
+# Contribuindo com o HelixPHP Cycle ORM Extension
 
 Obrigado por considerar contribuir com este projeto!
 

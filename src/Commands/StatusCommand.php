@@ -1,8 +1,8 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Commands;
+namespace Helix\CycleORM\Commands;
 
-use CAFernandes\ExpressPHP\CycleORM\Health\CycleHealthCheck;
+use Helix\CycleORM\Health\CycleHealthCheck;
 
 class StatusCommand extends BaseCommand
 {

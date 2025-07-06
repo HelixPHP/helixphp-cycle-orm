@@ -1,9 +1,9 @@
-# Referência Rápida - Express PHP Cycle ORM Extension
+# Referência Rápida - HelixPHP Cycle ORM Extension
 
 ## Instalação e Configuração
 
 ```bash
-composer require cafernandes/express-php-cycle-orm-extension
+composer require helixphp/core-cycle-orm-extension
 ```
 
 ```php
@@ -11,8 +11,8 @@ composer require cafernandes/express-php-cycle-orm-extension
 chdir(dirname(__DIR__)); // IMPORTANTE!
 require 'vendor/autoload.php';
 
-use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
-use CAFernandes\ExpressPHP\CycleORM\Middleware\CycleMiddleware;
+use CAFernandes\HelixPHP\CycleORM\CycleServiceProvider;
+use CAFernandes\HelixPHP\CycleORM\Middleware\CycleMiddleware;
 
 $app = new Express\Core\Application();
 
@@ -171,7 +171,7 @@ $_ENV['CYCLE_LOG_QUERIES'] = true;
 $_ENV['CYCLE_PROFILE_QUERIES'] = true;
 
 // Coletar métricas
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\MetricsCollector;
+use CAFernandes\HelixPHP\CycleORM\Monitoring\MetricsCollector;
 
 $metrics = MetricsCollector::getMetrics();
 // ['queries' => 10, 'time' => 0.125, 'cache_hits' => 5]
@@ -225,8 +225,8 @@ $app->use(new CycleMiddleware($app)); // ✓
 chdir(dirname(__DIR__));
 require 'vendor/autoload.php';
 
-use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
-use CAFernandes\ExpressPHP\CycleORM\Middleware\CycleMiddleware;
+use CAFernandes\HelixPHP\CycleORM\CycleServiceProvider;
+use CAFernandes\HelixPHP\CycleORM\Middleware\CycleMiddleware;
 use Express\Core\Application;
 
 $app = new Application();

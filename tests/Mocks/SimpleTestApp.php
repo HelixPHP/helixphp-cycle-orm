@@ -1,6 +1,6 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Mocks;
+namespace Helix\CycleORM\Tests\Mocks;
 
 class SimpleTestApp
 {

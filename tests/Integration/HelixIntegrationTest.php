@@ -1,18 +1,18 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Integration;
+namespace Helix\CycleORM\Tests\Integration;
 
-use CAFernandes\ExpressPHP\CycleORM\Tests\TestCase;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Entities\User;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Entities\Post;
-use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
-use Express\Http\Request;
-use Express\Http\Response;
+use Helix\CycleORM\Tests\TestCase;
+use Helix\CycleORM\Tests\Entities\User;
+use Helix\CycleORM\Tests\Entities\Post;
+use Helix\CycleORM\Http\CycleRequest;
+use Helix\Http\Request;
+use Helix\Http\Response;
 
 /**
  * @group integration
  */
-class ExpressIntegrationTest extends TestCase
+class HelixIntegrationTest extends TestCase
 {
     public function testFullApplicationLifecycle(): void
     {

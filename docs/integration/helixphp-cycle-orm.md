@@ -1,6 +1,6 @@
-# Guia de Integração: Express-PHP + Cycle ORM
+# Guia de Integração: HelixPHP + Cycle ORM
 
-Este guia mostra como integrar o Cycle ORM ao microframework Express-PHP, cobrindo desde a instalação até exemplos de uso real com entidades, migrations, repositórios customizados, endpoints HTTP, troubleshooting e dicas avançadas.
+Este guia mostra como integrar o Cycle ORM ao microframework HelixPHP, cobrindo desde a instalação até exemplos de uso real com entidades, migrations, repositórios customizados, endpoints HTTP, troubleshooting e dicas avançadas.
 
 ## Índice
 
@@ -24,7 +24,7 @@ Este guia mostra como integrar o Cycle ORM ao microframework Express-PHP, cobrin
 
 ## Visão Geral
 
-A extensão Express-PHP Cycle ORM integra o Cycle ORM ao microframework Express-PHP, fornecendo:
+A extensão HelixPHP Cycle ORM integra o Cycle ORM ao microframework HelixPHP, fornecendo:
 - Registro automático de serviços do ORM no container
 - Suporte a migrations, entidades anotadas, repositórios customizados
 - Health check, métricas e monitoramento
@@ -33,7 +33,7 @@ A extensão Express-PHP Cycle ORM integra o Cycle ORM ao microframework Express-
 ## Dependências
 
 - PHP >= 8.1
-- cafernandes/express-php >= 2.1.1
+- helixphp/core >= 2.1.1
 - cycle/orm >= 2.10
 - cycle/annotated, cycle/migrations, cycle/schema-builder
 
@@ -59,7 +59,7 @@ var/
 Adicione os pacotes ao seu projeto:
 
 ```bash
-composer require cafernandes/express-php-cycle-orm-extension cycle/orm cycle/annotated cycle/migrations
+composer require helixphp/core-cycle-orm-extension cycle/orm cycle/annotated cycle/migrations
 ```
 
 ## 2. Configuração Básica
@@ -88,7 +88,7 @@ No `config/app.php`, adicione o provider:
 ```php
 return [
     'providers' => [
-        CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider::class,
+        CAFernandes\HelixPHP\CycleORM\CycleServiceProvider::class,
     ],
 ];
 ```
@@ -173,7 +173,7 @@ class UserRepository extends Repository
 ## 7. Health Check
 
 ```php
-use CAFernandes\ExpressPHP\CycleORM\Health\CycleHealthCheck;
+use CAFernandes\HelixPHP\CycleORM\Health\CycleHealthCheck;
 
 $result = CycleHealthCheck::check($app);
 if ($result['cycle_orm'] !== 'healthy') {
@@ -184,7 +184,7 @@ if ($result['cycle_orm'] !== 'healthy') {
 ## 8. Monitoramento e Métricas
 
 ```php
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\MetricsCollector;
+use CAFernandes\HelixPHP\CycleORM\Monitoring\MetricsCollector;
 
 MetricsCollector::increment('entities_persisted');
 $metrics = MetricsCollector::getMetrics();
@@ -215,7 +215,7 @@ $app->run();
 
 ## Ciclo de Vida e Dicas de Debug
 
-- O provider registra `cycle.database`, `cycle.orm`, `cycle.em` no container Express-PHP.
+- O provider registra `cycle.database`, `cycle.orm`, `cycle.em` no container HelixPHP.
 - Use `php artisan cycle schema` e `php artisan cycle migrate` para atualizar o banco.
 - Para debug, ative logs SQL no Cycle ORM ou use o `MetricsCollector` para monitorar queries.
 - Para resetar métricas em testes: `MetricsCollector::reset();`
@@ -230,11 +230,11 @@ $app->run();
 
 ## Links Úteis
 
-- [Express-PHP](https://github.com/CAFernandes/express-php)
+- [HelixPHP](https://github.com/HelixPHP/helix-core)
 - [Cycle ORM](https://cycle-orm.dev/docs/intro/2.x/en)
 - [Cycle ORM Annotations](https://cycle-orm.dev/docs/annotated/2.x/en)
 - [Cycle ORM Migrations](https://cycle-orm.dev/docs/migrations/2.x/en)
-- [Exemplo de projeto Express-PHP + Cycle ORM](https://github.com/CAFernandes/express-php-cycle-orm-extension)
+- [Exemplo de projeto HelixPHP + Cycle ORM](https://github.com/HelixPHP/helix-core-cycle-orm-extension)
 
 ---
 

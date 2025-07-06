@@ -1,7 +1,7 @@
 <?php
 require_once 'vendor/autoload.php';
 
-use Express\Core\Application;
+use Helix\Core\Application;
 use App\Models\User;
 use App\Models\Post;
 
@@ -163,7 +163,7 @@ $app->get('/api/users/search', function($req, $res) {
     // Aplicar filtros usando helper
     $filters = $req->query['filters'] ?? [];
     if (!empty($filters)) {
-        $query = \CAFernandes\ExpressPHP\CycleORM\Helpers\CycleHelpers::applyFilters(
+        $query = \Helix\CycleORM\Helpers\CycleHelpers::applyFilters(
             $query,
             $filters,
             ['name', 'email', 'status'] // campos permitidos
@@ -173,7 +173,7 @@ $app->get('/api/users/search', function($req, $res) {
     // Aplicar busca
     $search = $req->query['search'] ?? null;
     if ($search) {
-        $query = \CAFernandes\ExpressPHP\CycleORM\Helpers\CycleHelpers::applySearch(
+        $query = \Helix\CycleORM\Helpers\CycleHelpers::applySearch(
             $query,
             $search,
             ['name', 'email'] // campos de busca
@@ -183,7 +183,7 @@ $app->get('/api/users/search', function($req, $res) {
     // Aplicar ordenação
     $sortBy = $req->query['sort_by'] ?? 'createdAt';
     $sortDirection = $req->query['sort_direction'] ?? 'desc';
-    $query = \CAFernandes\ExpressPHP\CycleORM\Helpers\CycleHelpers::applySorting(
+    $query = \Helix\CycleORM\Helpers\CycleHelpers::applySorting(
         $query,
         $sortBy,
         $sortDirection,
@@ -234,7 +234,7 @@ $app->get('/api/users/:id/posts', function($req, $res) {
 
 // Health check endpoint
 $app->get('/health/cycle', function($req, $res) {
-    $health = \CAFernandes\ExpressPHP\CycleORM\Health\CycleHealthCheck::check($req->app ?? $app);
+    $health = \Helix\CycleORM\Health\CycleHealthCheck::check($req->app ?? $app);
 
     $statusCode = $health['cycle_orm'] === 'healthy' ? 200 : 503;
 

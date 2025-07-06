@@ -1,11 +1,11 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Feature;
+namespace Helix\CycleORM\Tests\Feature;
 
-use CAFernandes\ExpressPHP\CycleORM\Tests\TestCase;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Entities\User;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Entities\Post;
-use CAFernandes\ExpressPHP\CycleORM\RepositoryFactory;
+use Helix\CycleORM\Tests\TestCase;
+use Helix\CycleORM\Tests\Entities\User;
+use Helix\CycleORM\Tests\Entities\Post;
+use Helix\CycleORM\RepositoryFactory;
 use Cycle\ORM\RepositoryInterface;
 
 class RepositoryFactoryTest extends TestCase

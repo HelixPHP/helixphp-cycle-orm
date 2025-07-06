@@ -1,8 +1,8 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Mocks;
+namespace Helix\CycleORM\Tests\Mocks;
 
-use Express\Core\Application;
+use Helix\Core\Application;
 
 class MockApplication extends Application
 {

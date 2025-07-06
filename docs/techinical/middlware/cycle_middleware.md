@@ -1,6 +1,6 @@
 # CycleMiddleware
 
-O `CycleMiddleware` integra o Cycle ORM ao pipeline de requisições do Express PHP, tornando o ORM, EntityManager e Database acessíveis em todas as rotas.
+O `CycleMiddleware` integra o Cycle ORM ao pipeline de requisições do HelixPHP, tornando o ORM, EntityManager e Database acessíveis em todas as rotas.
 
 ## Visão Geral
 Esse middleware é essencial para garantir que todas as requisições tenham acesso ao contexto do ORM, facilitando operações de persistência, consulta e transação.

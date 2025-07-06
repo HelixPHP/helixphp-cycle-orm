@@ -1,6 +1,6 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Monitoring;
+namespace Helix\CycleORM\Monitoring;
 
 /**
  * Coletor de métricas para Cycle ORM.

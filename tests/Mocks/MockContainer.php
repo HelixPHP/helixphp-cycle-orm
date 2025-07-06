@@ -1,8 +1,8 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Mocks;
+namespace Helix\CycleORM\Tests\Mocks;
 
-use Express\Core\Container;
+use Helix\Core\Container;
 
 class MockContainer extends Container
 {

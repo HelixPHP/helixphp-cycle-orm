@@ -1,11 +1,11 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Feature;
+namespace Helix\CycleORM\Tests\Feature;
 
-use CAFernandes\ExpressPHP\CycleORM\Tests\TestCase;
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\MetricsCollector;
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\PerformanceProfiler;
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\QueryLogger;
+use Helix\CycleORM\Tests\TestCase;
+use Helix\CycleORM\Monitoring\MetricsCollector;
+use Helix\CycleORM\Monitoring\PerformanceProfiler;
+use Helix\CycleORM\Monitoring\QueryLogger;
 
 class MonitoringTest extends TestCase
 {
@@ -262,7 +262,7 @@ class MonitoringTest extends TestCase
 
         // Create new provider for production environment
         $prodApp = $this->createApplication();
-        $prodProvider = new \CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider($prodApp);
+        $prodProvider = new \Helix\CycleORM\CycleServiceProvider($prodApp);
         $prodProvider->boot();
 
         $container = $prodApp->getContainer();
@@ -277,9 +277,9 @@ class MonitoringTest extends TestCase
         $_ENV['APP_DEBUG'] = '1';
     }
 
-    private function createApplication(): \Express\Core\Application
+    private function createApplication(): \Helix\Core\Application
     {
-        $app = new \Express\Core\Application();
+        $app = new \Helix\Core\Application();
         $container = $app->getContainer();
 
         $container->bind(

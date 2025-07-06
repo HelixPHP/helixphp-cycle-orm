@@ -1,8 +1,8 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Monitoring;
+namespace Helix\CycleORM\Tests\Monitoring;
 
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\MetricsCollector;
+use Helix\CycleORM\Monitoring\MetricsCollector;
 use PHPUnit\Framework\TestCase;
 
 class MetricsCollectorExtraTest extends TestCase

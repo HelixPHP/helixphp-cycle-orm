@@ -1,4 +1,4 @@
-# Guia Completo - Express PHP Cycle ORM Extension
+# Guia Completo - HelixPHP Cycle ORM Extension
 
 Este guia apresenta o uso da extensão desde o básico até implementações avançadas com arquitetura limpa.
 
@@ -15,7 +15,7 @@ Este guia apresenta o uso da extensão desde o básico até implementações ava
 ### 1. Instalar via Composer
 
 ```bash
-composer require cafernandes/express-php-cycle-orm-extension
+composer require helixphp/core-cycle-orm-extension
 ```
 
 ### 2. Configurar Variáveis de Ambiente
@@ -66,8 +66,8 @@ Crie o arquivo `public/index.php`:
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use ExpressPHP\Express;
-use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
+use HelixPHP\Express;
+use CAFernandes\HelixPHP\CycleORM\CycleServiceProvider;
 
 // Criar aplicação Express
 $app = new Express();
@@ -1061,8 +1061,8 @@ final class ListUsersUseCase
 
 namespace App\Presentation\Controllers;
 
-use ExpressPHP\Express\Request;
-use ExpressPHP\Express\Response;
+use HelixPHP\Express\Request;
+use HelixPHP\Express\Response;
 use App\Application\UseCases\CreateUser\CreateUserUseCase;
 use App\Application\UseCases\CreateUser\CreateUserDTO;
 use App\Application\UseCases\ListUsers\ListUsersUseCase;
@@ -1196,7 +1196,7 @@ return $container;
 
 ## Recursos Extras
 
-### Métodos Corretos do Express PHP
+### Métodos Corretos do HelixPHP
 
 **Request:**
 - `$req->params->id` - Parâmetros de rota (não getAttribute)
@@ -1216,7 +1216,7 @@ return $container;
 ### 1. Middleware de Transação
 
 ```php
-use CAFernandes\ExpressPHP\CycleORM\Middleware\TransactionMiddleware;
+use CAFernandes\HelixPHP\CycleORM\Middleware\TransactionMiddleware;
 
 // Aplicar em todas as rotas
 $app->use(new TransactionMiddleware($app));
@@ -1254,7 +1254,7 @@ $_ENV['CYCLE_LOG_QUERIES'] = true;
 $_ENV['CYCLE_PROFILE_QUERIES'] = true;
 
 // Coletar métricas
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\MetricsCollector;
+use CAFernandes\HelixPHP\CycleORM\Monitoring\MetricsCollector;
 
 $app->get('/metrics', function ($req, $res) {
     $metrics = MetricsCollector::getMetrics();
@@ -1265,7 +1265,7 @@ $app->get('/metrics', function ($req, $res) {
 ### 4. Health Check
 
 ```php
-use CAFernandes\ExpressPHP\CycleORM\Health\HealthCheckMiddleware;
+use CAFernandes\HelixPHP\CycleORM\Health\HealthCheckMiddleware;
 
 $app->get('/health', function ($req, $res) {
     return $res->json(['status' => 'ok']);

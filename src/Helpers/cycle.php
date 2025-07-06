@@ -1,7 +1,7 @@
 <?php
 
-use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
-use Express\Http\Request;
+use Helix\CycleORM\Http\CycleRequest;
+use Helix\Http\Request;
 
 /**
  * Helper para garantir que temos um CycleRequest.

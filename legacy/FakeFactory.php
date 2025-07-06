@@ -1,5 +1,5 @@
 <?php
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Repository\Fakes;
+namespace Helix\CycleORM\Tests\Repository\Fakes;
 
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\SchemaInterface;

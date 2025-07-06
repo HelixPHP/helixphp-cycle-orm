@@ -1,6 +1,6 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Integration;
+namespace Helix\CycleORM\Tests\Integration;
 
 use Cycle\Database\StatementInterface;
 

@@ -1,4 +1,4 @@
-# Documentação Express PHP Cycle ORM Extension
+# Documentação HelixPHP Cycle ORM Extension
 
 ## 🚀 Início Rápido
 - [**Guia de Integração Completo**](./integration-guide.md) 🆕 - Passo a passo detalhado

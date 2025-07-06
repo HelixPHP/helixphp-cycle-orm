@@ -1,15 +1,15 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests;
+namespace Helix\CycleORM\Tests;
 
-use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
-use CAFernandes\ExpressPHP\CycleORM\Middleware\CycleMiddleware;
-use Express\Core\Application;
-use Express\Routing\Router;
+use Helix\CycleORM\CycleServiceProvider;
+use Helix\CycleORM\Middleware\CycleMiddleware;
+use Helix\Core\Application;
+use Helix\Routing\Router;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider
+ * @covers \Helix\CycleORM\CycleServiceProvider
  *
  * @internal
  */
@@ -102,7 +102,7 @@ class CycleServiceProviderTest extends TestCase
 
     public function testDatabaseConfigValidation(): void
     {
-        $this->expectException(\CAFernandes\ExpressPHP\CycleORM\Exceptions\CycleORMException::class);
+        $this->expectException(\Helix\CycleORM\Exceptions\CycleORMException::class);
         $this->expectExceptionMessage('Missing required database config key');
 
         // Simular validação de config inválida

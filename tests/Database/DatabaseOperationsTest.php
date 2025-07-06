@@ -1,10 +1,10 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Database;
+namespace Helix\CycleORM\Tests\Database;
 
-use CAFernandes\ExpressPHP\CycleORM\Tests\TestCase;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Entities\User;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Entities\Post;
+use Helix\CycleORM\Tests\TestCase;
+use Helix\CycleORM\Tests\Entities\User;
+use Helix\CycleORM\Tests\Entities\Post;
 
 class DatabaseOperationsTest extends TestCase
 {

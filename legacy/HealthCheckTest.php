@@ -1,8 +1,8 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests;
+namespace Helix\CycleORM\Tests;
 
-use CAFernandes\ExpressPHP\CycleORM\Health\CycleHealthCheck;
+use Helix\CycleORM\Health\CycleHealthCheck;
 use Cycle\Database\Config\DriverConfig;
 use Cycle\Database\DatabaseInterface;
 use Cycle\Database\Driver\CompilerInterface;
@@ -18,7 +18,7 @@ use Cycle\Database\Query\UpdateQuery;
 use Cycle\Database\StatementInterface;
 use Cycle\Database\TableInterface;
 use Cycle\ORM\SchemaInterface;
-use Express\Core\Application;
+use Helix\Core\Application;
 use PHPUnit\Framework\TestCase;
 
 /**

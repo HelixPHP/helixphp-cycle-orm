@@ -1,23 +1,23 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests;
+namespace Helix\CycleORM\Tests;
 
-use CAFernandes\ExpressPHP\CycleORM\Commands\CommandRegistry;
-use CAFernandes\ExpressPHP\CycleORM\Commands\EntityCommand;
-use CAFernandes\ExpressPHP\CycleORM\Commands\SchemaCommand;
+use Helix\CycleORM\Commands\CommandRegistry;
+use Helix\CycleORM\Commands\EntityCommand;
+use Helix\CycleORM\Commands\SchemaCommand;
 use Cycle\Database\Config\DatabaseConfig;
 use Cycle\Database\DatabaseManager;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Schema;
 use Cycle\Schema\Compiler;
 use Cycle\Schema\Registry;
-use Express\Core\Application;
+use Helix\Core\Application;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \CAFernandes\ExpressPHP\CycleORM\Commands\CommandRegistry
- * @covers \CAFernandes\ExpressPHP\CycleORM\Commands\EntityCommand
- * @covers \CAFernandes\ExpressPHP\CycleORM\Commands\SchemaCommand
+ * @covers \Helix\CycleORM\Commands\CommandRegistry
+ * @covers \Helix\CycleORM\Commands\EntityCommand
+ * @covers \Helix\CycleORM\Commands\SchemaCommand
  *
  * @internal
  */

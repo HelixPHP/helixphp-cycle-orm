@@ -1,9 +1,9 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Integration;
+namespace Helix\CycleORM\Tests\Integration;
 
-use CAFernandes\ExpressPHP\CycleORM\Health\CycleHealthCheck;
-use CAFernandes\ExpressPHP\CycleORM\Tests\Fixtures\TestEntity;
+use Helix\CycleORM\Health\CycleHealthCheck;
+use Helix\CycleORM\Tests\Fixtures\TestEntity;
 use Cycle\Database\Config\DriverConfig;
 use Cycle\Database\DatabaseInterface;
 use Cycle\Database\DatabaseProviderInterface;
@@ -29,7 +29,7 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORM;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
-use Express\Core\Application;
+use Helix\Core\Application;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -1099,7 +1099,7 @@ class FullIntegrationTest extends TestCase
             'cycle.entities',
             [
                 'directories' => [__DIR__ . '/../Fixtures'],
-                'namespace' => 'CAFernandes\ExpressPHP\CycleORM\Tests\Fixtures',
+                'namespace' => 'Helix\CycleORM\Tests\Fixtures',
             ]
         );
         $config->set(
@@ -1139,13 +1139,13 @@ class FullIntegrationTest extends TestCase
             fn () => new class() {
                 public function getRoles()
                 {
-                    return ['CAFernandes\ExpressPHP\CycleORM\Tests\Fixtures\TestEntity'];
+                    return ['Helix\CycleORM\Tests\Fixtures\TestEntity'];
                 }
 
                 public function define($role, $what)
                 {
                     if (SchemaInterface::ENTITY === $what) {
-                        return 'CAFernandes\ExpressPHP\CycleORM\Tests\Fixtures\TestEntity';
+                        return 'Helix\CycleORM\Tests\Fixtures\TestEntity';
                     }
                     if (SchemaInterface::TABLE === $what) {
                         return 'test_entities';

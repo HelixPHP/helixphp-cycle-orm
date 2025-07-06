@@ -1,6 +1,6 @@
 <?php
 
-namespace Express\Core;
+namespace Helix\Core;
 
 class ServiceProvider
 {

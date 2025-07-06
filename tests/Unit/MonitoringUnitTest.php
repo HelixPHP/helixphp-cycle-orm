@@ -1,10 +1,10 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Unit;
+namespace Helix\CycleORM\Tests\Unit;
 
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\MetricsCollector;
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\PerformanceProfiler;
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\QueryLogger;
+use Helix\CycleORM\Monitoring\MetricsCollector;
+use Helix\CycleORM\Monitoring\PerformanceProfiler;
+use Helix\CycleORM\Monitoring\QueryLogger;
 use PHPUnit\Framework\TestCase;
 
 class MonitoringUnitTest extends TestCase

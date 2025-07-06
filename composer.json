@@ -1,8 +1,8 @@
 {
-  "name": "cafernandes/express-php-cycle-orm-extension",
-  "description": "Robust and well-tested Cycle ORM integration for Express-PHP microframework with type safety and comprehensive testing",
+  "name": "helixphp/cycle-orm",
+  "description": "Robust and well-tested Cycle ORM integration for HelixPHP microframework with type safety and comprehensive testing",
   "keywords": [
-    "express-php",
+    "helixphp",
     "cycle-orm",
     "database",
     "orm",
@@ -21,9 +21,15 @@
       "homepage": "https://github.com/CAFernandes"
     }
   ],
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../helixphp-core"
+    }
+  ],
   "require": {
     "php": "^8.1",
-    "cafernandes/express-php": "^2.1.1",
+    "helixphp/core": "@dev",
     "cycle/orm": "^2.10",
     "cycle/annotated": "^4.3",
     "cycle/migrations": "^4.2.5",
@@ -38,26 +44,19 @@
   },
   "autoload": {
     "psr-4": {
-      "CAFernandes\\ExpressPHP\\CycleORM\\": "src/"
+      "Helix\\CycleORM\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "CAFernandes\\ExpressPHP\\CycleORM\\Tests\\": "tests/",
+      "Helix\\CycleORM\\Tests\\": "tests/",
       "Cycle\\ORM\\Select\\": "tests/Mocks/Cycle/ORM/Select/"
-    }
-  },
-  "extra": {
-    "express-php": {
-      "providers": [
-        "CAFernandes\\ExpressPHP\\CycleORM\\CycleServiceProvider"
-      ]
     }
   },
   "scripts": {
     "test": "phpunit",
     "test:unit": "phpunit --testsuite=Unit",
-    "test:feature": "phpunit --testsuite=Feature", 
+    "test:feature": "phpunit --testsuite=Feature",
     "test:integration": "phpunit --testsuite=Integration",
     "test:database": "phpunit --testsuite=Database",
     "test-coverage": "phpunit --coverage-html coverage",

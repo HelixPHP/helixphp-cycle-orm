@@ -1,8 +1,8 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests\Monitoring;
+namespace Helix\CycleORM\Tests\Monitoring;
 
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\QueryLogger;
+use Helix\CycleORM\Monitoring\QueryLogger;
 use PHPUnit\Framework\TestCase;
 
 class QueryLoggerTest extends TestCase

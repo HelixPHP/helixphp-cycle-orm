@@ -1,13 +1,13 @@
 <?php
 
-namespace CAFernandes\ExpressPHP\CycleORM\Tests;
+namespace Helix\CycleORM\Tests;
 
-use CAFernandes\ExpressPHP\CycleORM\Commands\CommandRegistry;
-use CAFernandes\ExpressPHP\CycleORM\Commands\EntityCommand;
+use Helix\CycleORM\Commands\CommandRegistry;
+use Helix\CycleORM\Commands\EntityCommand;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \CAFernandes\ExpressPHP\CycleORM\Commands\CommandRegistry
+ * @covers \Helix\CycleORM\Commands\CommandRegistry
  *
  * @internal
  */

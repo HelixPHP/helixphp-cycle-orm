@@ -17,7 +17,7 @@ Permite acessar ORM, EntityManager, Database, usuário autenticado e informaçõ
 
 ## Exemplo de Uso
 ```php
-use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
+use CAFernandes\HelixPHP\CycleORM\Http\CycleRequest;
 
 function handle(CycleRequest $request) {
     $user = $request->user;
