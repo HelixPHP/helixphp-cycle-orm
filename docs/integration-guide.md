@@ -31,8 +31,8 @@ mkdir -p public src/{Controllers,Entities,Repositories} database app/Entities bi
 
 declare(strict_types=1);
 
-use Express\Core\Application;
-use CAFernandes\HelixPHP\CycleORM\CycleServiceProvider;
+use Helix\Core\Application;
+use Helix\CycleORM\CycleServiceProvider;
 use Dotenv\Dotenv;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
@@ -267,8 +267,8 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Entities\User;
-use Express\Http\Request;
-use Express\Http\Response;
+use Helix\Http\Request;
+use Helix\Http\Response;
 
 class UserController
 {
@@ -397,11 +397,11 @@ $app->run();
 
 declare(strict_types=1);
 
-use Express\Core\Application;
-use CAFernandes\HelixPHP\CycleORM\CycleServiceProvider;
-use CAFernandes\HelixPHP\CycleORM\Commands\SchemaCommand;
-use CAFernandes\HelixPHP\CycleORM\Commands\MigrateCommand;
-use CAFernandes\HelixPHP\CycleORM\Commands\StatusCommand;
+use Helix\Core\Application;
+use Helix\CycleORM\CycleServiceProvider;
+use Helix\CycleORM\Commands\SchemaCommand;
+use Helix\CycleORM\Commands\MigrateCommand;
+use Helix\CycleORM\Commands\StatusCommand;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 

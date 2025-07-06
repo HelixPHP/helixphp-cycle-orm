@@ -14,31 +14,31 @@
 ## 🔧 Documentação Técnica
 
 ### Core Components
-- [Service Provider](./techinical/provider.md) - Arquitetura e registro de serviços
-- [Repository Factory](./techinical/repository.md) - Sistema de repositórios
-- [CycleRequest](./techinical/http/cycle_request.md) - Request estendido com ORM
+- [Service Provider](./technical/provider.md) - Arquitetura e registro de serviços
+- [Repository Factory](./technical/repository.md) - Sistema de repositórios
+- [CycleRequest](./technical/http/cycle_request.md) - Request estendido com ORM
 
 ### Middleware
-- [CycleMiddleware](./techinical/middlware/cycle_middleware.md) - Integração principal
-- [TransactionMiddleware](./techinical/middlware/transaction_middleware.md) - Transações automáticas
-- [EntityValidationMiddleware](./techinical/middlware/entity_validation_middleware.md) - Validação de entidades
+- [CycleMiddleware](./technical/middlware/cycle_middleware.md) - Integração principal
+- [TransactionMiddleware](./technical/middlware/transaction_middleware.md) - Transações automáticas
+- [EntityValidationMiddleware](./technical/middlware/entity_validation_middleware.md) - Validação de entidades
 
 ### Comandos CLI
-- [Schema Command](./techinical/commands/schema_command.md) - Sincronização de schema
-- [Migrate Command](./techinical/commands/migrate_command.md) - Execução de migrações
-- [Status Command](./techinical/commands/status_command.md) - Status do banco
-- [Entity Command](./techinical/commands/entity_command.md) - Gerenciamento de entidades
+- [Schema Command](./technical/commands/schema_command.md) - Sincronização de schema
+- [Migrate Command](./technical/commands/migrate_command.md) - Execução de migrações
+- [Status Command](./technical/commands/status_command.md) - Status do banco
+- [Entity Command](./technical/commands/entity_command.md) - Gerenciamento de entidades
 
 ### Monitoramento e Health
-- [Health Check](./techinical/heath/cycle_health_check.md) - Verificação de saúde
-- [Query Logger](./techinical/monitoring/query_logger.md) - Log de queries SQL
-- [Performance Profiler](./techinical/monitoring/performance_profiler.md) - Profiling de performance
-- [Metrics Collector](./techinical/monitoring/metrics_collector.md) - Coleta de métricas
+- [Health Check](./technical/heath/cycle_health_check.md) - Verificação de saúde
+- [Query Logger](./technical/monitoring/query_logger.md) - Log de queries SQL
+- [Performance Profiler](./technical/monitoring/performance_profiler.md) - Profiling de performance
+- [Metrics Collector](./technical/monitoring/metrics_collector.md) - Coleta de métricas
 
 ### Exceptions
-- [Exception Handling](./techinical/exceptions/exception_handling.md) - Tratamento de erros
-- [CycleORMException](./techinical/exceptions/cycle_orm_exception.md) - Exceções do ORM
-- [EntityNotFoundException](./techinical/exceptions/entity_not_found_exception.md) - Entidade não encontrada
+- [Exception Handling](./technical/exceptions/exception_handling.md) - Tratamento de erros
+- [CycleORMException](./technical/exceptions/cycle_orm_exception.md) - Exceções do ORM
+- [EntityNotFoundException](./technical/exceptions/entity_not_found_exception.md) - Entidade não encontrada
 
 ## 🤝 Contribuindo
 - [Guia de Contribuição](./contributing/README.md)

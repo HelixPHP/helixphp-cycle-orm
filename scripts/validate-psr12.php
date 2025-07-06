@@ -2,7 +2,7 @@
 <?php
 /**
  * Script de Validação PSR-12 Completa
- * Express PHP Framework
+ * HelixPHP Framework
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';

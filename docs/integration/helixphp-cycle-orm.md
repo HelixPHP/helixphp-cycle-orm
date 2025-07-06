@@ -88,7 +88,7 @@ No `config/app.php`, adicione o provider:
 ```php
 return [
     'providers' => [
-        CAFernandes\HelixPHP\CycleORM\CycleServiceProvider::class,
+        Helix\CycleORM\CycleServiceProvider::class,
     ],
 ];
 ```
@@ -173,7 +173,7 @@ class UserRepository extends Repository
 ## 7. Health Check
 
 ```php
-use CAFernandes\HelixPHP\CycleORM\Health\CycleHealthCheck;
+use Helix\CycleORM\Health\CycleHealthCheck;
 
 $result = CycleHealthCheck::check($app);
 if ($result['cycle_orm'] !== 'healthy') {
@@ -184,7 +184,7 @@ if ($result['cycle_orm'] !== 'healthy') {
 ## 8. Monitoramento e Métricas
 
 ```php
-use CAFernandes\HelixPHP\CycleORM\Monitoring\MetricsCollector;
+use Helix\CycleORM\Monitoring\MetricsCollector;
 
 MetricsCollector::increment('entities_persisted');
 $metrics = MetricsCollector::getMetrics();
@@ -194,7 +194,7 @@ $metrics = MetricsCollector::getMetrics();
 
 ```php
 // public/index.php
-use Express\Core\Application;
+use Helix\Core\Application;
 use App\Entities\User;
 use Cycle\ORM\ORMInterface;
 

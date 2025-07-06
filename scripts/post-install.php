@@ -12,7 +12,7 @@ class PostInstallScript
             return;
         }
 
-        echo "\n🎉 Express-PHP Cycle ORM Extension installed successfully!\n\n";
+        echo "\n🎉 HelixPHP Cycle ORM Extension installed successfully!\n\n";
 
         $shouldInstall = self::askYesNo("Would you like to run the setup wizard? (y/N)");
 

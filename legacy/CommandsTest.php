@@ -96,7 +96,7 @@ class CommandsTest extends TestCase
                 return $this->schema;
             }
         };
-        // Application Express-PHP real
+        // Application HelixPHP real
         $app = new Application();
         $container = $app->getContainer();
         $container->bind('cycle.orm', fn () => $orm);

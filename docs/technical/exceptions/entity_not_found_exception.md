@@ -15,7 +15,7 @@ Utilizada principalmente em repositórios e serviços de domínio, facilita o re
 
 ## Exemplo de Uso
 ```php
-use CAFernandes\HelixPHP\CycleORM\Exceptions\EntityNotFoundException;
+use Helix\CycleORM\Exceptions\EntityNotFoundException;
 
 throw new EntityNotFoundException(User::class, 1);
 ```

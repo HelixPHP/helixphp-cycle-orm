@@ -11,10 +11,10 @@ composer require helixphp/core-cycle-orm-extension
 chdir(dirname(__DIR__)); // IMPORTANTE!
 require 'vendor/autoload.php';
 
-use CAFernandes\HelixPHP\CycleORM\CycleServiceProvider;
-use CAFernandes\HelixPHP\CycleORM\Middleware\CycleMiddleware;
+use Helix\CycleORM\CycleServiceProvider;
+use Helix\CycleORM\Middleware\CycleMiddleware;
 
-$app = new Express\Core\Application();
+$app = new Helix\Core\Application();
 
 // Configurar banco
 $_ENV['DB_CONNECTION'] = 'sqlite';
@@ -171,7 +171,7 @@ $_ENV['CYCLE_LOG_QUERIES'] = true;
 $_ENV['CYCLE_PROFILE_QUERIES'] = true;
 
 // Coletar métricas
-use CAFernandes\HelixPHP\CycleORM\Monitoring\MetricsCollector;
+use Helix\CycleORM\Monitoring\MetricsCollector;
 
 $metrics = MetricsCollector::getMetrics();
 // ['queries' => 10, 'time' => 0.125, 'cache_hits' => 5]
@@ -225,9 +225,9 @@ $app->use(new CycleMiddleware($app)); // ✓
 chdir(dirname(__DIR__));
 require 'vendor/autoload.php';
 
-use CAFernandes\HelixPHP\CycleORM\CycleServiceProvider;
-use CAFernandes\HelixPHP\CycleORM\Middleware\CycleMiddleware;
-use Express\Core\Application;
+use Helix\CycleORM\CycleServiceProvider;
+use Helix\CycleORM\Middleware\CycleMiddleware;
+use Helix\Core\Application;
 
 $app = new Application();
 

@@ -15,7 +15,7 @@ Utilizada como superclasse para todas as exceptions do pacote, facilita o tratam
 
 ## Exemplo de Uso
 ```php
-use CAFernandes\HelixPHP\CycleORM\Exceptions\CycleORMException;
+use Helix\CycleORM\Exceptions\CycleORMException;
 
 throw new CycleORMException('Erro ao conectar', 0, null, ['component' => 'database']);
 ```

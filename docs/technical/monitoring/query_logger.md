@@ -15,7 +15,7 @@ O logger captura a query SQL, parâmetros utilizados e o tempo de execução, re
 
 ## Exemplo de Uso
 ```php
-use CAFernandes\HelixPHP\CycleORM\Monitoring\QueryLogger;
+use Helix\CycleORM\Monitoring\QueryLogger;
 
 $logger = new QueryLogger();
 $logger->log('SELECT * FROM users WHERE id = ?', [1], 2.5);

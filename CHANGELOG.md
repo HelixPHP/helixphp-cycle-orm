@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.0] - 2025-07-06
+
+### Changed
+- Migrated from Express PHP to HelixPHP framework
+- Updated all namespaces from `Express\` to `Helix\`
+- Renamed package from `cafernandes/express-php-cycle-orm` to `helixphp/cycle-orm`
+- Updated documentation structure and fixed typos
+- Improved PSR-12 compliance and code quality
+
+### Fixed
+- Fixed directory name typo: `techinical` → `technical`
+- Fixed all namespace references in documentation
+- Updated version references to v1.0.0
+
+
 All notable changes to HelixPHP Cycle ORM will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),

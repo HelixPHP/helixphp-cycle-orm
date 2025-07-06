@@ -66,11 +66,11 @@ Crie o arquivo `public/index.php`:
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use HelixPHP\Express;
-use CAFernandes\HelixPHP\CycleORM\CycleServiceProvider;
+use Helix\Core\Application;
+use Helix\CycleORM\CycleServiceProvider;
 
-// Criar aplicação Express
-$app = new Express();
+// Criar aplicação HelixPHP
+$app = new Application();
 
 // Configurar variáveis de ambiente
 $_ENV['DB_CONNECTION'] = 'sqlite';
@@ -1216,7 +1216,7 @@ return $container;
 ### 1. Middleware de Transação
 
 ```php
-use CAFernandes\HelixPHP\CycleORM\Middleware\TransactionMiddleware;
+use Helix\CycleORM\Middleware\TransactionMiddleware;
 
 // Aplicar em todas as rotas
 $app->use(new TransactionMiddleware($app));
@@ -1254,7 +1254,7 @@ $_ENV['CYCLE_LOG_QUERIES'] = true;
 $_ENV['CYCLE_PROFILE_QUERIES'] = true;
 
 // Coletar métricas
-use CAFernandes\HelixPHP\CycleORM\Monitoring\MetricsCollector;
+use Helix\CycleORM\Monitoring\MetricsCollector;
 
 $app->get('/metrics', function ($req, $res) {
     $metrics = MetricsCollector::getMetrics();
@@ -1265,7 +1265,7 @@ $app->get('/metrics', function ($req, $res) {
 ### 4. Health Check
 
 ```php
-use CAFernandes\HelixPHP\CycleORM\Health\HealthCheckMiddleware;
+use Helix\CycleORM\Health\HealthCheckMiddleware;
 
 $app->get('/health', function ($req, $res) {
     return $res->json(['status' => 'ok']);
