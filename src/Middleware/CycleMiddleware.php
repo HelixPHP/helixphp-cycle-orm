@@ -69,5 +69,4 @@ class CycleMiddleware
         // Passa o CycleRequest wrapper para o próximo handler
         $next($cycleRequest, $res);
     }
-
 }
