@@ -353,8 +353,8 @@ class CycleServiceProvider extends ServiceProvider
             'cycle.repository',
             function () use ($self) {
                 $orm = $self->app->getContainer()->get('cycle.orm');
-                if (!$orm instanceof ORM) {
-                    throw new \RuntimeException('cycle.orm não é ORM');
+                if (!$orm instanceof ORMInterface) {
+                    throw new \RuntimeException('cycle.orm não é ORMInterface');
                 }
                 return new RepositoryFactory($orm);
             }
