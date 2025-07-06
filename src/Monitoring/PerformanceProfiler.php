@@ -70,7 +70,7 @@ class PerformanceProfiler
 
         $elapsed = (microtime(true) - $this->timings[$name]) * 1000;
         $this->timings[$name] = $elapsed;
-        
+
         return $elapsed;
     }
 

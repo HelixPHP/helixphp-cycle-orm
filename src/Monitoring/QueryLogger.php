@@ -76,7 +76,7 @@ class QueryLogger
         if (strlen($query) > 255) {
             return substr($query, 0, 252) . '...';
         }
-        
+
         return $query;
     }
 }

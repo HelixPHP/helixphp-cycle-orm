@@ -12,6 +12,7 @@ use Cycle\Database\DatabaseManager;
 use Cycle\ORM\EntityManager;
 use Cycle\ORM\Factory;
 use Cycle\ORM\ORM;
+use Cycle\ORM\Schema;
 use Cycle\Schema\Compiler;
 use Cycle\Schema\Generator;
 use Cycle\Schema\Registry;
@@ -142,28 +143,21 @@ class CycleServiceProvider extends ServiceProvider
             'cycle.database',
             function () use ($self) {
                 try {
-                    // Usar configuração simples
+                    // Use proper driver config
                     $connectionConfig = $self->getConnectionConfig();
 
-                    // Garantir porta como string
-                    if (isset($connectionConfig['port']) && is_int($connectionConfig['port'])) {
-                        $connectionConfig['port'] = (string) $connectionConfig['port'];
-                    }
-                    // Garantir options como array indexado de string
-                    if (isset($connectionConfig['options']) && is_array($connectionConfig['options'])) {
-                        $connectionConfig['options'] = array_values($connectionConfig['options']);
-                    }
-
                     $manager = new DatabaseManager(
-                        new DatabaseConfig([
-                            'default' => 'default',
-                            'databases' => [
-                                'default' => ['connection' => 'default'],
-                            ],
-                            'connections' => [
-                                'default' => $connectionConfig
+                        new DatabaseConfig(
+                            [
+                                'default' => 'default',
+                                'databases' => [
+                                    'default' => ['connection' => 'default'],
+                                ],
+                                'connections' => [
+                                    'default' => $connectionConfig
+                                ]
                             ]
-                        ])
+                        )
                     );
 
                     // Skip connection validation for now to get basic functionality working
@@ -171,10 +165,6 @@ class CycleServiceProvider extends ServiceProvider
 
                     return $manager;
                 } catch (\Exception $e) {
-                    $self->logError("Failed to register database manager: " . $e->getMessage(), [
-                        'exception' => get_class($e),
-                        'trace' => $e->getTraceAsString()
-                    ]);
                     throw new CycleORMException(
                         "Critical database service registration failed: " . $e->getMessage(),
                         0,
@@ -199,7 +189,10 @@ class CycleServiceProvider extends ServiceProvider
                             ClassesInterface::class,
                             function () use ($config) {
                                 $finder = new Finder();
-                                $dirs = isset($config['directories']) && (is_array($config['directories']) || is_string($config['directories'])) ? $config['directories'] : [];
+                                $dirs = isset($config['directories'])
+                                    && (is_array($config['directories']) || is_string($config['directories']))
+                                    ? $config['directories']
+                                    : [];
                                 $finder->files()->in($dirs);
                                 return new ClassLocator($finder);
                             }
@@ -227,8 +220,12 @@ class CycleServiceProvider extends ServiceProvider
                     $compiler = new Compiler();
                     return $compiler->compile($registry, $generators);
                 } catch (\Exception $e) {
-                    $self->logError('Failed to compile Cycle schema: ' . $e->getMessage());
-                    throw $e;
+                    throw new CycleORMException(
+                        "Critical schema compilation failed: " . $e->getMessage(),
+                        0,
+                        $e,
+                        ['component' => 'schema']
+                    );
                 }
             }
         );
@@ -306,20 +303,18 @@ class CycleServiceProvider extends ServiceProvider
                         throw new \RuntimeException('cycle.database não é DatabaseProviderInterface');
                     }
                     $factory = new Factory($dbal);
-                    $schema = $self->app->getContainer()->get('cycle.schema');
-                    if (!$schema instanceof \Cycle\ORM\SchemaInterface) {
-                        throw new \RuntimeException('cycle.schema não é SchemaInterface');
+                    $compiledSchema = $self->app->getContainer()->get('cycle.schema');
+                    // The schema is already compiled, so it's an array
+                    if (!is_array($compiledSchema)) {
+                        throw new \RuntimeException('cycle.schema não é array');
                     }
+                    $schema = new Schema($compiledSchema);
                     $orm = new ORM(
                         $factory,
                         $schema
                     );
                     return $orm;
                 } catch (\Exception $e) {
-                    $self->logError("Failed to register ORM: " . $e->getMessage(), [
-                        'exception' => get_class($e),
-                        'trace' => $e->getTraceAsString()
-                    ]);
                     throw new CycleORMException(
                         "Critical ORM service registration failed: " . $e->getMessage(),
                         0,
@@ -344,10 +339,6 @@ class CycleServiceProvider extends ServiceProvider
                     }
                     return new EntityManager($orm);
                 } catch (\Exception $e) {
-                    $self->logError("Failed to register EntityManager: " . $e->getMessage(), [
-                        'exception' => get_class($e),
-                        'trace' => $e->getTraceAsString()
-                    ]);
                     throw new CycleORMException(
                         "Critical EntityManager service registration failed: " . $e->getMessage(),
                         0,
@@ -380,7 +371,7 @@ class CycleServiceProvider extends ServiceProvider
             'cycle.migrator',
             function () {
                 // Retorna um migrator básico ou mock para desenvolvimento
-                return new class() {
+                return new class () {
                     /**
                      * @return array{pending: array<int, mixed>, executed: array<int, mixed>}
                      */
@@ -459,44 +450,43 @@ class CycleServiceProvider extends ServiceProvider
     }
 
     /**
-     * @return array<string, array<string, mixed>|int|string>
+     * @return SQLiteDriverConfig|MySQLDriverConfig
      */
-    private function getConnectionConfig(): array
+    private function getConnectionConfig()
     {
         $dbConnection = $this->getEnvString('DB_CONNECTION', 'sqlite');
 
         if ($dbConnection === 'sqlite') {
             $dbPath = $this->getEnvString('DB_DATABASE', __DIR__ . '/../../../database/app.sqlite');
-            return [
-                'driver' => 'sqlite',
-                'connection' => 'sqlite:' . $dbPath,
-                'username' => '',
-                'password' => '',
-                'options' => [
-                    'ERRMODE_EXCEPTION' => 'ERRMODE_EXCEPTION',
-                    'FETCH_ASSOC' => 'FETCH_ASSOC'
-                ],
-            ];
+            $connection = new \Cycle\Database\Config\SQLite\FileConnectionConfig(
+                database: $dbPath,
+                options: [
+                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+                    \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+                ]
+            );
+            return new SQLiteDriverConfig(
+                connection: $connection,
+                queryCache: true
+            );
         } else {
             $host = $this->getEnvString('DB_HOST', 'localhost');
             $port = $this->getEnvInt('DB_PORT', 3306);
             $db = $this->getEnvString('DB_DATABASE', 'express');
             $user = $this->getEnvString('DB_USERNAME', 'root');
             $pass = $this->getEnvString('DB_PASSWORD', 'defaultpass');
-            return [
-                'driver' => 'mysql',
-                'host' => $host,
-                'port' => $port,
-                'database' => $db,
-                'username' => $user,
-                'password' => $pass,
-                'charset' => 'utf8mb4',
-                'collation' => 'utf8mb4_unicode_ci',
-                'options' => [
-                    'ERRMODE_EXCEPTION' => 'ERRMODE_EXCEPTION',
-                    'FETCH_ASSOC' => 'FETCH_ASSOC'
-                ],
-            ];
+            $connection = new \Cycle\Database\Config\MySQL\TcpConnectionConfig(
+                host: $host,
+                port: $port,
+                database: $db,
+                user: $user,
+                password: $pass,
+                options: []
+            );
+            return new MySQLDriverConfig(
+                connection: $connection,
+                queryCache: true
+            );
         }
     }
 
@@ -513,8 +503,8 @@ class CycleServiceProvider extends ServiceProvider
             ],
             'connections' => [],
             'directories' => [
-                __DIR__ . '/../../../app/Entities',
-                __DIR__ . '/../../../src/Entities'
+                getcwd() . '/app/Entities',
+                getcwd() . '/src/Entities'
             ]
         ];
 

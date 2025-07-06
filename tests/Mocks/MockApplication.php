@@ -12,20 +12,23 @@ class MockApplication extends Application
     {
         $this->startTime = new \DateTime();
         $this->mockContainer = new MockContainer();
-        
+
         // Bind basic services that the parent would bind
-        $this->mockContainer->bind('config', function () {
-            return new class() {
-                public function get(string $key, mixed $default = null): mixed
-                {
-                    return match ($key) {
-                        'app.debug' => true,
-                        'app.env' => 'testing',
-                        default => $default
-                    };
-                }
-            };
-        });
+        $this->mockContainer->bind(
+            'config',
+            function () {
+                return new class () {
+                    public function get(string $key, mixed $default = null): mixed
+                    {
+                        return match ($key) {
+                            'app.debug' => true,
+                            'app.env' => 'testing',
+                            default => $default
+                        };
+                    }
+                };
+            }
+        );
     }
 
     public function getContainer(): MockContainer

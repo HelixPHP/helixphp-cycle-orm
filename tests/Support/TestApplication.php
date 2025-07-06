@@ -36,17 +36,20 @@ class TestApplication
 
     private function setupDefaultBindings(): void
     {
-        $this->container->bind('config', function () {
-            return new class() {
-                public function get(string $key, mixed $default = null): mixed
-                {
-                    return match ($key) {
-                        'app.debug' => true,
-                        'app.env' => 'testing',
-                        default => $default
-                    };
-                }
-            };
-        });
+        $this->container->bind(
+            'config',
+            function () {
+                return new class () {
+                    public function get(string $key, mixed $default = null): mixed
+                    {
+                        return match ($key) {
+                            'app.debug' => true,
+                            'app.env' => 'testing',
+                            default => $default
+                        };
+                    }
+                };
+            }
+        );
     }
 }

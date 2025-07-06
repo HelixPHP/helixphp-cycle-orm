@@ -2,4 +2,6 @@
 
 namespace CAFernandes\ExpressPHP\CycleORM\Exceptions;
 
-class CycleORMException extends \Exception {}
+class CycleORMException extends \Exception
+{
+}

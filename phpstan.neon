@@ -7,24 +7,7 @@ parameters:
     excludePaths:
         - tests/HealthCheckTest.php
         - tests/Integration/FullIntegrationTest.php
-    ignoreErrors:
-        - '#Class Cycle\\Database\\DatabaseManager does not have a constructor#'
-        - '#Class Cycle\\ORM\\ORM does not have a constructor#'
-        - '#Class Cycle\\ORM\\EntityManager does not have a constructor#'
-        - '#Call to an undefined method Cycle\\ORM\\ORM::getRepository#'
-        # Integration test specific ignores (complex mocks)
-        - path: tests/Integration/FullIntegrationTest.php
-          message: '#has no type specified#'
-        - path: tests/Integration/FullIntegrationTest.php
-          message: '#has no value type specified in iterable type#'
-        - path: tests/Integration/FullIntegrationTest.php
-          message: '#contains abstract method#'
-        - path: tests/Integration/FullIntegrationTest.php
-          message: '#Cannot call method.*on.*false#'
-        - path: tests/Integration/FullIntegrationTest.php
-          message: '#Else branch is unreachable#'
-        - path: tests/Integration/FullIntegrationTest.php
-          message: '#does not specify its types#'
+    ignoreErrors: []
 
     # Express-PHP specific ignores
     universalObjectCratesClasses:

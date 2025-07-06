@@ -26,14 +26,14 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Setup environment variables for testing
         $_ENV['APP_ENV'] = 'testing';
         $_ENV['DB_CONNECTION'] = 'sqlite';
         $_ENV['DB_DATABASE'] = ':memory:';
-        
+
         $this->app = $this->createApplication();
-        
+
         $this->setupDatabase();
         $this->setupORM();
     }
@@ -52,18 +52,20 @@ abstract class TestCase extends BaseTestCase
     private function setupDatabase(): void
     {
         // Create in-memory SQLite database for testing
-        $config = new DatabaseConfig([
-            'default' => 'default',
-            'databases' => [
-                'default' => ['connection' => 'default'],
-            ],
-            'connections' => [
-                'default' => new SQLiteDriverConfig(
-                    connection: new FileConnectionConfig(database: ':memory:'),
-                    queryCache: false
-                )
+        $config = new DatabaseConfig(
+            [
+                'default' => 'default',
+                'databases' => [
+                    'default' => ['connection' => 'default'],
+                ],
+                'connections' => [
+                    'default' => new SQLiteDriverConfig(
+                        connection: new FileConnectionConfig(database: ':memory:'),
+                        queryCache: false
+                    )
+                ]
             ]
-        ]);
+        );
 
         $this->dbal = new DatabaseManager($config);
         $this->app->getContainer()->bind('cycle.database', fn() => $this->dbal);
@@ -73,55 +75,57 @@ abstract class TestCase extends BaseTestCase
     {
         // Create a minimal ORM setup without the service provider
         $factory = new Factory($this->dbal);
-        
+
         // Create basic schema for test entities
-        $schema = new Schema([
-            User::class => [
-                Schema::ROLE => 'user',
-                Schema::MAPPER => \Cycle\ORM\Mapper\Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'users',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => [
-                    'id' => 'id',
-                    'name' => 'name',
-                    'email' => 'email',
-                    'createdAt' => 'createdAt'
+        $schema = new Schema(
+            [
+                User::class => [
+                    Schema::ROLE => 'user',
+                    Schema::MAPPER => \Cycle\ORM\Mapper\Mapper::class,
+                    Schema::DATABASE => 'default',
+                    Schema::TABLE => 'users',
+                    Schema::PRIMARY_KEY => 'id',
+                    Schema::COLUMNS => [
+                        'id' => 'id',
+                        'name' => 'name',
+                        'email' => 'email',
+                        'createdAt' => 'createdAt'
+                    ],
+                    Schema::TYPECAST => [
+                        'id' => 'int',
+                        'createdAt' => 'datetime'
+                    ],
+                    Schema::RELATIONS => []
                 ],
-                Schema::TYPECAST => [
-                    'id' => 'int',
-                    'createdAt' => 'datetime'
-                ],
-                Schema::RELATIONS => []
-            ],
-            Post::class => [
-                Schema::ROLE => 'post',
-                Schema::MAPPER => \Cycle\ORM\Mapper\Mapper::class,
-                Schema::DATABASE => 'default',
-                Schema::TABLE => 'posts',
-                Schema::PRIMARY_KEY => 'id',
-                Schema::COLUMNS => [
-                    'id' => 'id',
-                    'title' => 'title',
-                    'content' => 'content',
-                    'userId' => 'userId',
-                    'createdAt' => 'createdAt'
-                ],
-                Schema::TYPECAST => [
-                    'id' => 'int',
-                    'userId' => 'int',
-                    'createdAt' => 'datetime'
-                ],
-                Schema::RELATIONS => []
+                Post::class => [
+                    Schema::ROLE => 'post',
+                    Schema::MAPPER => \Cycle\ORM\Mapper\Mapper::class,
+                    Schema::DATABASE => 'default',
+                    Schema::TABLE => 'posts',
+                    Schema::PRIMARY_KEY => 'id',
+                    Schema::COLUMNS => [
+                        'id' => 'id',
+                        'title' => 'title',
+                        'content' => 'content',
+                        'userId' => 'userId',
+                        'createdAt' => 'createdAt'
+                    ],
+                    Schema::TYPECAST => [
+                        'id' => 'int',
+                        'userId' => 'int',
+                        'createdAt' => 'datetime'
+                    ],
+                    Schema::RELATIONS => []
+                ]
             ]
-        ]);
-        
+        );
+
         $this->orm = new ORM($factory, $schema);
         $this->em = new EntityManager($this->orm);
-        
+
         $this->app->getContainer()->bind('cycle.orm', fn() => $this->orm);
         $this->app->getContainer()->bind('cycle.em', fn() => $this->em);
-        
+
         // Create tables for test entities
         $this->createTables();
     }
@@ -129,7 +133,7 @@ abstract class TestCase extends BaseTestCase
     private function createTables(): void
     {
         $database = $this->dbal->database();
-        
+
         // Create users table
         $schema = $database->table('users')->getSchema();
         $schema->primary('id');
@@ -164,11 +168,13 @@ abstract class TestCase extends BaseTestCase
     protected function createUser(string $name = 'Test User', string $email = 'test@example.com'): int
     {
         $database = $this->dbal->database();
-        return $database->table('users')->insertGetId([
-            'name' => $name,
-            'email' => $email,
-            'createdAt' => new \DateTimeImmutable()
-        ]);
+        return $database->table('users')->insertGetId(
+            [
+                'name' => $name,
+                'email' => $email,
+                'createdAt' => new \DateTimeImmutable()
+            ]
+        );
     }
 
     /**
@@ -177,11 +183,13 @@ abstract class TestCase extends BaseTestCase
     protected function createPost(string $title = 'Test Post', string $content = 'Test content', int $userId = 1): int
     {
         $database = $this->dbal->database();
-        return $database->table('posts')->insertGetId([
-            'title' => $title,
-            'content' => $content,
-            'userId' => $userId,
-            'createdAt' => new \DateTimeImmutable()
-        ]);
+        return $database->table('posts')->insertGetId(
+            [
+                'title' => $title,
+                'content' => $content,
+                'userId' => $userId,
+                'createdAt' => new \DateTimeImmutable()
+            ]
+        );
     }
 }

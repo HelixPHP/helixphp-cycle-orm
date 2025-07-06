@@ -21,9 +21,9 @@ class MonitoringUnitTest extends TestCase
         MetricsCollector::increment('entities_loaded', 5);
         MetricsCollector::increment('cache_hits', 3);
         MetricsCollector::increment('cache_hits', 2);
-        
+
         $metrics = MetricsCollector::getMetrics();
-        
+
         $this->assertEquals(5, $metrics['entities_loaded']);
         $this->assertEquals(5, $metrics['cache_hits']); // 3 + 2
     }
@@ -32,9 +32,9 @@ class MonitoringUnitTest extends TestCase
     {
         MetricsCollector::addTime('total_query_time', 150.5);
         MetricsCollector::addTime('total_query_time', 75.3);
-        
+
         $metrics = MetricsCollector::getMetrics();
-        
+
         $this->assertEquals(225.8, $metrics['total_query_time']);
     }
 
@@ -42,20 +42,20 @@ class MonitoringUnitTest extends TestCase
     {
         // Record normal query
         MetricsCollector::recordQueryTime('SELECT * FROM users', 50.0);
-        
+
         $metrics = MetricsCollector::getMetrics();
         $this->assertEquals(1, $metrics['queries_executed']);
         $this->assertEquals(50.0, $metrics['total_query_time']);
         $this->assertEquals(0, $metrics['slow_queries']);
-        
+
         // Record slow query (> 100ms)
         MetricsCollector::recordQueryTime('SELECT * FROM posts WHERE content LIKE "%test%"', 150.0);
-        
+
         $metrics = MetricsCollector::getMetrics();
         $this->assertEquals(2, $metrics['queries_executed']);
         $this->assertEquals(200.0, $metrics['total_query_time']);
         $this->assertEquals(1, $metrics['slow_queries']);
-        
+
         // Check slow queries
         $slowQueries = MetricsCollector::getSlowQueries();
         $this->assertCount(1, $slowQueries);
@@ -67,20 +67,20 @@ class MonitoringUnitTest extends TestCase
     public function testPerformanceProfiler(): void
     {
         $profiler = new PerformanceProfiler();
-        
+
         // Start profiling
         $profiler->startTiming('test_operation');
-        
+
         // Simulate some work
         usleep(10000); // 10ms
-        
+
         // Stop profiling
         $elapsed = $profiler->stop('test_operation');
-        
+
         $this->assertIsFloat($elapsed);
         $this->assertGreaterThan(5.0, $elapsed); // Should be at least 5ms
         $this->assertLessThan(100.0, $elapsed); // Allow more time in case of system load
-        
+
         // Get profile data
         $profiles = $profiler->getProfiles();
         $this->assertArrayHasKey('test_operation', $profiles);
@@ -90,16 +90,16 @@ class MonitoringUnitTest extends TestCase
     public function testQueryLogger(): void
     {
         $logger = new QueryLogger();
-        
+
         // Log some queries
         $logger->log('SELECT * FROM users', 25.5);
         $logger->log('INSERT INTO posts VALUES (?)', 15.2);
         $logger->log('UPDATE users SET name = ?', 8.7);
-        
+
         $logs = $logger->getLogs();
-        
+
         $this->assertCount(3, $logs);
-        
+
         // Check first log entry
         $firstLog = $logs[0];
         $this->assertEquals('SELECT * FROM users', $firstLog['query']);
@@ -110,14 +110,14 @@ class MonitoringUnitTest extends TestCase
     public function testQueryLoggerTruncatesLongQueries(): void
     {
         $logger = new QueryLogger();
-        
+
         // Create a very long query
         $longQuery = str_repeat('SELECT * FROM table_with_very_long_name ', 20);
         $logger->log($longQuery, 10.0);
-        
+
         $logs = $logger->getLogs();
         $loggedQuery = $logs[0]['query'];
-        
+
         $this->assertLessThanOrEqual(255, strlen($loggedQuery));
         $this->assertStringEndsWith('...', $loggedQuery);
     }
@@ -128,9 +128,9 @@ class MonitoringUnitTest extends TestCase
         for ($i = 1; $i <= 15; $i++) {
             MetricsCollector::recordQueryTime("SELECT $i", 200.0);
         }
-        
+
         $slowQueries = MetricsCollector::getSlowQueries();
-        
+
         // Should only keep the last 10
         $this->assertCount(10, $slowQueries);
         $this->assertStringContainsString('SELECT 15', $slowQueries[9]['query']);
@@ -142,18 +142,18 @@ class MonitoringUnitTest extends TestCase
         // Add some metrics
         MetricsCollector::increment('entities_loaded', 10);
         MetricsCollector::recordQueryTime('SELECT 1', 150.0);
-        
+
         $metrics = MetricsCollector::getMetrics();
         $this->assertEquals(10, $metrics['entities_loaded']);
         $this->assertEquals(1, $metrics['slow_queries']);
-        
+
         // Reset
         MetricsCollector::reset();
-        
+
         $metrics = MetricsCollector::getMetrics();
         $this->assertEquals(0, $metrics['entities_loaded']);
         $this->assertEquals(0, $metrics['slow_queries']);
-        
+
         $slowQueries = MetricsCollector::getSlowQueries();
         $this->assertEmpty($slowQueries);
     }
@@ -161,17 +161,17 @@ class MonitoringUnitTest extends TestCase
     public function testQueryLoggerLimit(): void
     {
         $logger = new QueryLogger();
-        
+
         // Log more than the limit (100 queries)
         for ($i = 1; $i <= 150; $i++) {
             $logger->log("SELECT $i", 10.0);
         }
-        
+
         $logs = $logger->getLogs();
-        
+
         // Should only keep the last 100
         $this->assertCount(100, $logs);
-        
+
         // First log should be query 51, last should be query 150
         $this->assertStringContainsString('SELECT 51', $logs[0]['query']);
         $this->assertStringContainsString('SELECT 150', $logs[99]['query']);

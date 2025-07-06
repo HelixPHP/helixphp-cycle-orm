@@ -13,7 +13,7 @@ if (!function_exists('app_path')) {
             dirname(__DIR__, 4) . '/app', // a partir do vendor
             dirname(__DIR__, 4) . '/src', // a partir do vendor usando src
         ];
-        
+
         $basePath = null;
         foreach ($possiblePaths as $possiblePath) {
             if (is_dir($possiblePath)) {
@@ -21,7 +21,7 @@ if (!function_exists('app_path')) {
                 break;
             }
         }
-        
+
         // Se não encontrar, criar baseado no diretório atual
         if (!$basePath) {
             $basePath = getcwd() . '/app';

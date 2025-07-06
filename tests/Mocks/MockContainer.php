@@ -28,7 +28,7 @@ class MockContainer extends Container
 
         if (isset($this->bindings[$id])) {
             $concrete = $this->bindings[$id];
-            
+
             if (is_callable($concrete)) {
                 $instance = $concrete();
             } elseif (is_string($concrete)) {
@@ -36,7 +36,7 @@ class MockContainer extends Container
             } else {
                 $instance = $concrete;
             }
-            
+
             $this->instances[$id] = $instance;
             return $instance;
         }
