@@ -200,23 +200,6 @@ class CycleRequestTest extends TestCase
         $this->assertFalse($pagination['has_more']);
     }
 
-    public function testEntityValidation(): void
-    {
-        $rules = [
-            'name' => 'required|string',
-            'email' => 'required|email'
-        ];
-
-        $result = $this->cycleRequest->validateEntity($rules);
-
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('valid', $result);
-        $this->assertArrayHasKey('errors', $result);
-
-        // Basic implementation just returns valid for now
-        $this->assertTrue($result['valid']);
-        $this->assertEmpty($result['errors']);
-    }
 
     public function testGetOriginalRequest(): void
     {

@@ -141,18 +141,6 @@ class CycleRequest
         ];
     }
 
-    /**
-     * Validação de entidade.
-     *
-     * @param array<string, mixed> $rules
-     *
-     * @return array<string, mixed>
-     */
-    public function validateEntity(array $rules): array
-    {
-        // Implementação da validação
-        return ['valid' => true, 'errors' => []];
-    }
 
     public function getOriginalRequest(): Request
     {
