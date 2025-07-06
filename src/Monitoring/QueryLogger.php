@@ -47,7 +47,7 @@ class QueryLogger
     /**
      * Limpar logs.
      */
-    public function clear(): void
+    public function clearLogs(): void
     {
         $this->logs = [];
     }
@@ -61,11 +61,20 @@ class QueryLogger
     }
 
     /**
-     * Resetar logs (alias para clear, para compatibilidade).
+     * Resetar logs (alias para clearLogs, para compatibilidade).
      */
     public function reset(): void
     {
-        $this->clear();
+        $this->clearLogs();
+    }
+
+    /**
+     * Limpar logs (alias para compatibilidade com versões anteriores).
+     * @deprecated Use clearLogs() instead
+     */
+    public function clear(): void
+    {
+        $this->clearLogs();
     }
 
     /**
