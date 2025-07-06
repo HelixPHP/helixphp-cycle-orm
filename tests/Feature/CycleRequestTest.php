@@ -41,15 +41,19 @@ class CycleRequestTest extends TestCase
 
     public function testPropertyForwarding(): void
     {
-        // Set property on original request mock
-        $this->originalRequest->testProperty = 'test-value';
+        // Create a real Request instance for property forwarding test
+        $realRequest = new Request('GET', '/', '/');
+        $cycleRequest = new CycleRequest($realRequest);
+
+        // Set property on original request
+        $realRequest->setAttribute('testProperty', 'test-value');
 
         // Should be accessible through CycleRequest
-        $this->assertEquals('test-value', $this->cycleRequest->testProperty);
+        $this->assertEquals('test-value', $cycleRequest->getAttribute('testProperty'));
 
         // Setting should also forward
-        $this->cycleRequest->anotherProperty = 'another-value';
-        $this->assertEquals('another-value', $this->originalRequest->anotherProperty);
+        $cycleRequest->setAttribute('anotherProperty', 'another-value');
+        $this->assertEquals('another-value', $realRequest->getAttribute('anotherProperty'));
     }
 
     public function testRepositoryAccess(): void

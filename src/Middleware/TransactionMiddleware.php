@@ -19,9 +19,10 @@ class TransactionMiddleware
     /**
      * Compatível com padrão callable do Express-PHP.
      *
-     * @param callable($req, Response):void $next função next do Express-PHP, recebe Request e Response
+     * @param Request|CycleRequest $req
+     * @param callable(Request, Response):void $next função next do Express-PHP
      */
-    public function __invoke($req, Response $res, callable $next): void
+    public function __invoke(Request|CycleRequest $req, Response $res, callable $next): void
     {
         $this->handle($req, $res, $next);
     }

@@ -7,7 +7,7 @@ use Cycle\Annotated\Annotation\Entity;
 use Cycle\Annotated\Annotation\Table;
 
 #[Entity]
-#[Table(name: 'users')]
+#[Table('users')]
 class User
 {
     #[Column(type: 'primary')]

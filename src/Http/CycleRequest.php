@@ -158,4 +158,21 @@ class CycleRequest
     {
         return $this->originalRequest;
     }
+
+    /**
+     * Encaminha getAttribute para o Request original.
+     */
+    public function getAttribute(string $name, mixed $default = null): mixed
+    {
+        return $this->originalRequest->getAttribute($name, $default);
+    }
+
+    /**
+     * Encaminha setAttribute para o Request original.
+     */
+    public function setAttribute(string $name, mixed $value): self
+    {
+        $this->originalRequest->setAttribute($name, $value);
+        return $this;
+    }
 }

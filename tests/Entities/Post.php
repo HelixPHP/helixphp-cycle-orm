@@ -8,7 +8,7 @@ use Cycle\Annotated\Annotation\Relation\BelongsTo;
 use Cycle\Annotated\Annotation\Table;
 
 #[Entity]
-#[Table(name: 'posts')]
+#[Table('posts')]
 class Post
 {
     #[Column(type: 'primary')]

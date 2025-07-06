@@ -168,8 +168,7 @@ class CycleServiceProvider extends ServiceProvider
                     throw new CycleORMException(
                         "Critical database service registration failed: " . $e->getMessage(),
                         0,
-                        $e,
-                        ['component' => 'database_manager']
+                        $e
                     );
                 }
             }
@@ -223,8 +222,7 @@ class CycleServiceProvider extends ServiceProvider
                     throw new CycleORMException(
                         "Critical schema compilation failed: " . $e->getMessage(),
                         0,
-                        $e,
-                        ['component' => 'schema']
+                        $e
                     );
                 }
             }
@@ -318,8 +316,7 @@ class CycleServiceProvider extends ServiceProvider
                     throw new CycleORMException(
                         "Critical ORM service registration failed: " . $e->getMessage(),
                         0,
-                        $e,
-                        ['component' => 'orm']
+                        $e
                     );
                 }
             }
@@ -342,8 +339,7 @@ class CycleServiceProvider extends ServiceProvider
                     throw new CycleORMException(
                         "Critical EntityManager service registration failed: " . $e->getMessage(),
                         0,
-                        $e,
-                        ['component' => 'entity_manager']
+                        $e
                     );
                 }
             }
@@ -638,10 +634,7 @@ class CycleServiceProvider extends ServiceProvider
 
         if (!empty($missing)) {
             throw new CycleORMException(
-                "Required environment variables are missing: " . implode(', ', $missing),
-                0,
-                null,
-                ['missing_variables' => $missing]
+                "Required environment variables are missing: " . implode(', ', $missing)
             );
         }
     }
