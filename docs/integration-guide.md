@@ -1,517 +1,574 @@
-# Guia de Integração Completo
+# Guia de Integração Express PHP + Cycle ORM
 
-Este guia fornece instruções detalhadas para integrar o Express PHP Cycle ORM Extension em seu projeto.
+Este guia detalha como integrar corretamente a Express PHP Cycle ORM Extension em seu projeto.
 
-## Índice
+## 📋 Pré-requisitos
 
-1. [Requisitos](#requisitos)
-2. [Instalação](#instalação)
-3. [Configuração Inicial](#configuração-inicial)
-4. [Estrutura de Diretórios](#estrutura-de-diretórios)
-5. [Uso do CycleMiddleware](#uso-do-cyclemiddleware)
-6. [Padrões de Implementação](#padrões-de-implementação)
-7. [Resolução de Problemas](#resolução-de-problemas)
-8. [Exemplos Práticos](#exemplos-práticos)
-
-## Requisitos
-
-- PHP 8.1 ou superior (PHP 8.3 recomendado para evitar avisos de depreciação)
-- Composer 2.0+
-- Express PHP Framework 2.1+
+- PHP 8.1 ou superior
+- Composer
+- Express PHP 2.1.1+
 - SQLite ou MySQL
 
-## Instalação
+## 🚀 Instalação Rápida
 
 ```bash
-composer require cafernandes/express-php-cycle-orm-extension
+# 1. Criar novo projeto
+mkdir meu-projeto && cd meu-projeto
+
+# 2. Instalar dependências
+composer require cafernandes/express-php cafernandes/express-php-cycle-orm-extension
+
+# 3. Criar estrutura de diretórios
+mkdir -p public src/{Controllers,Entities,Repositories} database app/Entities bin
 ```
 
-## Configuração Inicial
+## 🔧 Configuração Passo a Passo
 
-### 1. Estrutura de Diretórios
-
-Crie a seguinte estrutura em seu projeto:
-
-```
-seu-projeto/
-├── app/
-│   └── Entities/        # Diretório para entidades (obrigatório)
-├── database/
-│   └── database.sqlite  # Arquivo de banco SQLite
-├── public/
-│   └── index.php       # Ponto de entrada
-└── composer.json
-```
-
-### 2. Configuração Básica
+### 1. Arquivo de Entrada (public/index.php)
 
 ```php
 <?php
-// public/index.php
+
+declare(strict_types=1);
+
+use Express\Core\Application;
+use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
+use Dotenv\Dotenv;
+
+require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 // IMPORTANTE: Define o diretório de trabalho
 chdir(dirname(__DIR__));
 
-require_once __DIR__ . '/../vendor/autoload.php';
+// Carrega variáveis de ambiente (opcional)
+try {
+    $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
+    $dotenv->load();
+} catch (Exception $e) {
+    // Define valores padrão
+    $_ENV['APP_ENV'] = 'development';
+    $_ENV['APP_DEBUG'] = 'true';
+    $_ENV['DB_CONNECTION'] = 'sqlite';
+    $_ENV['DB_DATABASE'] = __DIR__ . '/../database/database.sqlite';
+    $_ENV['CYCLE_ENTITY_DIRS'] = 'src/Entities';
+}
 
-use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
-use Express\Core\Application;
-
-// Configuração do ambiente
-$_ENV['DB_CONNECTION'] = 'sqlite';
-$_ENV['DB_DATABASE'] = __DIR__ . '/../database/database.sqlite';
-
-// Criar aplicação
+// Cria a aplicação
 $app = new Application();
 
-// Registrar o Cycle ORM
+// Configura debug (opcional)
+$config = $app->getConfig();
+$config->set('app.debug', true);
+
+// Registra o Cycle ORM
 $app->register(new CycleServiceProvider($app));
+
+// IMPORTANTE: Middleware customizado (solução para o bug do CycleMiddleware)
+$app->use(function ($req, $res, $next) use ($app) {
+    $container = $app->getContainer();
+    
+    if (!$container->has('cycle.orm')) {
+        throw new \RuntimeException('Cycle ORM not properly registered');
+    }
+
+    // Obtém os serviços do Cycle ORM
+    $orm = $container->get('cycle.orm');
+    $em = $container->get('cycle.em');
+    $db = $container->get('cycle.database');
+    $repository = $container->get('cycle.repository');
+
+    // Injeta serviços através de attributes
+    $req->setAttribute('cycle.orm', $orm);
+    $req->setAttribute('cycle.em', $em);
+    $req->setAttribute('cycle.db', $db);
+    $req->setAttribute('cycle.repository', $repository);
+
+    // Helper methods
+    $req->setAttribute('repository', function(string $entityClass) use ($repository) {
+        return $repository->getRepository($entityClass);
+    });
+
+    $req->setAttribute('entity', function(string $entityClass, array $data = []) use ($orm) {
+        return $orm->make($entityClass, $data);
+    });
+
+    $req->setAttribute('entityManager', function() use ($em) {
+        return $em;
+    });
+
+    $next($req, $res);
+});
 
 // Suas rotas aqui...
 
 $app->run();
 ```
 
-### 3. Variáveis de Ambiente
+### 2. Arquivo de Ambiente (.env)
 
-Configure as variáveis de ambiente conforme seu banco de dados:
-
-#### SQLite (Desenvolvimento)
 ```env
+# Application
+APP_NAME="Meu Projeto"
+APP_ENV=development
+APP_DEBUG=true
+
+# Database
 DB_CONNECTION=sqlite
-DB_DATABASE=./database/database.sqlite
+DB_DATABASE=database/database.sqlite
+
+# Para MySQL:
+# DB_CONNECTION=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=meu_banco
+# DB_USERNAME=root
+# DB_PASSWORD=senha
+
+# Cycle ORM
+CYCLE_ENTITY_DIRS=src/Entities
+CYCLE_LOG_QUERIES=true
+CYCLE_PROFILE_QUERIES=true
 ```
 
-#### MySQL (Produção)
-```env
-DB_CONNECTION=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_DATABASE=seu_banco
-DB_USERNAME=usuario
-DB_PASSWORD=senha
+### 3. Configuração do Composer (composer.json)
+
+```json
+{
+    "name": "meu/projeto",
+    "type": "project",
+    "require": {
+        "php": "^8.1",
+        "cafernandes/express-php": "^2.1.1",
+        "cafernandes/express-php-cycle-orm-extension": "^1.0.2",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "scripts": {
+        "serve": "php -S localhost:8000 -t public public/index.php"
+    }
+}
 ```
 
-## Uso do CycleMiddleware
+## 📝 Criando Entidades
 
-O CycleMiddleware transforma automaticamente requisições Express em CycleRequest, fornecendo acesso direto aos serviços ORM.
-
-### Configuração do Middleware
+### Exemplo: Entidade User
 
 ```php
-use CAFernandes\ExpressPHP\CycleORM\Middleware\CycleMiddleware;
+// src/Entities/User.php
+<?php
 
-// Adicionar o middleware globalmente
-$app->use(new CycleMiddleware($app));
+declare(strict_types=1);
 
-// Agora todas as rotas recebem CycleRequest
-$app->get('/users', function ($req, $res) {
-    // $req é agora um CycleRequest com métodos ORM
-    $users = $req->repository(User::class)->findAll();
-    return $res->json($users);
-});
-```
-
-### Métodos Disponíveis no CycleRequest
-
-```php
-// Repositório para entidade
-$userRepo = $req->repository(User::class);
-
-// Criar nova entidade
-$user = $req->entity(User::class, ['name' => 'John']);
-
-// Paginação
-$paginated = $req->paginate(User::class, 20, 1);
-
-// Acesso direto aos serviços (via container)
-$orm = $req->getContainer()->get('cycle.orm');
-$em = $req->getContainer()->get('cycle.em');
-$db = $req->getContainer()->get('cycle.database');
-```
-
-## Padrões de Implementação
-
-### 1. Implementação Básica (MVP/Prototipagem)
-
-```php
-// Acesso direto ao banco de dados
-$app->get('/api/users', function ($req, $res) use ($app) {
-    $db = $app->make('cycle.database');
-    $users = $db->database()
-        ->query('SELECT * FROM users')
-        ->fetchAll();
-    
-    return $res->json(['data' => $users]);
-});
-
-// Inserção simples
-$app->post('/api/users', function ($req, $res) use ($app) {
-    $db = $app->make('cycle.database');
-    $data = $req->body;
-    
-    $db->database()->execute(
-        'INSERT INTO users (name, email) VALUES (?, ?)',
-        [$data->name, $data->email]
-    );
-    
-    return $res->json(['message' => 'User created'], 201);
-});
-```
-
-### 2. Implementação com CycleRequest
-
-```php
-// Com CycleMiddleware ativo
-$app->get('/api/users', function ($req, $res) {
-    // Acesso via container do CycleRequest
-    $db = $req->getContainer()->get('cycle.database');
-    
-    $users = $db->database()
-        ->query('SELECT * FROM users ORDER BY id DESC')
-        ->fetchAll();
-    
-    return $res->json([
-        'status' => true,
-        'data' => $users,
-        'meta' => [
-            'request_type' => get_class($req), // CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest
-            'total' => count($users)
-        ]
-    ]);
-});
-```
-
-### 3. Implementação com Entidades
-
-```php
-// app/Entities/User.php
 namespace App\Entities;
 
 use Cycle\Annotated\Annotation\Column;
 use Cycle\Annotated\Annotation\Entity;
 use Cycle\Annotated\Annotation\Table;
 
-#[Entity]
-#[Table('users')]
+#[Entity(repository: \App\Repositories\UserRepository::class)]
+#[Table(name: 'users')]
 class User
 {
     #[Column(type: 'primary')]
-    public int $id;
+    private ?int $id = null;
 
-    #[Column(type: 'string')]
-    public string $name;
+    #[Column(type: 'string', nullable: false)]
+    private string $name;
 
-    #[Column(type: 'string')]
-    public string $email;
+    #[Column(type: 'string', nullable: false, unique: true)]
+    private string $email;
 
-    #[Column(type: 'datetime', nullable: true)]
-    public ?\DateTimeInterface $createdAt = null;
+    #[Column(type: 'string', nullable: false)]
+    private string $password;
+
+    #[Column(type: 'datetime')]
+    private \DateTimeInterface $createdAt;
+
+    #[Column(type: 'datetime')]
+    private \DateTimeInterface $updatedAt;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
+
+    // Getters
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    // Setters
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+        $this->updatedAt = new \DateTime();
+        return $this;
+    }
+
+    public function setEmail(string $email): self
+    {
+        $this->email = $email;
+        $this->updatedAt = new \DateTime();
+        return $this;
+    }
+
+    public function setPassword(string $password): self
+    {
+        $this->password = password_hash($password, PASSWORD_DEFAULT);
+        $this->updatedAt = new \DateTime();
+        return $this;
+    }
+
+    public function verifyPassword(string $password): bool
+    {
+        return password_verify($password, $this->password);
+    }
+
+    // Conversão
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'email' => $this->email,
+            'created_at' => $this->createdAt->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updatedAt->format('Y-m-d H:i:s'),
+        ];
+    }
 }
 ```
 
-### 4. Implementação com Repository Pattern
+## 🎮 Criando Controllers
+
+### Controller Básico
 
 ```php
-// Infrastructure/Repositories/UserRepository.php
-namespace Infrastructure\Repositories;
-
-use Cycle\Database\DatabaseInterface;
-
-class UserRepository
-{
-    public function __construct(
-        private DatabaseInterface $database
-    ) {}
-    
-    public function findAll(): array
-    {
-        return $this->database->database()
-            ->query('SELECT * FROM users ORDER BY id DESC')
-            ->fetchAll();
-    }
-    
-    public function findById(int $id): ?array
-    {
-        return $this->database->database()
-            ->query('SELECT * FROM users WHERE id = ?', [$id])
-            ->fetch();
-    }
-    
-    public function create(array $data): int
-    {
-        $this->database->database()->execute(
-            'INSERT INTO users (name, email, createdAt) VALUES (?, ?, ?)',
-            [$data['name'], $data['email'], date('Y-m-d H:i:s')]
-        );
-        
-        return (int) $this->database->database()
-            ->getDriver()
-            ->lastInsertID();
-    }
-}
-
-// Registrar no container
-$app->getContainer()->bind(UserRepository::class, function ($container) {
-    return new UserRepository(
-        $container->get('cycle.database')
-    );
-});
-
-// Usar em rotas
-$app->get('/api/users', function ($req, $res) use ($app) {
-    $repository = $app->make(UserRepository::class);
-    $users = $repository->findAll();
-    
-    return $res->json(['data' => $users]);
-});
-```
-
-## Resolução de Problemas
-
-### PHP 8.4 - Avisos de Depreciação
-
-**Problema**: Avisos sobre parâmetros implicitamente nullable no Spiral Core.
-
-**Soluções**:
-
-1. **Usar PHP 8.1 ou 8.3** (Recomendado)
-   ```bash
-   php8.1 -S localhost:8000 public/index.php
-   ```
-
-2. **Suprimir avisos de depreciação** (Não recomendado para produção)
-   ```bash
-   php -d error_reporting=E_ALL~E_DEPRECATED -S localhost:8000 public/index.php
-   ```
-
-### Diretório de Entidades Não Encontrado
-
-**Problema**: Erro "The app/Entities directory does not exist"
-
-**Solução**: 
-1. Certifique-se de que o diretório `app/Entities` existe
-2. Defina o diretório de trabalho correto no início do script:
-   ```php
-   chdir(dirname(__DIR__)); // Define o diretório raiz do projeto
-   ```
-
-### Múltiplos Middlewares
-
-**Problema**: Erro de tipo quando CycleMiddleware é registrado múltiplas vezes.
-
-**Solução**: Registre o CycleMiddleware apenas uma vez, preferencialmente de forma global:
-```php
-// Correto
-$app->use(new CycleMiddleware($app));
-
-// Evite registrar novamente em rotas individuais
-```
-
-## Exemplos Práticos
-
-### API CRUD Completa
-
-```php
+// src/Controllers/UserController.php
 <?php
-// public/index.php
 
-chdir(dirname(__DIR__));
-require_once __DIR__ . '/../vendor/autoload.php';
+declare(strict_types=1);
 
-use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
-use CAFernandes\ExpressPHP\CycleORM\Middleware\CycleMiddleware;
-use Express\Core\Application;
+namespace App\Controllers;
 
-$app = new Application();
+use App\Entities\User;
+use Express\Http\Request;
+use Express\Http\Response;
 
-// Configuração
-$_ENV['DB_CONNECTION'] = 'sqlite';
-$_ENV['DB_DATABASE'] = __DIR__ . '/../database/database.sqlite';
+class UserController
+{
+    public function index(Request $request): Response
+    {
+        try {
+            // Obtém o helper de repositório
+            $repositoryHelper = $request->getAttribute('repository');
+            $repository = $repositoryHelper(User::class);
+            
+            // Busca todos os usuários
+            $users = $repository->findAll();
+            
+            // Converte para array
+            $userData = array_map(fn(User $user) => $user->toArray(), $users);
+            
+            return (new Response())->json([
+                'success' => true,
+                'data' => $userData,
+                'count' => count($userData)
+            ]);
+        } catch (\Exception $e) {
+            return (new Response())->status(500)->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
 
-// Registrar serviços
-$app->register(new CycleServiceProvider($app));
-$app->use(new CycleMiddleware($app));
+    public function store(Request $request): Response
+    {
+        try {
+            $data = $request->getBody();
+            
+            // Validação básica
+            if (!isset($data['name'], $data['email'], $data['password'])) {
+                return (new Response())->status(400)->json([
+                    'success' => false,
+                    'error' => 'Name, email and password are required'
+                ]);
+            }
+            
+            // Obtém helpers
+            $repositoryHelper = $request->getAttribute('repository');
+            $entityManagerHelper = $request->getAttribute('entityManager');
+            
+            $repository = $repositoryHelper(User::class);
+            $entityManager = $entityManagerHelper();
+            
+            // Verifica se email já existe
+            if ($repository->findOne(['email' => $data['email']])) {
+                return (new Response())->status(409)->json([
+                    'success' => false,
+                    'error' => 'Email already exists'
+                ]);
+            }
+            
+            // Cria novo usuário
+            $user = new User();
+            $user->setName($data['name']);
+            $user->setEmail($data['email']);
+            $user->setPassword($data['password']);
+            
+            // Persiste no banco
+            $entityManager->persist($user);
+            $entityManager->run();
+            
+            return (new Response())->status(201)->json([
+                'success' => true,
+                'data' => $user->toArray()
+            ]);
+        } catch (\Exception $e) {
+            return (new Response())->status(500)->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+}
+```
 
-// Rotas
+## 🛣️ Definindo Rotas
+
+```php
+// public/index.php (continuação)
+
+// Instancia controllers
+$userController = new \App\Controllers\UserController();
+
+// Define rotas
 $app->get('/', function ($req, $res) {
     return $res->json([
-        'message' => 'API with Cycle ORM',
-        'endpoints' => [
-            'GET /api/users' => 'List users',
-            'POST /api/users' => 'Create user',
-            'GET /api/users/{id}' => 'Get user',
-            'PUT /api/users/{id}' => 'Update user',
-            'DELETE /api/users/{id}' => 'Delete user'
-        ]
+        'message' => 'API funcionando!',
+        'version' => '1.0.0'
     ]);
 });
 
-// Setup do banco
-$app->get('/setup', function ($req, $res) {
-    $db = $req->getContainer()->get('cycle.database');
-    
-    try {
-        $db->database()->execute("
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                email TEXT NOT NULL UNIQUE,
-                createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-        ");
-        
-        return $res->json(['message' => 'Database setup completed']);
-    } catch (Exception $e) {
-        return $res->json(['error' => $e->getMessage()], 500);
-    }
-});
+// Rotas de usuários
+$app->get('/api/users', [$userController, 'index']);
+$app->get('/api/users/{id}', [$userController, 'show']);
+$app->post('/api/users', [$userController, 'store']);
+$app->put('/api/users/{id}', [$userController, 'update']);
+$app->delete('/api/users/{id}', [$userController, 'destroy']);
 
-// Listar usuários
-$app->get('/api/users', function ($req, $res) {
-    $db = $req->getContainer()->get('cycle.database');
-    $users = $db->database()->query('SELECT * FROM users')->fetchAll();
+// Health check
+$app->get('/health', function ($req, $res) {
+    $hasOrm = $req->hasAttribute('cycle.orm');
     
-    return $res->json(['data' => $users]);
-});
-
-// Criar usuário
-$app->post('/api/users', function ($req, $res) {
-    $db = $req->getContainer()->get('cycle.database');
-    $data = $req->body;
-    
-    if (empty($data->name) || empty($data->email)) {
-        return $res->json(['error' => 'Name and email required'], 400);
-    }
-    
-    try {
-        $db->database()->execute(
-            'INSERT INTO users (name, email) VALUES (?, ?)',
-            [$data->name, $data->email]
-        );
-        
-        $id = $db->database()->getDriver()->lastInsertID();
-        $user = $db->database()
-            ->query('SELECT * FROM users WHERE id = ?', [$id])
-            ->fetch();
-        
-        return $res->json(['data' => $user], 201);
-    } catch (Exception $e) {
-        return $res->json(['error' => 'Email already exists'], 409);
-    }
-});
-
-// Buscar usuário
-$app->get('/api/users/:id', function ($req, $res) {
-    $db = $req->getContainer()->get('cycle.database');
-    $id = $req->params->id;
-    
-    $user = $db->database()
-        ->query('SELECT * FROM users WHERE id = ?', [$id])
-        ->fetch();
-    
-    if (!$user) {
-        return $res->json(['error' => 'User not found'], 404);
-    }
-    
-    return $res->json(['data' => $user]);
-});
-
-// Atualizar usuário
-$app->put('/api/users/:id', function ($req, $res) {
-    $db = $req->getContainer()->get('cycle.database');
-    $id = $req->params->id;
-    $data = $req->body;
-    
-    $user = $db->database()
-        ->query('SELECT * FROM users WHERE id = ?', [$id])
-        ->fetch();
-    
-    if (!$user) {
-        return $res->json(['error' => 'User not found'], 404);
-    }
-    
-    $name = $data->name ?? $user['name'];
-    $email = $data->email ?? $user['email'];
-    
-    try {
-        $db->database()->execute(
-            'UPDATE users SET name = ?, email = ? WHERE id = ?',
-            [$name, $email, $id]
-        );
-        
-        $updated = $db->database()
-            ->query('SELECT * FROM users WHERE id = ?', [$id])
-            ->fetch();
-        
-        return $res->json(['data' => $updated]);
-    } catch (Exception $e) {
-        return $res->json(['error' => 'Email already exists'], 409);
-    }
-});
-
-// Deletar usuário
-$app->delete('/api/users/:id', function ($req, $res) {
-    $db = $req->getContainer()->get('cycle.database');
-    $id = $req->params->id;
-    
-    $user = $db->database()
-        ->query('SELECT * FROM users WHERE id = ?', [$id])
-        ->fetch();
-    
-    if (!$user) {
-        return $res->json(['error' => 'User not found'], 404);
-    }
-    
-    $db->database()->execute('DELETE FROM users WHERE id = ?', [$id]);
-    
-    return $res->json(['message' => 'User deleted'], 204);
+    return $res->json([
+        'status' => 'healthy',
+        'cycle_orm' => $hasOrm ? 'connected' : 'disconnected',
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
 });
 
 $app->run();
 ```
 
-### Executando o Projeto
+## 🔨 Comandos CLI
 
-1. **Criar estrutura de diretórios**:
-   ```bash
-   mkdir -p app/Entities database
-   touch database/database.sqlite
-   ```
+### Configurar Console (bin/console)
 
-2. **Iniciar servidor (PHP 8.1)**:
-   ```bash
-   php8.1 -S localhost:8000 public/index.php
-   ```
+```php
+#!/usr/bin/env php
+<?php
 
-3. **Configurar banco de dados**:
-   ```bash
-   curl http://localhost:8000/setup
-   ```
+declare(strict_types=1);
 
-4. **Testar endpoints**:
-   ```bash
-   # Listar usuários
-   curl http://localhost:8000/api/users
-   
-   # Criar usuário
-   curl -X POST http://localhost:8000/api/users \
-     -H "Content-Type: application/json" \
-     -d '{"name":"John Doe","email":"john@example.com"}'
-   ```
+use Express\Core\Application;
+use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
+use CAFernandes\ExpressPHP\CycleORM\Commands\SchemaCommand;
+use CAFernandes\ExpressPHP\CycleORM\Commands\MigrateCommand;
+use CAFernandes\ExpressPHP\CycleORM\Commands\StatusCommand;
 
-## Melhores Práticas
+require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-1. **Sempre defina o diretório de trabalho** no início do script principal
-2. **Use PHP 8.1 ou 8.3** para evitar avisos de depreciação
-3. **Crie o diretório `app/Entities`** mesmo se não usar entidades anotadas
-4. **Registre o CycleMiddleware globalmente** para evitar conflitos
-5. **Use transações** para operações múltiplas com TransactionMiddleware
-6. **Implemente cache** para melhorar performance em produção
+chdir(dirname(__DIR__));
 
-## Suporte
+// Configuração
+$_ENV['DB_CONNECTION'] = 'sqlite';
+$_ENV['DB_DATABASE'] = __DIR__ . '/../database/database.sqlite';
+$_ENV['CYCLE_ENTITY_DIRS'] = 'src/Entities';
 
-Para problemas ou dúvidas:
-- Abra uma issue no [GitHub](https://github.com/cafernandes/express-php-cycle-orm-extension)
-- Consulte a [documentação completa](./index.md)
-- Veja os [exemplos de implementação](../examples/)
+$app = new Application();
+$app->register(new CycleServiceProvider($app));
+$container = $app->getContainer();
+
+$command = $argv[1] ?? 'help';
+
+switch ($command) {
+    case 'cycle:schema:sync':
+        $schemaCommand = new SchemaCommand(['--sync' => true], $container);
+        $schemaCommand->handle();
+        break;
+        
+    case 'cycle:migrate':
+        $migrateCommand = new MigrateCommand([], $container);
+        $migrateCommand->handle();
+        break;
+        
+    case 'cycle:status':
+        $statusCommand = new StatusCommand([], $container);
+        $statusCommand->handle();
+        break;
+        
+    case 'help':
+    default:
+        echo "Available commands:\n";
+        echo "  cycle:schema:sync  Sync database schema\n";
+        echo "  cycle:migrate      Run migrations\n";
+        echo "  cycle:status       Check migration status\n";
+        echo "  help              Show this help message\n";
+        break;
+}
+```
+
+Torne executável:
+
+```bash
+chmod +x bin/console
+```
+
+### Usando os Comandos
+
+```bash
+# Criar/atualizar schema do banco
+php bin/console cycle:schema:sync
+
+# Verificar status
+php bin/console cycle:status
+
+# Executar migrações
+php bin/console cycle:migrate
+```
+
+## 🚀 Executando o Projeto
+
+```bash
+# 1. Instalar dependências
+composer install
+
+# 2. Criar banco de dados
+mkdir -p database
+touch database/database.sqlite
+
+# 3. Sincronizar schema
+php bin/console cycle:schema:sync
+
+# 4. Iniciar servidor
+composer serve
+# ou
+php -S localhost:8000 -t public public/index.php
+
+# 5. Testar
+curl http://localhost:8000/health
+```
+
+## 🎯 Padrões de Uso
+
+### Acessando Serviços ORM
+
+```php
+// Em qualquer rota ou controller:
+
+// 1. Via helpers (recomendado)
+$repositoryHelper = $request->getAttribute('repository');
+$userRepo = $repositoryHelper(User::class);
+
+// 2. Via attributes diretos
+$orm = $request->getAttribute('cycle.orm');
+$em = $request->getAttribute('cycle.em');
+$db = $request->getAttribute('cycle.db');
+
+// 3. Via container (alternativa)
+$container = $app->getContainer();
+$orm = $container->get('cycle.orm');
+```
+
+### Transações
+
+```php
+public function bulkOperation(Request $request): Response
+{
+    $emHelper = $request->getAttribute('entityManager');
+    $em = $emHelper();
+    
+    try {
+        $em->getTransaction()->begin();
+        
+        // Operações múltiplas
+        foreach ($items as $item) {
+            $entity = new Entity();
+            // ...
+            $em->persist($entity);
+        }
+        
+        $em->run();
+        $em->getTransaction()->commit();
+        
+        return (new Response())->json(['success' => true]);
+        
+    } catch (\Exception $e) {
+        $em->getTransaction()->rollback();
+        return (new Response())->status(500)->json(['error' => $e->getMessage()]);
+    }
+}
+```
+
+## ⚠️ Troubleshooting
+
+### Erro: "The directory does not exist"
+
+**Solução**: Crie o diretório `app/Entities`:
+
+```bash
+mkdir -p app/Entities
+```
+
+### Erro: "Cycle ORM not properly registered"
+
+**Solução**: Certifique-se de registrar o provider antes de usar:
+
+```php
+$app->register(new CycleServiceProvider($app));
+```
+
+### Erro com CycleMiddleware original
+
+**Solução**: Use o middleware customizado mostrado neste guia em vez do CycleMiddleware incluído.
+
+## 📚 Recursos Adicionais
+
+- [Documentação do Express PHP](https://github.com/cafernandes/express-php)
+- [Documentação do Cycle ORM](https://cycle-orm.dev)
+- [Exemplos de código](https://github.com/cafernandes/express-php-cycle-orm-extension/tree/main/examples)
+
+## 🤝 Suporte
+
+Se encontrar problemas:
+
+1. Verifique os logs em `storage/logs/`
+2. Ative o debug: `APP_DEBUG=true`
+3. Abra uma issue no [GitHub](https://github.com/cafernandes/express-php-cycle-orm-extension/issues)

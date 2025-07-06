@@ -6,18 +6,17 @@
 [![PSR-12](https://img.shields.io/badge/PSR-12-blue.svg)](https://www.php-fig.org/psr/psr-12/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Uma extensão robusta e bem testada que integra o Cycle ORM ao framework Express PHP, oferecendo recursos avançados de ORM com arquitetura limpa e moderna. Fornece integração transparente através do CycleRequest, permitindo acesso direto aos serviços ORM em suas rotas.
+Uma extensão robusta e bem testada que integra o Cycle ORM ao framework Express PHP, oferecendo recursos avançados de ORM com arquitetura limpa e moderna.
 
 ## 🚀 Características
 
 - **Integração Completa**: Perfeita integração com Express PHP através de Service Provider
-- **CycleRequest**: Wrapper inteligente que adiciona métodos ORM ao Request padrão
+- **Attributes Pattern**: Acesso aos serviços ORM via attributes do Request
 - **Type Safety**: Código 100% tipado com PHPStan nível 9 e PSR-12
 - **Bem Testado**: 68 testes automatizados cobrindo todas as funcionalidades
 - **Repositórios Customizados**: Factory pattern para repositórios com cache inteligente
-- **Middlewares Prontos**: CycleMiddleware, Transaction e Entity Validation
 - **Monitoramento**: Sistema completo de métricas, profiling e logging de queries
-- **Compatibilidade**: PHP 8.1+ (recomendado PHP 8.3 para evitar avisos)
+- **Compatibilidade**: PHP 8.1+ (recomendado PHP 8.3)
 - **CLI Commands**: Comandos para migração e gerenciamento do schema
 
 ## 📦 Instalação
@@ -26,14 +25,16 @@ Uma extensão robusta e bem testada que integra o Cycle ORM ao framework Express
 composer require cafernandes/express-php-cycle-orm-extension
 ```
 
-## 🎯 Uso Rápido
+## 🎯 Guia de Integração Completo
 
 ### 1. Configuração Inicial
 
 ```php
 // public/index.php
+use Express\Core\Application;
 use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
-use CAFernandes\ExpressPHP\CycleORM\Middleware\CycleMiddleware;
+
+require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 // IMPORTANTE: Define o diretório de trabalho
 chdir(dirname(__DIR__));
@@ -41,296 +42,537 @@ chdir(dirname(__DIR__));
 // Configure as variáveis de ambiente
 $_ENV['DB_CONNECTION'] = 'sqlite';
 $_ENV['DB_DATABASE'] = __DIR__ . '/../database/database.sqlite';
+$_ENV['CYCLE_ENTITY_DIRS'] = 'src/Entities'; // Diretórios das entidades
+
+$app = new Application();
 
 // Registre o provider
 $app->register(new CycleServiceProvider($app));
-
-// Adicione o CycleMiddleware para usar CycleRequest
-$app->use(new CycleMiddleware($app));
 ```
 
-### ⚠️ Importante
-- Sempre defina o diretório de trabalho com `chdir()`
-- Crie o diretório `app/Entities` mesmo se não usar entidades anotadas
-- Use PHP 8.1 ou 8.3 para evitar avisos de depreciação do Spiral Core
+### 2. Middleware de Integração (Solução Recomendada)
 
-### 2. Configurar Variáveis de Ambiente
-
-```env
-# SQLite (desenvolvimento)
-DB_CONNECTION=sqlite
-DB_DATABASE=/path/to/database.sqlite
-
-# MySQL (produção)
-DB_CONNECTION=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_DATABASE=your_database
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
-```
-
-### 3. Uso com CycleRequest (Recomendado)
-
-Com o CycleMiddleware ativo, todas as rotas recebem um CycleRequest com métodos ORM:
+⚠️ **Nota Importante**: Devido a limitações de design no CycleMiddleware atual, recomendamos usar o seguinte middleware customizado:
 
 ```php
-// Listar usuários usando CycleRequest
-$app->get('/api/users', function ($req, $res) {
-    // $req é agora um CycleRequest
-    $db = $req->getContainer()->get('cycle.database');
-    $users = $db->database()->query('SELECT * FROM users')->fetchAll();
+// Middleware Cycle ORM com Attributes Pattern
+$app->use(function ($req, $res, $next) use ($app) {
+    $container = $app->getContainer();
     
-    return $res->json([
-        'data' => $users,
-        'request_type' => get_class($req) // CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest
-    ]);
-});
+    if (!$container->has('cycle.orm')) {
+        throw new \RuntimeException('Cycle ORM not properly registered');
+    }
 
-// Métodos disponíveis no CycleRequest
-$app->get('/api/example', function ($req, $res) {
-    // Repositório para entidade
-    $userRepo = $req->repository(User::class);
-    
-    // Criar nova entidade
-    $user = $req->entity(User::class, ['name' => 'John']);
-    
-    // Paginação
-    $paginated = $req->paginate(User::class, 20, 1);
-    
-    // Propriedades ORM disponíveis
-    $orm = $req->orm;  // Instância do ORM
-    $em = $req->em;    // Entity Manager
-    
-    return $res->json(['message' => 'CycleRequest features']);
+    // Obtém os serviços do Cycle ORM
+    $orm = $container->get('cycle.orm');
+    $em = $container->get('cycle.em');
+    $db = $container->get('cycle.database');
+    $repository = $container->get('cycle.repository');
+
+    // Injeta serviços através de attributes do Express PHP
+    $req->setAttribute('cycle.orm', $orm);
+    $req->setAttribute('cycle.em', $em);
+    $req->setAttribute('cycle.db', $db);
+    $req->setAttribute('cycle.repository', $repository);
+
+    // Helper methods como closures
+    $req->setAttribute('repository', function(string $entityClass) use ($repository) {
+        return $repository->getRepository($entityClass);
+    });
+
+    $req->setAttribute('entity', function(string $entityClass, array $data = []) use ($orm) {
+        return $orm->make($entityClass, $data);
+    });
+
+    $req->setAttribute('entityManager', function() use ($em) {
+        return $em;
+    });
+
+    // Continua com o Request original
+    $next($req, $res);
 });
 ```
 
-### 4. Uso Avançado - Arquitetura Limpa com Repositórios
+### 3. Definindo Entidades
 
 ```php
-use CAFernandes\ExpressPHP\CycleORM\Http\CycleRequest;
+// src/Entities/User.php
+namespace App\Entities;
 
-// Repository Interface
-interface UserRepositoryInterface
-{
-    public function findById(int $id): ?User;
-    public function findAll(): array;
-    public function save(User $user): void;
-}
+use Cycle\Annotated\Annotation\Column;
+use Cycle\Annotated\Annotation\Entity;
+use Cycle\Annotated\Annotation\Table;
 
-// Repository Implementation
-class UserRepository implements UserRepositoryInterface
+#[Entity(repository: \App\Repositories\UserRepository::class)]
+#[Table(name: 'users')]
+class User
 {
-    public function __construct(
-        private DatabaseInterface $database
-    ) {}
-    
-    public function findById(int $id): ?User
+    #[Column(type: 'primary')]
+    private ?int $id = null;
+
+    #[Column(type: 'string', nullable: false)]
+    private string $name;
+
+    #[Column(type: 'string', nullable: false, unique: true)]
+    private string $email;
+
+    #[Column(type: 'datetime')]
+    private \DateTimeInterface $createdAt;
+
+    public function __construct()
     {
-        $result = $this->database->query(
-            'SELECT * FROM users WHERE id = ?',
-            [$id]
-        )->fetch();
+        $this->createdAt = new \DateTime();
+    }
+
+    // Getters e setters...
+}
+```
+
+### 4. Repositórios Customizados
+
+```php
+// src/Repositories/UserRepository.php
+namespace App\Repositories;
+
+use App\Entities\User;
+use Cycle\ORM\Select\Repository;
+
+class UserRepository extends Repository
+{
+    public function findByEmail(string $email): ?User
+    {
+        return $this->findOne(['email' => $email]);
+    }
+
+    public function findRecentUsers(int $days = 30): iterable
+    {
+        $date = new \DateTime();
+        $date->sub(new \DateInterval('P' . $days . 'D'));
         
-        return $result ? $this->mapToEntity($result) : null;
-    }
-    
-    private function mapToEntity(array $data): User
-    {
-        return new User(
-            id: $data['id'],
-            name: $data['name'],
-            email: $data['email']
-        );
+        return $this->select()
+            ->where('created_at', '>=', $date)
+            ->orderBy('created_at', 'DESC')
+            ->fetchAll();
     }
 }
+```
 
-// Controller com Injeção de Dependência
+### 5. Usando nos Controllers
+
+```php
+// src/Controllers/UserController.php
+namespace App\Controllers;
+
+use App\Entities\User;
+use Express\Http\Request;
+use Express\Http\Response;
+
 class UserController
 {
-    public function __construct(
-        private UserRepositoryInterface $repository
-    ) {}
-    
-    public function show(int $id): JsonResponse
+    public function index(Request $request): Response
     {
-        $user = $this->repository->findById($id);
+        // Obtém o helper de repositório
+        $repositoryHelper = $request->getAttribute('repository');
+        $repository = $repositoryHelper(User::class);
         
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
-        }
+        $users = $repository->findAll();
         
-        return response()->json($user);
+        return (new Response())->json([
+            'success' => true,
+            'data' => array_map(fn(User $u) => $u->toArray(), $users)
+        ]);
+    }
+
+    public function store(Request $request): Response
+    {
+        $data = $request->getBody();
+        
+        // Obtém helpers
+        $repositoryHelper = $request->getAttribute('repository');
+        $entityManagerHelper = $request->getAttribute('entityManager');
+        
+        $repository = $repositoryHelper(User::class);
+        $entityManager = $entityManagerHelper();
+        
+        // Cria nova entidade
+        $user = new User();
+        $user->setName($data['name']);
+        $user->setEmail($data['email']);
+        
+        // Persiste
+        $entityManager->persist($user);
+        $entityManager->run();
+        
+        return (new Response())->status(201)->json([
+            'success' => true,
+            'data' => $user->toArray()
+        ]);
     }
 }
 ```
 
-## 🧪 Executar Testes
+### 6. Rotas da Aplicação
 
-```bash
-# Todos os testes
-composer test
+```php
+// public/index.php
 
-# Com relatório de cobertura
-composer test-coverage
+// Instancia o controller
+$userController = new UserController();
 
-# Verificar qualidade do código
-composer phpstan       # PHPStan nível 9
-composer cs:check      # PSR-12 compliance
-composer cs:fix        # Corrigir PSR-12
+// Define as rotas
+$app->get('/api/users', [$userController, 'index']);
+$app->get('/api/users/{id}', [$userController, 'show']);
+$app->post('/api/users', [$userController, 'store']);
+$app->put('/api/users/{id}', [$userController, 'update']);
+$app->delete('/api/users/{id}', [$userController, 'destroy']);
+
+$app->run();
 ```
 
-## 📈 Qualidade do Código
+## 🔧 Configuração Avançada
 
-- **PHPStan Nível 9**: Zero erros de tipagem em análise estática
-- **PSR-12**: Conformidade total com padrões de código
-- **68 Testes**: Cobertura completa com PHPUnit
-- **Type Safety**: Interfaces e tipos bem definidos
-- **CI/CD**: GitHub Actions para testes automatizados
+### Variáveis de Ambiente
 
-## 🔧 Funcionalidades Avançadas
+```env
+# Banco de Dados
+DB_CONNECTION=sqlite           # ou mysql
+DB_DATABASE=database/app.db    # caminho do SQLite ou nome do banco MySQL
+DB_HOST=127.0.0.1             # apenas para MySQL
+DB_PORT=3306                  # apenas para MySQL
+DB_USERNAME=root              # apenas para MySQL
+DB_PASSWORD=secret            # apenas para MySQL
 
-### Sincronização de Schema
+# Cycle ORM
+CYCLE_ENTITY_DIRS=src/Entities,app/Entities  # diretórios das entidades
+CYCLE_LOG_QUERIES=true        # log de queries em dev
+CYCLE_PROFILE_QUERIES=true    # profiling em dev
+
+# Aplicação
+APP_ENV=development
+APP_DEBUG=true
+```
+
+### Estrutura de Diretórios Recomendada
+
+```
+projeto/
+├── app/
+│   └── Entities/          # Alternativa para entidades
+├── bin/
+│   └── console           # CLI commands
+├── config/
+│   └── cycle.php         # Configurações do Cycle ORM
+├── database/
+│   ├── migrations/       # Arquivos de migração
+│   └── database.sqlite   # Banco SQLite
+├── public/
+│   └── index.php        # Entry point
+├── src/
+│   ├── Controllers/     # Controllers da aplicação
+│   ├── Entities/        # Entidades do domínio
+│   └── Repositories/    # Repositórios customizados
+├── .env                 # Variáveis de ambiente
+└── composer.json
+```
+
+## 📝 Comandos CLI
+
+### Console Setup
+
+```php
+// bin/console
+#!/usr/bin/env php
+<?php
+
+use Express\Core\Application;
+use CAFernandes\ExpressPHP\CycleORM\CycleServiceProvider;
+use CAFernandes\ExpressPHP\CycleORM\Commands\SchemaCommand;
+use CAFernandes\ExpressPHP\CycleORM\Commands\MigrateCommand;
+
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+
+chdir(dirname(__DIR__));
+
+$app = new Application();
+$app->register(new CycleServiceProvider($app));
+$container = $app->getContainer();
+
+$command = $argv[1] ?? 'help';
+
+switch ($command) {
+    case 'cycle:schema:sync':
+        $schemaCommand = new SchemaCommand(['--sync' => true], $container);
+        $schemaCommand->handle();
+        break;
+        
+    case 'cycle:migrate':
+        $migrateCommand = new MigrateCommand([], $container);
+        $migrateCommand->handle();
+        break;
+        
+    case 'help':
+    default:
+        echo "Available commands:\n";
+        echo "  cycle:schema:sync  Sync database schema\n";
+        echo "  cycle:migrate      Run migrations\n";
+        break;
+}
+```
+
+### Uso dos Comandos
+
 ```bash
-# Sincronizar schema do banco de dados
+# Sincronizar schema do banco
 php bin/console cycle:schema:sync
 
-# Verificar status das migrações
-php bin/console cycle:status
+# Executar migrações
+php bin/console cycle:migrate
+
+# Ver ajuda
+php bin/console help
 ```
 
-### Configuração Completa do Cycle ORM
+## 🔍 Acessando Serviços ORM
+
+### Via Attributes (Recomendado)
+
 ```php
-// config/cycle.php
-return [
-    'default' => env('DB_CONNECTION', 'sqlite'),
+public function example(Request $request): Response
+{
+    // ORM
+    $orm = $request->getAttribute('cycle.orm');
     
-    'connections' => [
-        'sqlite' => [
-            'driver' => 'sqlite',
-            'database' => env('DB_DATABASE', ':memory:'),
-        ],
-        'mysql' => [
-            'driver' => 'mysql',
-            'host' => env('DB_HOST', 'localhost'),
-            'port' => env('DB_PORT', 3306),
-            'database' => env('DB_DATABASE', 'express_php'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
-        ],
-    ],
+    // Entity Manager
+    $emHelper = $request->getAttribute('entityManager');
+    $em = $emHelper();
     
-    'entities' => [
-        'directories' => [
-            __DIR__ . '/../src/Domain/Entities',
-        ],
-    ],
+    // Repository
+    $repoHelper = $request->getAttribute('repository');
+    $userRepo = $repoHelper(User::class);
     
-    'cache' => [
-        'enabled' => env('CYCLE_CACHE_ENABLED', true),
-        'directory' => env('CYCLE_CACHE_DIR', __DIR__ . '/../storage/cache/cycle'),
-    ],
-];
+    // Database
+    $db = $request->getAttribute('cycle.db');
+    
+    // Entity Helper
+    $entityHelper = $request->getAttribute('entity');
+    $user = $entityHelper(User::class, ['name' => 'John']);
+}
 ```
 
-### Repository Factory com Cache
+### Via Container (Alternativa)
+
 ```php
-$factory = $app->get('cycle.repository');
-$userRepo = $factory->getRepository(User::class); // Cached automatically
+public function example(Request $request) use ($app): Response
+{
+    $container = $app->getContainer();
+    
+    $orm = $container->get('cycle.orm');
+    $em = $container->get('cycle.em');
+    $db = $container->get('cycle.database');
+    $repository = $container->get('cycle.repository');
+}
 ```
 
-### Middleware de Transação
-```php
-$app->use(new TransactionMiddleware($app));
+## 🎨 Exemplos Práticos
 
-// Transações automáticas em rotas
-$app->post('/api/users', function ($req, $res) {
-    // Transação iniciada automaticamente
-    // Commit automático em sucesso
-    // Rollback automático em erro
+### CRUD Completo
+
+```php
+class UserController
+{
+    // Listar todos
+    public function index(Request $request): Response
+    {
+        $repoHelper = $request->getAttribute('repository');
+        $users = $repoHelper(User::class)->findAll();
+        
+        return (new Response())->json(['users' => $users]);
+    }
+
+    // Buscar por ID
+    public function show(Request $request): Response
+    {
+        $id = (int) $request->getParam('id');
+        $repoHelper = $request->getAttribute('repository');
+        $user = $repoHelper(User::class)->findByPK($id);
+        
+        if (!$user) {
+            return (new Response())->status(404)->json(['error' => 'Not found']);
+        }
+        
+        return (new Response())->json(['user' => $user]);
+    }
+
+    // Criar
+    public function store(Request $request): Response
+    {
+        $data = $request->getBody();
+        $entityHelper = $request->getAttribute('entity');
+        $emHelper = $request->getAttribute('entityManager');
+        
+        $user = $entityHelper(User::class, $data);
+        $em = $emHelper();
+        
+        $em->persist($user);
+        $em->run();
+        
+        return (new Response())->status(201)->json(['user' => $user]);
+    }
+
+    // Atualizar
+    public function update(Request $request): Response
+    {
+        $id = (int) $request->getParam('id');
+        $data = $request->getBody();
+        
+        $repoHelper = $request->getAttribute('repository');
+        $emHelper = $request->getAttribute('entityManager');
+        
+        $user = $repoHelper(User::class)->findByPK($id);
+        if (!$user) {
+            return (new Response())->status(404)->json(['error' => 'Not found']);
+        }
+        
+        // Atualiza propriedades
+        $user->setName($data['name'] ?? $user->getName());
+        $user->setEmail($data['email'] ?? $user->getEmail());
+        
+        $em = $emHelper();
+        $em->persist($user);
+        $em->run();
+        
+        return (new Response())->json(['user' => $user]);
+    }
+
+    // Deletar
+    public function destroy(Request $request): Response
+    {
+        $id = (int) $request->getParam('id');
+        
+        $repoHelper = $request->getAttribute('repository');
+        $emHelper = $request->getAttribute('entityManager');
+        
+        $user = $repoHelper(User::class)->findByPK($id);
+        if (!$user) {
+            return (new Response())->status(404)->json(['error' => 'Not found']);
+        }
+        
+        $em = $emHelper();
+        $em->delete($user);
+        $em->run();
+        
+        return (new Response())->status(204)->json([]);
+    }
+}
+```
+
+### Queries Avançadas
+
+```php
+public function search(Request $request): Response
+{
+    $query = $request->getQuery('q', '');
+    $repoHelper = $request->getAttribute('repository');
+    $repository = $repoHelper(User::class);
+    
+    // Busca personalizada
+    $users = $repository
+        ->select()
+        ->where('name', 'LIKE', '%' . $query . '%')
+        ->orWhere('email', 'LIKE', '%' . $query . '%')
+        ->orderBy('created_at', 'DESC')
+        ->limit(20)
+        ->fetchAll();
+    
+    return (new Response())->json(['users' => $users]);
+}
+```
+
+### Transações
+
+```php
+public function bulkCreate(Request $request): Response
+{
+    $items = $request->getBody()['items'] ?? [];
+    $emHelper = $request->getAttribute('entityManager');
+    $entityHelper = $request->getAttribute('entity');
+    
+    $em = $emHelper();
+    $created = [];
+    
+    try {
+        // Inicia transação
+        $em->getTransaction()->begin();
+        
+        foreach ($items as $data) {
+            $user = $entityHelper(User::class, $data);
+            $em->persist($user);
+            $created[] = $user;
+        }
+        
+        $em->run();
+        $em->getTransaction()->commit();
+        
+        return (new Response())->json([
+            'success' => true,
+            'created' => count($created),
+            'users' => $created
+        ]);
+        
+    } catch (\Exception $e) {
+        $em->getTransaction()->rollback();
+        
+        return (new Response())->status(500)->json([
+            'error' => 'Transaction failed',
+            'message' => $e->getMessage()
+        ]);
+    }
+}
+```
+
+## ⚠️ Problemas Conhecidos
+
+### CycleMiddleware Original
+
+O CycleMiddleware incluído na extensão tem um problema de design que causa erro de tipo recursivo. Por isso, recomendamos usar o middleware customizado mostrado acima até que seja corrigido em versões futuras.
+
+### Diretório de Entidades
+
+A extensão procura entidades em `app/Entities` e `src/Entities`. Certifique-se de que pelo menos um desses diretórios existe ou configure via `CYCLE_ENTITY_DIRS`.
+
+## 🧪 Testando a Integração
+
+```php
+// Endpoint de teste
+$app->get('/api/test', function ($request): Response {
+    $hasOrm = $request->hasAttribute('cycle.orm');
+    $hasEm = $request->hasAttribute('cycle.em');
+    $hasDb = $request->hasAttribute('cycle.db');
+    $hasRepo = $request->hasAttribute('repository');
+    
+    return (new Response())->json([
+        'integration' => 'working',
+        'attributes' => [
+            'orm' => $hasOrm,
+            'em' => $hasEm,
+            'db' => $hasDb,
+            'repository_helper' => $hasRepo
+        ]
+    ]);
 });
 ```
 
-### Sistema de Monitoramento
-```php
-use CAFernandes\ExpressPHP\CycleORM\Monitoring\MetricsCollector;
+## 🤝 Contribuindo
 
-// Ativar profiling de queries
-$_ENV['CYCLE_PROFILE_QUERIES'] = true;
-$_ENV['CYCLE_LOG_QUERIES'] = true;
-
-// Coletar métricas
-$metrics = MetricsCollector::getMetrics();
-// Exibe: queries executadas, tempo de execução, cache hits/misses
-```
-
-### Container de Injeção de Dependência
-```php
-// Registrar repositórios no container
-$container->bind(UserRepositoryInterface::class, function ($container) {
-    return new UserRepository(
-        $container->get('cycle.database')
-    );
-});
-
-// Usar em controllers
-$userController = $container->get(UserController::class);
-```
-
-## 📚 Exemplos de Implementação
-
-### API CRUD Completa
-```php
-// Estrutura de pastas recomendada
-├── src/
-│   ├── Domain/
-│   │   ├── Entities/
-│   │   │   └── User.php
-│   │   └── Repositories/
-│   │       └── UserRepositoryInterface.php
-│   ├── Infrastructure/
-│   │   └── Repositories/
-│   │       └── UserRepository.php
-│   └── Application/
-│       ├── Controllers/
-│       │   └── UserController.php
-│       └── UseCases/
-│           └── CreateUserUseCase.php
-```
-
-### Padrões de Implementação
-
-A extensão suporta diferentes níveis de complexidade:
-
-1. **Nível Básico**: Acesso direto ao banco via Cycle Database
-   - Ideal para MVPs e prototipagem rápida
-   - Queries SQL diretas com segurança
-   - Mínima configuração necessária
-
-2. **Nível Intermediário**: Padrão Repository
-   - Organização do código em camadas
-   - Facilita testes e manutenção
-   - Reutilização de lógica de negócio
-
-3. **Nível Avançado**: Clean Architecture
-   - Separação completa de responsabilidades
-   - Use Cases e Value Objects
-   - Máxima testabilidade e flexibilidade
-
-## 📚 Documentação Completa
-
-- [Guia de Integração Completo](docs/integration-guide.md) 🆕
-- [Guia Completo - Do Básico ao Avançado](docs/guia-completo.md)
-- [Documentação Principal](docs/index.md)
-- [Resolução de Problemas](docs/integration-guide.md#resolução-de-problemas)
-- [Exemplos Práticos](docs/integration-guide.md#exemplos-práticos)
-- [Guia de Contribuição](CONTRIBUTING.md)
-
-## 🤝 Contribuição
-
-Contribuições são bem-vindas! Consulte [CONTRIBUTING.md](CONTRIBUTING.md) para guidelines.
+Contribuições são bem-vindas! Por favor, siga os padrões PSR-12 e inclua testes para novas funcionalidades.
 
 ## 📄 Licença
 
-Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+Este projeto está licenciado sob a licença MIT.
+
+## 🔗 Links Úteis
+
+- [Express PHP Framework](https://github.com/cafernandes/express-php)
+- [Cycle ORM Documentation](https://cycle-orm.dev)
+- [PHPStan](https://phpstan.org)
+- [PSR-12 Coding Standard](https://www.php-fig.org/psr/psr-12/)
