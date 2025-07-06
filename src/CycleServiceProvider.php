@@ -12,6 +12,7 @@ use Cycle\Database\DatabaseManager;
 use Cycle\ORM\EntityManager;
 use Cycle\ORM\Factory;
 use Cycle\ORM\ORM;
+use Cycle\ORM\ORMInterface;
 use Cycle\ORM\Schema;
 use Cycle\Schema\Compiler;
 use Cycle\Schema\Generator;
