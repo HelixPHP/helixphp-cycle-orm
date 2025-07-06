@@ -3,10 +3,10 @@ parameters:
     treatPhpDocTypesAsCertain: false
     paths:
         - src
-        - tests
     excludePaths:
-        - tests/HealthCheckTest.php
-        - tests/Integration/FullIntegrationTest.php
+        - tests
+    bootstrapFiles:
+        - vendor/autoload.php
     ignoreErrors:
         - '#Parameter \#1 of callable .* expects Express\\Http\\Request, .* given#'
 
@@ -15,3 +15,7 @@ parameters:
         - Express\Http\Request
         - Express\Http\Response
         - Express\Core\Application
+    
+    # Stub files for better type inference
+    stubFiles:
+        - vendor/cafernandes/express-php/src/Http/Request.php
