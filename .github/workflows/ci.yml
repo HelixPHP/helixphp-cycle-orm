@@ -33,6 +33,18 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-php-${{ matrix.php-version }}-
 
+    - name: Setup GitHub Token for Composer
+      run: composer config --global github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Replace local path with GitHub repository
+      run: |
+        sed -i 's|"type": "path"|"type": "vcs"|' composer.json
+        sed -i 's|"url": "../pivotphp-core"|"url": "https://github.com/${{ github.repository_owner }}/pivotphp-core"|' composer.json
+        sed -i 's|"pivotphp/core": "\*@dev"|"pivotphp/core": "dev-main"|' composer.json
+
+    - name: Debug composer.json
+      run: cat composer.json
+
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-interaction
 

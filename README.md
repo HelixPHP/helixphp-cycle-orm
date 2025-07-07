@@ -28,6 +28,26 @@ Robust and well-tested Cycle ORM integration for PivotPHP microframework
 composer require pivotphp/cycle-orm
 ```
 
+### Development Setup
+
+When developing locally with both pivotphp-core and pivotphp-cycle-orm:
+
+1. Clone both repositories in the same parent directory:
+```bash
+git clone https://github.com/CAFernandes/pivotphp-core.git
+git clone https://github.com/CAFernandes/pivotphp-cycle-orm.git
+```
+
+2. Install dependencies:
+```bash
+cd pivotphp-cycle-orm
+composer install
+```
+
+The `composer.json` is configured to use the local path `../pivotphp-core` for development.
+
+**Note**: The CI/CD pipeline automatically adjusts the composer configuration to use the GitHub repository instead of the local path.
+
 ## 🔧 Quick Start
 
 ### 1. Register the Service Provider

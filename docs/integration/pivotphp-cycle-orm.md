@@ -88,7 +88,7 @@ No `config/app.php`, adicione o provider:
 ```php
 return [
     'providers' => [
-        Helix\CycleORM\CycleServiceProvider::class,
+        PivotPHP\CycleORM\CycleServiceProvider::class,
     ],
 ];
 ```
@@ -230,11 +230,11 @@ $app->run();
 
 ## Links Úteis
 
-- [PivotPHP](https://github.com/PivotPHP/helix-core)
+- [PivotPHP](https://github.com/PivotPHP/pivotphp-core)
 - [Cycle ORM](https://cycle-orm.dev/docs/intro/2.x/en)
 - [Cycle ORM Annotations](https://cycle-orm.dev/docs/annotated/2.x/en)
 - [Cycle ORM Migrations](https://cycle-orm.dev/docs/migrations/2.x/en)
-- [Exemplo de projeto PivotPHP + Cycle ORM](https://github.com/PivotPHP/helix-core-cycle-orm-extension)
+- [Exemplo de projeto PivotPHP + Cycle ORM](https://github.com/PivotPHP/pivotphp-cycle-orm)
 
 ---
 
