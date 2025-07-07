@@ -7,7 +7,7 @@ All files have been updated to reflect the PivotPHP branding:
 ### Framework References
 - Updated from "Express PHP" to "PivotPHP"
 - Updated from "PivotPHP" to "PivotPHP"
-- Updated namespace references from `PivotPHP\Core\` to `Helix\`
+- Updated namespace references to `PivotPHP\CycleORM\`
 
 ### Documentation Structure
 - Fixed typo: "techinical" → "technical"
@@ -20,13 +20,13 @@ All files have been updated to reflect the PivotPHP branding:
 
 ### Package Information
 - ✅ Package name: `pivotphp/cycle-orm`
-- ✅ Namespace: `Helix\CycleORM\`
+- ✅ Namespace: `PivotPHP\CycleORM\`
 - ✅ Framework dependency: `pivotphp/core`
 
 ### Files Updated
 - ✅ Documentation (docs/)
 - ✅ Scripts (scripts/)
-- ✅ Legacy files (legacy/)
+- ✅ Legacy files removed
 - ✅ README.md
 - ✅ CHANGELOG.md
 

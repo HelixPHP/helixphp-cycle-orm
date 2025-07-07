@@ -50,12 +50,12 @@ cat > composer.json << 'EOF'
   },
   "autoload": {
     "psr-4": {
-      "Helix\\CycleORM\\": "src/"
+      "PivotPHP\\CycleORM\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Helix\\CycleORM\\Tests\\": "tests/",
+      "PivotPHP\\CycleORM\\Tests\\": "tests/",
       "Cycle\\ORM\\Select\\": "tests/Mocks/Cycle/ORM/Select/"
     }
   },

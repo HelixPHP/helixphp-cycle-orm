@@ -1,6 +1,6 @@
 # CycleRequest
 
-O objeto `CycleRequest` é um wrapper que estende o `Helix\Http\Request` para integrar recursos do Cycle ORM diretamente na requisição, mantendo compatibilidade total com o objeto original.
+O objeto `CycleRequest` é um wrapper que estende o `PivotPHP\Core\Http\Request` para integrar recursos do Cycle ORM diretamente na requisição, mantendo compatibilidade total com o objeto original.
 
 ## Visão Geral
 Permite acessar ORM, EntityManager, Database, usuário autenticado e informações de autenticação diretamente na requisição, facilitando o desenvolvimento de middlewares e handlers avançados.

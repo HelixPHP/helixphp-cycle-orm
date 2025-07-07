@@ -14,7 +14,7 @@ require 'vendor/autoload.php';
 use PivotPHP\Core\CycleORM\CycleServiceProvider;
 use PivotPHP\Core\CycleORM\Middleware\CycleMiddleware;
 
-$app = new Helix\Core\Application();
+$app = new PivotPHP\Core\Application();
 
 // Configurar banco
 $_ENV['DB_CONNECTION'] = 'sqlite';

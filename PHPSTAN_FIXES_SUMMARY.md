@@ -6,7 +6,7 @@ This document summarizes the changes made to fix PHPStan errors in the pivotphp-
 
 1. **Private/Protected Property Access**: Fixed direct access to private properties of `PivotPHP\Core\Http\Request`
 2. **Type Mismatch**: Resolved issues with `CycleRequest` vs `Request` type compatibility
-3. **Namespace References**: Updated old `Helix` namespace references to `PivotPHP\Core`
+3. **Namespace References**: Updated old namespace references to `PivotPHP\Core`
 
 ## Files Modified
 
@@ -27,8 +27,8 @@ This document summarizes the changes made to fix PHPStan errors in the pivotphp-
 - Simplified middleware logic by removing CycleRequest instance checks
 
 ### 4. `/phpstan.neon`
-- Removed obsolete `Helix\Http\Request` ignore pattern
-- Updated `universalObjectCratesClasses` from `Helix\*` to `PivotPHP\Core\*` namespaces
+- Updated namespace patterns in configuration
+- Updated `universalObjectCratesClasses` to `PivotPHP\Core\*` namespaces
 
 ## Result
 
