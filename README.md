@@ -1,20 +1,20 @@
-# HelixPHP Cycle ORM
+# PivotPHP Cycle ORM
 
 <div align="center">
 
 [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-blue.svg)](https://www.php.net/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Latest Stable Version](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)](https://github.com/HelixPHP/helixphp-cycle-orm/releases)
+[![Latest Stable Version](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)](https://github.com/PivotPHP/pivotphp-cycle-orm/releases)
 [![PHPStan](https://img.shields.io/badge/PHPStan-Level%209-success.svg)](https://phpstan.org/)
-[![Tests](https://img.shields.io/badge/tests-67%20passed-success.svg)](https://github.com/HelixPHP/helixphp-cycle-orm/actions)
+[![Tests](https://img.shields.io/badge/tests-67%20passed-success.svg)](https://github.com/PivotPHP/pivotphp-cycle-orm/actions)
 
-Robust and well-tested Cycle ORM integration for HelixPHP microframework
+Robust and well-tested Cycle ORM integration for PivotPHP microframework
 
 </div>
 
 ## 🚀 Features
 
-- **Seamless Integration**: Deep integration with HelixPHP Core
+- **Seamless Integration**: Deep integration with PivotPHP Core
 - **Type Safety**: Full type safety with PHPStan Level 9
 - **Repository Pattern**: Built-in repository pattern support
 - **Performance Monitoring**: Query logging and performance profiling
@@ -25,7 +25,7 @@ Robust and well-tested Cycle ORM integration for HelixPHP microframework
 ## 📦 Installation
 
 ```bash
-composer require helixphp/cycle-orm
+composer require pivotphp/cycle-orm
 ```
 
 ## 🔧 Quick Start
@@ -33,8 +33,8 @@ composer require helixphp/cycle-orm
 ### 1. Register the Service Provider
 
 ```php
-use Helix\Core\Application;
-use Helix\CycleORM\CycleServiceProvider;
+use PivotPHP\Core\Core\Application;
+use PivotPHP\Core\CycleORM\CycleServiceProvider;
 
 $app = new Application();
 $app->register(new CycleServiceProvider());
@@ -73,13 +73,13 @@ class User
 {
     #[Column(type: 'primary')]
     private int $id;
-    
+
     #[Column(type: 'string')]
     private string $name;
-    
+
     #[Column(type: 'string', unique: true)]
     private string $email;
-    
+
     // Getters and setters...
 }
 ```
@@ -89,7 +89,7 @@ class User
 ```php
 $app->get('/users', function (CycleRequest $request) {
     $users = $request->getRepository(User::class)->findAll();
-    
+
     return $request->response()->json($users);
 });
 
@@ -97,9 +97,9 @@ $app->post('/users', function (CycleRequest $request) {
     $user = new User();
     $user->setName($request->input('name'));
     $user->setEmail($request->input('email'));
-    
+
     $request->persist($user);
-    
+
     return $request->response()->json($user, 201);
 });
 ```
@@ -116,7 +116,7 @@ class UserRepository extends Repository
     {
         return $this->findOne(['email' => $email]);
     }
-    
+
     public function findActive(): array
     {
         return $this->select()
@@ -130,22 +130,22 @@ class UserRepository extends Repository
 ### Transaction Middleware
 
 ```php
-use Helix\CycleORM\Middleware\TransactionMiddleware;
+use PivotPHP\Core\CycleORM\Middleware\TransactionMiddleware;
 
 // Automatic transaction handling
-$app->post('/api/orders', 
+$app->post('/api/orders',
     new TransactionMiddleware(),
     function (CycleRequest $request) {
         // All database operations are wrapped in a transaction
         $order = new Order();
         $request->persist($order);
-        
+
         // If an exception occurs, transaction is rolled back
         foreach ($request->input('items') as $item) {
             $orderItem = new OrderItem();
             $request->persist($orderItem);
         }
-        
+
         return $request->response()->json($order);
     }
 );
@@ -154,7 +154,7 @@ $app->post('/api/orders',
 ### Query Monitoring
 
 ```php
-use Helix\CycleORM\Monitoring\QueryLogger;
+use PivotPHP\Core\CycleORM\Monitoring\QueryLogger;
 
 // Enable query logging
 $logger = $app->get(QueryLogger::class);
@@ -172,12 +172,12 @@ $stats = $logger->getStatistics();
 ### Health Checks
 
 ```php
-use Helix\CycleORM\Health\CycleHealthCheck;
+use PivotPHP\Core\CycleORM\Health\CycleHealthCheck;
 
 $app->get('/health', function () use ($app) {
     $health = $app->get(CycleHealthCheck::class);
     $status = $health->check();
-    
+
     return [
         'status' => $status->isHealthy() ? 'healthy' : 'unhealthy',
         'database' => $status->getData()
@@ -190,7 +190,7 @@ $app->get('/health', function () use ($app) {
 ### Entity Validation Middleware
 
 ```php
-use Helix\CycleORM\Middleware\EntityValidationMiddleware;
+use PivotPHP\Core\CycleORM\Middleware\EntityValidationMiddleware;
 
 $app->post('/users',
     new EntityValidationMiddleware(User::class, [
@@ -204,7 +204,7 @@ $app->post('/users',
 ### Performance Profiling
 
 ```php
-use Helix\CycleORM\Monitoring\PerformanceProfiler;
+use PivotPHP\Core\CycleORM\Monitoring\PerformanceProfiler;
 
 $profiler = $app->get(PerformanceProfiler::class);
 $profiler->startProfiling();
@@ -223,16 +223,16 @@ $profile = $profiler->stopProfiling();
 
 ```php
 // Create entity command
-php vendor/bin/helix cycle:entity User
+php vendor/bin/pivotphp cycle:entity User
 
 // Run migrations
-php vendor/bin/helix cycle:migrate
+php vendor/bin/pivotphp cycle:migrate
 
 // Update schema
-php vendor/bin/helix cycle:schema
+php vendor/bin/pivotphp cycle:schema
 
 // Check database status
-php vendor/bin/helix cycle:status
+php vendor/bin/pivotphp cycle:status
 ```
 
 ## 🧪 Testing
@@ -263,16 +263,16 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## 📄 License
 
-HelixPHP Cycle ORM is open-sourced software licensed under the [MIT license](LICENSE).
+PivotPHP Cycle ORM is open-sourced software licensed under the [MIT license](LICENSE).
 
 ## 🙏 Credits
 
 - Created by [Caio Alberto Fernandes](https://github.com/CAFernandes)
 - Built on top of [Cycle ORM](https://cycle-orm.dev/)
-- Part of the [HelixPHP](https://github.com/HelixPHP) ecosystem
+- Part of the [PivotPHP](https://github.com/PivotPHP) ecosystem
 
 ---
 
 <div align="center">
-  <sub>Built with HelixPHP - The modern PHP microframework</sub>
+  <sub>Built with PivotPHP - The modern PHP microframework</sub>
 </div>

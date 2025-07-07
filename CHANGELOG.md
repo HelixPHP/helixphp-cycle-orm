@@ -1,99 +1,112 @@
 # Changelog
 
-## [1.0.0] - 2025-07-06
-
-### Changed
-- Migrated from Express PHP to HelixPHP framework
-- Updated all namespaces from `Express\` to `Helix\`
-- Renamed package from `cafernandes/express-php-cycle-orm` to `helixphp/cycle-orm`
-- Updated documentation structure and fixed typos
-- Improved PSR-12 compliance and code quality
-
-### Fixed
-- Fixed directory name typo: `techinical` → `technical`
-- Fixed all namespace references in documentation
-- Updated version references to v1.0.0
-
-
-All notable changes to HelixPHP Cycle ORM will be documented in this file.
+All notable changes to PivotPHP Cycle ORM will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2024-01-07
+## [1.0.0] - 2025-07-07
 
-### 🎉 Initial Release of HelixPHP Cycle ORM
+### 🎉 **Initial Stable Release**
 
-First stable release of HelixPHP Cycle ORM integration, marking the rebrand from the previous namespace to HelixPHP.
+First stable release of PivotPHP Cycle ORM integration, providing robust database ORM capabilities for the PivotPHP Framework.
 
-### Added
+#### Added
+- **Cycle ORM Integration**: Complete integration with Cycle ORM for PivotPHP Framework
+- **Service Provider**: `CycleServiceProvider` for seamless framework integration
+- **Repository Pattern**: Built-in repository pattern support with custom repositories
+- **Transaction Middleware**: Automatic transaction handling for requests
+- **Entity Validation**: Middleware for entity validation with custom rules
+- **Query Monitoring**: Performance monitoring and query logging capabilities
+- **Health Checks**: Database health monitoring integration
+- **Migration Support**: Schema migration tools and commands
+- **Database Factory**: Support for multiple database connections
+- **Type Safety**: Full type safety with PHPStan Level 9 compliance
 
-#### Core Integration
-- Complete Cycle ORM integration with HelixPHP Core
-- CycleServiceProvider for seamless setup
-- CycleRequest class extending HelixPHP Request with ORM capabilities
-- Repository factory with type-safe implementations
-- Entity manager integration for persistence
+#### Features
+- **Multiple Databases**: Support for MySQL, PostgreSQL, SQLite, SQL Server
+- **Relationships**: Full support for all Cycle ORM relationship types
+- **Migrations**: Schema versioning and migration system
+- **Factories**: Entity factories for testing and seeding
+- **Events**: Database events and listeners
+- **Caching**: Query result caching integration
+- **Debugging**: Query debugging and profiling tools
+- **Commands**: CLI commands for database operations
 
-#### Middleware Suite
-- **TransactionMiddleware**: Automatic transaction wrapping for routes
-- **EntityValidationMiddleware**: Request validation against entity rules
-- **HealthCheckMiddleware**: Database health monitoring
-- **CycleMiddleware**: Core middleware for ORM integration
+#### Technical Details
+- **Namespace**: `PivotPHP\CycleORM`
+- **Framework**: PivotPHP Core v1.0.0+
+- **Cycle ORM**: v2.x compatibility
+- **PHP**: 8.1+ with full 8.4 compatibility
+- **Standards**: PSR-11, PSR-12 compliant
+- **Testing**: Comprehensive test coverage
 
-#### Monitoring & Performance
-- **QueryLogger**: Track and analyze database queries
-- **PerformanceProfiler**: Profile database operations
-- **MetricsCollector**: Gather performance statistics
-- **CycleHealthCheck**: Monitor database connection health
+#### Performance
+- **Optimized Queries**: Query optimization and caching
+- **Connection Pooling**: Efficient database connection management
+- **Lazy Loading**: Intelligent lazy loading of relationships
+- **Memory Management**: Optimized memory usage for large datasets
+
+#### Documentation
+- Complete integration guide
+- API reference documentation
+- Performance optimization guide
+- Migration from other ORMs
+- Best practices and examples
 
 #### CLI Commands
-- `cycle:entity` - Generate entity classes
-- `cycle:migrate` - Run database migrations
-- `cycle:schema` - Update database schema
-- `cycle:status` - Check database status
+```bash
+php vendor/bin/pivotphp cycle:entity User       # Create entity
+php vendor/bin/pivotphp cycle:migrate          # Run migrations
+php vendor/bin/pivotphp cycle:schema           # Update schema
+php vendor/bin/pivotphp cycle:status           # Check status
+```
 
-#### Developer Experience
-- Zero-configuration setup with sensible defaults
-- Type-safe repository pattern
-- Comprehensive helper functions
-- Integration with HelixPHP's validation system
+#### Basic Usage
+```php
+use PivotPHP\Core\Core\Application;
+use PivotPHP\CycleORM\CycleServiceProvider;
 
-### Changed
-- **Namespace Migration**: Changed from CAFernandes\ExpressPHP to Helix\CycleORM
-- **Package Name**: Now `helixphp/cycle-orm`
-- **Dependencies**: Updated to use `helixphp/core` instead of `cafernandes/express-php`
-- **PHP Version**: Requires PHP 8.1+
+$app = new Application();
+$app->register(new CycleServiceProvider());
 
-### Testing
-- 67 comprehensive tests covering all features
-- Unit, feature, and integration test suites
-- Mock implementations for testing
-- Test helpers and utilities
+// Use in routes
+$app->get('/users', function (CycleRequest $request) {
+    $users = $request->getRepository(User::class)->findAll();
+    return $request->response()->json($users);
+});
+```
 
-### Documentation
-- Complete integration guide
-- Quick reference documentation
-- Example implementations
-- Migration guide from previous versions
+### 📋 Release Notes
 
-### Quality
-- PHPStan Level 9 compliance
-- PSR-12 code style
-- Comprehensive type coverage
-- Performance optimized
+This initial release provides a complete Cycle ORM integration for PivotPHP Framework, offering:
+
+1. **Database Abstraction**: Work with multiple database systems
+2. **Type Safety**: Full type safety and static analysis support
+3. **Performance**: Optimized for high-performance applications
+4. **Developer Experience**: Rich CLI tools and debugging capabilities
+5. **Testing**: Comprehensive test coverage and factories
+
+### 🔄 Future Roadmap
+
+Future releases will focus on:
+- Additional database drivers
+- Enhanced performance optimizations
+- Advanced caching strategies
+- Extended CLI tooling
+- Community-requested features
+
+### 📞 Support
+
+For questions, issues, or contributions:
+- **GitHub**: [https://github.com/PivotPHP/pivotphp-cycle-orm](https://github.com/PivotPHP/pivotphp-cycle-orm)
+- **Documentation**: [docs/](docs/)
+- **Integration Guide**: [docs/integration-guide.md](docs/integration-guide.md)
+- **Examples**: [examples/](examples/)
 
 ---
 
-## Previous History
-
-### [1.1.0] - Previous Namespace
-- Added complete integration guide
-- PHP 8.4 compatibility updates
-- PSR-12 compliance improvements
-- CRUD examples
-
-### [1.0.0] - Previous Namespace
-- Initial release under previous namespace
-- Basic Cycle ORM integration
-- Core middleware implementation
+**Current Version**: v1.0.0  
+**Release Date**: July 7, 2025  
+**Stability**: Stable  
+**Framework Requirement**: PivotPHP Core v1.0.0+

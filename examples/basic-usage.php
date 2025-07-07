@@ -1,16 +1,16 @@
 <?php
 require_once 'vendor/autoload.php';
 
-use Helix\Core\Application;
+use PivotPHP\Core\Core\Application;
 use App\Models\User;
 use App\Models\Post;
 
 /**
- * Exemplo básico de uso da extensão Express-PHP Cycle ORM
+ * Exemplo básico de uso da extensão PivotPHP Cycle ORM
  * Demonstra CRUD completo com relacionamentos
  */
 
-// Inicializar aplicação Express-PHP
+// Inicializar aplicação PivotPHP
 $app = new Application();
 
 // A extensão Cycle ORM é carregada automaticamente via auto-discovery!

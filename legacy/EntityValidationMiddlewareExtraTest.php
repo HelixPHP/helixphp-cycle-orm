@@ -1,10 +1,10 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Middleware;
+namespace PivotPHP\CycleORM\Tests\Middleware;
 
-use Helix\CycleORM\Middleware\EntityValidationMiddleware;
-use Helix\Http\Request;
-use Helix\Http\Response;
+use PivotPHP\CycleORM\Middleware\EntityValidationMiddleware;
+use PivotPHP\Core\Http\Request;
+use PivotPHP\Core\Http\Response;
 use PHPUnit\Framework\TestCase;
 
 class EntityValidationMiddlewareExtraTest extends TestCase

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="Express-PHP PSR-12 Extended">
+<ruleset name="PivotPHP PSR-12 Extended">
     <description>Express PHP Framework PSR-12 Extended Coding Standard</description>
     <file>src</file>
     <file>tests</file>

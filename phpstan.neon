@@ -10,12 +10,12 @@ parameters:
     ignoreErrors:
         - '#Parameter \#1 of callable .* expects Helix\\Http\\Request, .* given#'
 
-    # HelixPHP specific ignores
+    # PivotPHP specific ignores
     universalObjectCratesClasses:
         - Helix\Http\Request
         - Helix\Http\Response
         - Helix\Core\Application
-    
+
     # Stub files for better type inference
-    stubFiles:
-        - vendor/helixphp/core/src/Http/Request.php
+    # stubFiles:
+    #     - ../pivotphp-core/src/Http/Request.php

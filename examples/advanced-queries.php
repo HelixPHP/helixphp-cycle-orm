@@ -2,7 +2,7 @@
 
 require_once 'vendor/autoload.php';
 
-use Helix\Core\Application;
+use PivotPHP\Core\Core\Application;
 use App\Models\User;
 use App\Models\Post;
 use App\Models\Comment;

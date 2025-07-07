@@ -1,14 +1,16 @@
 <?php
 
-namespace Helix\CycleORM;
+namespace PivotPHP\CycleORM;
 
 use Cycle\Annotated\Entities as AnnotatedEntities;
+use Cycle\Annotated\Locator\TokenizerEntityLocator;
 use Cycle\Database\Config\DatabaseConfig;
-use Cycle\Database\Config\SQLiteDriverConfig;
+use Cycle\Database\Config\MySQL\TcpConnectionConfig;
 use Cycle\Database\Config\MySQLDriverConfig;
-use Cycle\Database\Config\SQLite\ConnectionConfig as SQLiteConnectionConfig;
-use Cycle\Database\Config\MySQL\ConnectionConfig as MySQLConnectionConfig;
+use Cycle\Database\Config\SQLite\FileConnectionConfig;
+use Cycle\Database\Config\SQLiteDriverConfig;
 use Cycle\Database\DatabaseManager;
+use Cycle\Database\DatabaseProviderInterface;
 use Cycle\ORM\EntityManager;
 use Cycle\ORM\Factory;
 use Cycle\ORM\ORM;
@@ -17,60 +19,18 @@ use Cycle\ORM\Schema;
 use Cycle\Schema\Compiler;
 use Cycle\Schema\Generator;
 use Cycle\Schema\Registry;
-use Helix\Core\Application;
-use Helix\Providers\ServiceProvider;
-use Symfony\Component\Finder\Finder;
-use Helix\CycleORM\Monitoring\QueryLogger;
-use Helix\CycleORM\Monitoring\PerformanceProfiler;
-use Helix\CycleORM\Exceptions\CycleORMException;
+use PivotPHP\Core\Core\Application;
+use PivotPHP\CycleORM\Exceptions\CycleORMException;
+use PivotPHP\CycleORM\Monitoring\PerformanceProfiler;
+use PivotPHP\CycleORM\Monitoring\QueryLogger;
+use PivotPHP\Core\Providers\ServiceProvider;
+use Psr\Log\LoggerInterface;
 use Spiral\Tokenizer\ClassesInterface;
 use Spiral\Tokenizer\ClassLocator;
-use Cycle\Annotated\Locator\TokenizerEntityLocator;
-use Psr\Log\LoggerInterface;
+use Symfony\Component\Finder\Finder;
 
 class CycleServiceProvider extends ServiceProvider
 {
-    /**
-     * @param string $key
-     * @param non-empty-string $default
-     * @return non-empty-string
-     */
-    private function getEnvString(string $key, string $default): string
-    {
-        $value = \env($key, $default);
-        if (!is_string($value) || $value === '') {
-            return $default;
-        }
-        return $value;
-    }
-
-    /**
-     * @param string $key
-     * @param int<1, max> $default
-     * @return int<1, max>
-     */
-    private function getEnvInt(string $key, int $default): int
-    {
-        $value = \env($key, (string)$default);
-        if (!is_numeric($value)) {
-            return $default;
-        }
-        $intValue = (int)$value;
-        return $intValue > 0 ? $intValue : $default;
-    }
-
-    /**
-     * @param string $key
-     * @return non-empty-string|null
-     */
-    private function getEnvStringOrNull(string $key): ?string
-    {
-        $value = \env($key, '');
-        if (!is_string($value) || $value === '') {
-            return null;
-        }
-        return $value;
-    }
     public function __construct(Application $app)
     {
         parent::__construct($app);
@@ -109,7 +69,7 @@ class CycleServiceProvider extends ServiceProvider
      *   $router->get('/rota', $this->ensureCallableHandler([$controller, 'metodo']));
      * Assim, evita-se TypeError ao passar array como handler.
      *
-     * @param callable|array{0:object,1:string} $handler
+     * @param array{0:object,1:string}|callable $handler
      */
     protected function ensureCallableHandler($handler): callable
     {
@@ -130,6 +90,50 @@ class CycleServiceProvider extends ServiceProvider
         throw new \InvalidArgumentException('Handler de rota inválido: deve ser callable.');
     }
 
+    /**
+     * @param non-empty-string $default
+     *
+     * @return non-empty-string
+     */
+    private function getEnvString(string $key, string $default): string
+    {
+        $value = \env($key, $default);
+        if (!is_string($value) || '' === $value) {
+            return $default;
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param int<1, max> $default
+     *
+     * @return int<1, max>
+     */
+    private function getEnvInt(string $key, int $default): int
+    {
+        $value = \env($key, (string) $default);
+        if (!is_numeric($value)) {
+            return $default;
+        }
+        $intValue = (int) $value;
+
+        return $intValue > 0 ? $intValue : $default;
+    }
+
+    /**
+     * @return null|non-empty-string
+     */
+    private function getEnvStringOrNull(string $key): ?string
+    {
+        $value = \env($key, '');
+        if (!is_string($value) || '' === $value) {
+            return null;
+        }
+
+        return $value;
+    }
+
     // Incluir os helpers necessários
     private static function includeHelpers(): void
     {
@@ -147,7 +151,7 @@ class CycleServiceProvider extends ServiceProvider
                     // Use proper driver config
                     $connectionConfig = $self->getConnectionConfig();
 
-                    $manager = new DatabaseManager(
+                    return new DatabaseManager(
                         new DatabaseConfig(
                             [
                                 'default' => 'default',
@@ -155,19 +159,17 @@ class CycleServiceProvider extends ServiceProvider
                                     'default' => ['connection' => 'default'],
                                 ],
                                 'connections' => [
-                                    'default' => $connectionConfig
-                                ]
+                                    'default' => $connectionConfig,
+                                ],
                             ]
                         )
                     );
 
                     // Skip connection validation for now to get basic functionality working
                     // $self->validateDatabaseConnection($manager);
-
-                    return $manager;
                 } catch (\Exception $e) {
                     throw new CycleORMException(
-                        "Critical database service registration failed: " . $e->getMessage(),
+                        'Critical database service registration failed: ' . $e->getMessage(),
                         0,
                         $e
                     );
@@ -194,12 +196,13 @@ class CycleServiceProvider extends ServiceProvider
                                     ? $config['directories']
                                     : [];
                                 $finder->files()->in($dirs);
+
                                 return new ClassLocator($finder);
                             }
                         );
                     }
                     $classLocator = $self->app->getContainer()->get(ClassesInterface::class);
-                    if (!$classLocator instanceof \Spiral\Tokenizer\ClassesInterface) {
+                    if (!$classLocator instanceof ClassesInterface) {
                         throw new \RuntimeException('ClassesInterface não é ClassesInterface');
                     }
                     $generators = [
@@ -213,15 +216,16 @@ class CycleServiceProvider extends ServiceProvider
                         new Generator\RenderModifiers(),
                     ];
                     $dbal = $self->app->getContainer()->get('cycle.database');
-                    if (!$dbal instanceof \Cycle\Database\DatabaseProviderInterface) {
+                    if (!$dbal instanceof DatabaseProviderInterface) {
                         throw new \RuntimeException('cycle.database não é DatabaseProviderInterface');
                     }
                     $registry = new Registry($dbal);
                     $compiler = new Compiler();
+
                     return $compiler->compile($registry, $generators);
                 } catch (\Exception $e) {
                     throw new CycleORMException(
-                        "Critical schema compilation failed: " . $e->getMessage(),
+                        'Critical schema compilation failed: ' . $e->getMessage(),
                         0,
                         $e
                     );
@@ -253,7 +257,6 @@ class CycleServiceProvider extends ServiceProvider
             );
         }
     }
-
 
     private function enableDevelopmentFeatures(): void
     {
@@ -298,7 +301,7 @@ class CycleServiceProvider extends ServiceProvider
             function () use ($self) {
                 try {
                     $dbal = $self->app->getContainer()->get('cycle.database');
-                    if (!$dbal instanceof \Cycle\Database\DatabaseProviderInterface) {
+                    if (!$dbal instanceof DatabaseProviderInterface) {
                         throw new \RuntimeException('cycle.database não é DatabaseProviderInterface');
                     }
                     $factory = new Factory($dbal);
@@ -308,14 +311,14 @@ class CycleServiceProvider extends ServiceProvider
                         throw new \RuntimeException('cycle.schema não é array');
                     }
                     $schema = new Schema($compiledSchema);
-                    $orm = new ORM(
+
+                    return new ORM(
                         $factory,
                         $schema
                     );
-                    return $orm;
                 } catch (\Exception $e) {
                     throw new CycleORMException(
-                        "Critical ORM service registration failed: " . $e->getMessage(),
+                        'Critical ORM service registration failed: ' . $e->getMessage(),
                         0,
                         $e
                     );
@@ -332,13 +335,14 @@ class CycleServiceProvider extends ServiceProvider
             function () use ($self) {
                 try {
                     $orm = $self->app->getContainer()->get('cycle.orm');
-                    if (!$orm instanceof \Cycle\ORM\ORMInterface) {
+                    if (!$orm instanceof ORMInterface) {
                         throw new \RuntimeException('cycle.orm não é ORMInterface');
                     }
+
                     return new EntityManager($orm);
                 } catch (\Exception $e) {
                     throw new CycleORMException(
-                        "Critical EntityManager service registration failed: " . $e->getMessage(),
+                        'Critical EntityManager service registration failed: ' . $e->getMessage(),
                         0,
                         $e
                     );
@@ -357,6 +361,7 @@ class CycleServiceProvider extends ServiceProvider
                 if (!$orm instanceof ORMInterface) {
                     throw new \RuntimeException('cycle.orm não é ORMInterface');
                 }
+
                 return new RepositoryFactory($orm);
             }
         );
@@ -368,7 +373,7 @@ class CycleServiceProvider extends ServiceProvider
             'cycle.migrator',
             function () {
                 // Retorna um migrator básico ou mock para desenvolvimento
-                return new class () {
+                return new class() {
                     /**
                      * @return array{pending: array<int, mixed>, executed: array<int, mixed>}
                      */
@@ -406,12 +411,12 @@ class CycleServiceProvider extends ServiceProvider
             'databases' => [
                 'default' => ['connection' => 'default'],
             ],
-            'connections' => []
+            'connections' => [],
         ];
 
-        if ($dbConnection === 'sqlite') {
+        if ('sqlite' === $dbConnection) {
             $sqliteDb = $this->getEnvString('DB_DATABASE', __DIR__ . '/../../../database/app.sqlite');
-            $sqliteConnection = new \Cycle\Database\Config\SQLite\FileConnectionConfig(
+            $sqliteConnection = new FileConnectionConfig(
                 database: $sqliteDb,
                 options: [
                     \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
@@ -429,7 +434,7 @@ class CycleServiceProvider extends ServiceProvider
             $mysqlDb = $this->getEnvString('DB_DATABASE', 'express');
             $mysqlUser = $this->getEnvString('DB_USERNAME', 'root');
             $mysqlPass = $this->getEnvStringOrNull('DB_PASSWORD');
-            $mysqlConnection = new \Cycle\Database\Config\MySQL\TcpConnectionConfig(
+            $mysqlConnection = new TcpConnectionConfig(
                 host: $mysqlHost,
                 port: $mysqlPort,
                 database: $mysqlDb,
@@ -447,44 +452,45 @@ class CycleServiceProvider extends ServiceProvider
     }
 
     /**
-     * @return SQLiteDriverConfig|MySQLDriverConfig
+     * @return MySQLDriverConfig|SQLiteDriverConfig
      */
     private function getConnectionConfig()
     {
         $dbConnection = $this->getEnvString('DB_CONNECTION', 'sqlite');
 
-        if ($dbConnection === 'sqlite') {
+        if ('sqlite' === $dbConnection) {
             $dbPath = $this->getEnvString('DB_DATABASE', __DIR__ . '/../../../database/app.sqlite');
-            $connection = new \Cycle\Database\Config\SQLite\FileConnectionConfig(
+            $connection = new FileConnectionConfig(
                 database: $dbPath,
                 options: [
                     \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
                     \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
                 ]
             );
+
             return new SQLiteDriverConfig(
                 connection: $connection,
                 queryCache: true
             );
-        } else {
-            $host = $this->getEnvString('DB_HOST', 'localhost');
-            $port = $this->getEnvInt('DB_PORT', 3306);
-            $db = $this->getEnvString('DB_DATABASE', 'express');
-            $user = $this->getEnvString('DB_USERNAME', 'root');
-            $pass = $this->getEnvString('DB_PASSWORD', 'defaultpass');
-            $connection = new \Cycle\Database\Config\MySQL\TcpConnectionConfig(
-                host: $host,
-                port: $port,
-                database: $db,
-                user: $user,
-                password: $pass,
-                options: []
-            );
-            return new MySQLDriverConfig(
-                connection: $connection,
-                queryCache: true
-            );
         }
+        $host = $this->getEnvString('DB_HOST', 'localhost');
+        $port = $this->getEnvInt('DB_PORT', 3306);
+        $db = $this->getEnvString('DB_DATABASE', 'express');
+        $user = $this->getEnvString('DB_USERNAME', 'root');
+        $pass = $this->getEnvString('DB_PASSWORD', 'defaultpass');
+        $connection = new TcpConnectionConfig(
+            host: $host,
+            port: $port,
+            database: $db,
+            user: $user,
+            password: $pass,
+            options: []
+        );
+
+        return new MySQLDriverConfig(
+            connection: $connection,
+            queryCache: true
+        );
     }
 
     /**
@@ -501,14 +507,14 @@ class CycleServiceProvider extends ServiceProvider
             'connections' => [],
             'directories' => [
                 getcwd() . '/app/Entities',
-                getcwd() . '/src/Entities'
-            ]
+                getcwd() . '/src/Entities',
+            ],
         ];
 
-        if ($dbConnection === 'sqlite') {
+        if ('sqlite' === $dbConnection) {
             $sqliteDb = $this->getEnvString('DB_DATABASE', __DIR__ . '/../../../database/app.sqlite');
             $sqliteOptions = [];
-            $sqliteConnection = new \Cycle\Database\Config\SQLite\FileConnectionConfig(
+            $sqliteConnection = new FileConnectionConfig(
                 database: $sqliteDb,
                 options: $sqliteOptions
             );
@@ -523,7 +529,7 @@ class CycleServiceProvider extends ServiceProvider
             $mysqlUser = $this->getEnvString('DB_USERNAME', 'root');
             $mysqlPass = $this->getEnvStringOrNull('DB_PASSWORD');
             $mysqlOptions = [];
-            $mysqlConnection = new \Cycle\Database\Config\MySQL\TcpConnectionConfig(
+            $mysqlConnection = new TcpConnectionConfig(
                 host: $mysqlHost,
                 port: $mysqlPort,
                 database: $mysqlDb,
@@ -542,7 +548,7 @@ class CycleServiceProvider extends ServiceProvider
 
     /**
      * Valida a conexão executando uma query simples.
-     * Commented out due to PHPStan issues with DatabaseManager::database() method
+     * Commented out due to PHPStan issues with DatabaseManager::database() method.
      */
     // private function validateDatabaseConnection(DatabaseManager $manager): void
     // {
@@ -571,12 +577,13 @@ class CycleServiceProvider extends ServiceProvider
                 $logger = $this->app->getContainer()->get('logger');
                 if ($logger instanceof LoggerInterface) {
                     $logger->error($message, $context);
+
                     return;
                 }
             }
         } catch (\Throwable $loggerError) {
             // Fallback to error_log if logger fails
-            error_log("Logger error: " . $loggerError->getMessage());
+            error_log('Logger error: ' . $loggerError->getMessage());
         }
 
         // Fallback logging
@@ -607,6 +614,7 @@ class CycleServiceProvider extends ServiceProvider
                 $logger = $this->app->getContainer()->get('logger');
                 if ($logger instanceof LoggerInterface) {
                     $logger->debug($message, $context);
+
                     return;
                 }
             }
@@ -635,7 +643,7 @@ class CycleServiceProvider extends ServiceProvider
 
         if (!empty($missing)) {
             throw new CycleORMException(
-                "Required environment variables are missing: " . implode(', ', $missing)
+                'Required environment variables are missing: ' . implode(', ', $missing)
             );
         }
     }

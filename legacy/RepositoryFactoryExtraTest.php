@@ -1,12 +1,12 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Repository;
+namespace PivotPHP\CycleORM\Tests\Repository;
 
-use Helix\CycleORM\RepositoryFactory;
+use PivotPHP\CycleORM\RepositoryFactory;
 use Cycle\ORM\ORM;
 use PHPUnit\Framework\TestCase;
-use Helix\CycleORM\Tests\Repository\FakeFactory;
-use Helix\CycleORM\Tests\Repository\FakeSchema;
+use PivotPHP\CycleORM\Tests\Repository\FakeFactory;
+use PivotPHP\CycleORM\Tests\Repository\FakeSchema;
 
 class RepositoryFactoryExtraTest extends TestCase
 {

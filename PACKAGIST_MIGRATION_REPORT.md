@@ -1,10 +1,10 @@
-# HelixPHP Cycle ORM - Packagist Migration Report
+# PivotPHP Cycle ORM - Packagist Migration Report
 
 ## ✅ Migration Successful!
 
 ### 📊 Summary
 
-The `helixphp/cycle-orm` package has been successfully updated to use the published version of `helixphp/core` from Packagist instead of a local path dependency.
+The `pivotphp/cycle-orm` package has been successfully updated to use the published version of `pivotphp/core` from Packagist instead of a local path dependency.
 
 ### 🔧 Changes Made
 
@@ -13,13 +13,13 @@ The `helixphp/cycle-orm` package has been successfully updated to use the publis
 - "repositories": [
 -   {
 -     "type": "path",
--     "url": "../helixphp-core"
+-     "url": "../pivotphp-core"
 -   }
 - ],
   "require": {
     "php": "^8.1",
--   "helixphp/core": "@dev",
-+   "helixphp/core": "^1.0",
+-   "pivotphp/core": "@dev",
++   "pivotphp/core": "^1.0",
     "cycle/orm": "^2.10",
     ...
   },
@@ -37,7 +37,7 @@ Status: ✅ ALL TESTS PASSING
 
 ### 📦 Dependencies Installed
 
-- **helixphp/core**: v1.0.0 (from Packagist)
+- **pivotphp/core**: v1.0.0 (from Packagist)
 - **cycle/orm**: v2.10.1
 - **All other dependencies**: Successfully resolved
 
@@ -73,7 +73,7 @@ composer update
 ### ✅ Ready for Publication
 
 The package is now ready to be:
-1. Published to Packagist as `helixphp/cycle-orm`
+1. Published to Packagist as `pivotphp/cycle-orm`
 2. Used in production environments
 3. Integrated into CI/CD pipelines
 4. Installed by end users without issues
@@ -87,6 +87,6 @@ The package is now ready to be:
 
 ---
 
-**Date**: $(date)  
-**Package**: helixphp/cycle-orm  
+**Date**: $(date)
+**Package**: pivotphp/cycle-orm
 **Status**: ✅ Ready for Packagist Publication

@@ -1,17 +1,17 @@
 <?php
 
-namespace Helix\CycleORM\Middleware;
+namespace PivotPHP\CycleORM\Middleware;
 
-use Helix\CycleORM\Http\CycleRequest;
 use Cycle\Database\DatabaseInterface;
 use Cycle\ORM\EntityManagerInterface;
 use Cycle\ORM\ORMInterface;
-use Helix\Core\Application;
-use Helix\Http\Request;
-use Helix\Http\Response;
+use PivotPHP\Core\Core\Application;
+use PivotPHP\CycleORM\Http\CycleRequest;
+use PivotPHP\Core\Http\Request;
+use PivotPHP\Core\Http\Response;
 
 /**
- * Middleware compatível com arquitetura real do Express-PHP.
+ * Middleware compatível com arquitetura real do PivotPHP.
  */
 class CycleMiddleware
 {
@@ -23,9 +23,9 @@ class CycleMiddleware
     }
 
     /**
-     * Tornar o middleware compatível com o padrão callable do Express-PHP.
+     * Tornar o middleware compatível com o padrão callable do PivotPHP.
      *
-     * @param callable(Request, Response):void $next função next do Express-PHP
+     * @param callable(Request, Response):void $next função next do PivotPHP
      */
     public function __invoke(Request $req, Response $res, callable $next): void
     {
@@ -35,7 +35,7 @@ class CycleMiddleware
     /**
      * Middleware principal do Cycle ORM.
      *
-     * @param callable(Request, Response):void $next função next do Express-PHP
+     * @param callable(Request, Response):void $next função next do PivotPHP
      */
     public function handle(Request $req, Response $res, callable $next): void
     {

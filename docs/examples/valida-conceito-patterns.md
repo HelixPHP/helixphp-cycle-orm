@@ -1,6 +1,6 @@
 # Padrões de Uso - Projeto valida_conceito
 
-Este documento descreve os padrões de implementação encontrados no projeto `valida_conceito`, que demonstra o uso prático da extensão HelixPHP Cycle ORM.
+Este documento descreve os padrões de implementação encontrados no projeto `valida_conceito`, que demonstra o uso prático da extensão PivotPHP Cycle ORM.
 
 ## Visão Geral
 
@@ -76,7 +76,7 @@ $app->get('/api/users', function ($req, $res) use ($app) {
     try {
         $database = $app->make('cycle.database');
         $users = $database->database()->query('SELECT * FROM users')->fetchAll();
-        
+
         return $res->json([
             'status' => 'success',
             'data' => $users
@@ -94,7 +94,7 @@ $app->post('/api/users', function ($req, $res) use ($app) {
     try {
         $database = $app->make('cycle.database');
         $data = $req->getParsedBody();
-        
+
         // Validação básica
         if (empty($data['name']) || empty($data['email'])) {
             return $res->json([
@@ -102,7 +102,7 @@ $app->post('/api/users', function ($req, $res) use ($app) {
                 'message' => 'Name and email are required'
             ], 400);
         }
-        
+
         // Inserir usando query builder
         $database->database()->insert('users')->values([
             'name' => $data['name'],
@@ -110,9 +110,9 @@ $app->post('/api/users', function ($req, $res) use ($app) {
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s')
         ])->run();
-        
+
         $lastInsertId = $database->database()->lastInsertID();
-        
+
         return $res->json([
             'status' => 'success',
             'data' => ['id' => $lastInsertId]
@@ -227,7 +227,7 @@ class UserRepository implements UserRepositoryInterface
     public function save(User $user): void
     {
         $data = $this->mapToArray($user);
-        
+
         if ($user->getId()) {
             $this->database->update('users', $data, ['id' => $user->getId()])->run();
         } else {
@@ -407,7 +407,7 @@ public function testCreateUser()
             'email' => 'test@example.com'
         ]
     ]);
-    
+
     $this->assertEquals(201, $response->getStatusCode());
 }
 
@@ -416,9 +416,9 @@ public function testCreateUserUseCase()
 {
     $repository = $this->createMock(UserRepositoryInterface::class);
     $useCase = new CreateUserUseCase($repository);
-    
+
     $result = $useCase->execute(new CreateUserDTO('Test', 'test@example.com'));
-    
+
     $this->assertTrue($result->isSuccess());
 }
 ```
@@ -432,7 +432,7 @@ public function testCreateUserUseCase()
 
 ## Conclusão
 
-O projeto `valida_conceito` demonstra que a extensão HelixPHP Cycle ORM é flexível o suficiente para suportar tanto implementações simples quanto arquiteturas complexas. A escolha entre os padrões depende dos requisitos do projeto:
+O projeto `valida_conceito` demonstra que a extensão PivotPHP Cycle ORM é flexível o suficiente para suportar tanto implementações simples quanto arquiteturas complexas. A escolha entre os padrões depende dos requisitos do projeto:
 
 - Use o **Padrão Básico** para: MVPs, prototipagem, APIs simples
 - Use o **Padrão Clean Architecture** para: Aplicações empresariais, sistemas complexos, quando testabilidade é crucial

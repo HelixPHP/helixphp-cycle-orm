@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Helix\CycleORM\Exceptions;
+namespace PivotPHP\CycleORM\Exceptions;
 
 use Exception;
-use Throwable;
 
 /**
- * Base exception class for Cycle ORM Extension
+ * Base exception class for Cycle ORM Extension.
  */
-class CycleORMException extends Exception
+class CycleORMException extends \Exception
 {
     /**
      * @var array<string, mixed>
@@ -21,9 +20,9 @@ class CycleORMException extends Exception
      * @param array<string, mixed> $context
      */
     public function __construct(
-        string $message = "",
+        string $message = '',
         int $code = 0,
-        ?Throwable $previous = null,
+        ?\Throwable $previous = null,
         array $context = []
     ) {
         parent::__construct($message, $code, $previous);
@@ -44,12 +43,14 @@ class CycleORMException extends Exception
     public function setContext(array $context): self
     {
         $this->context = $context;
+
         return $this;
     }
 
     public function addContext(string $key, mixed $value): self
     {
         $this->context[$key] = $value;
+
         return $this;
     }
 }

@@ -1,12 +1,12 @@
-# Guia de Integração Básica com HelixPHP Cycle ORM Extension
+# Guia de Integração Básica com PivotPHP Cycle ORM Extension
 
-Este guia mostra como integrar o Cycle ORM ao seu projeto HelixPHP de forma simples e rápida.
+Este guia mostra como integrar o Cycle ORM ao seu projeto PivotPHP de forma simples e rápida.
 
 ## Instalação
 
 1. Instale o pacote via Composer:
 ```bash
-composer require helixphp/core-cycle-orm-extension
+composer require pivotphp/core-cycle-orm-extension
 ```
 
 2. Publique as configurações (opcional):

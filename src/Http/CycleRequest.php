@@ -1,19 +1,20 @@
 <?php
 
-namespace Helix\CycleORM\Http;
+namespace PivotPHP\CycleORM\Http;
 
 use Cycle\Database\DatabaseInterface;
 use Cycle\ORM\EntityManagerInterface;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\RepositoryInterface;
 use Cycle\ORM\Select;
-use Helix\Http\Request;
+use PivotPHP\Core\Http\Request;
 
 /**
  * Wrapper que estende dinamicamente o Request original
- * Mantém 100% de compatibilidade com Express\Http\Request.
+ * Mantém 100% de compatibilidade com PivotPHP\Core\Http\Request.
  *
  * @method mixed getMethod() Forwards to original request
+ *
  * @property mixed $foo Dynamic property forwarding
  */
 class CycleRequest
@@ -95,7 +96,7 @@ class CycleRequest
         // Apply data manually if mapper didn't populate properly
         foreach ($data as $property => $value) {
             if (property_exists($entity, $property)) {
-                $entity->$property = $value;
+                $entity->{$property} = $value;
             }
         }
 
@@ -114,7 +115,9 @@ class CycleRequest
      * Paginação de resultados.
      *
      * @template TEntity of object
+     *
      * @param Select<TEntity> $query
+     *
      * @return array<string, mixed>
      */
     public function paginate(Select $query, int $page = 1, int $perPage = 15): array
@@ -141,7 +144,6 @@ class CycleRequest
         ];
     }
 
-
     public function getOriginalRequest(): Request
     {
         return $this->originalRequest;
@@ -161,6 +163,7 @@ class CycleRequest
     public function setAttribute(string $name, mixed $value): self
     {
         $this->originalRequest->setAttribute($name, $value);
+
         return $this;
     }
 }

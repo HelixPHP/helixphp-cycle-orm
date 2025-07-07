@@ -19,7 +19,7 @@ O profiler pode ser habilitado/desabilitado dinamicamente e permite criar "profi
 
 ## Exemplo de Uso
 ```php
-use Helix\CycleORM\Monitoring\PerformanceProfiler;
+use PivotPHP\Core\CycleORM\Monitoring\PerformanceProfiler;
 
 PerformanceProfiler::enable();
 PerformanceProfiler::start('import_users');

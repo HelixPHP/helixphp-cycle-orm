@@ -1,6 +1,6 @@
-# Guia de Integração: HelixPHP + Cycle ORM
+# Guia de Integração: PivotPHP + Cycle ORM
 
-Este guia mostra como integrar o Cycle ORM ao microframework HelixPHP, cobrindo desde a instalação até exemplos de uso real com entidades, migrations, repositórios customizados, endpoints HTTP, troubleshooting e dicas avançadas.
+Este guia mostra como integrar o Cycle ORM ao microframework PivotPHP, cobrindo desde a instalação até exemplos de uso real com entidades, migrations, repositórios customizados, endpoints HTTP, troubleshooting e dicas avançadas.
 
 ## Índice
 
@@ -24,7 +24,7 @@ Este guia mostra como integrar o Cycle ORM ao microframework HelixPHP, cobrindo 
 
 ## Visão Geral
 
-A extensão HelixPHP Cycle ORM integra o Cycle ORM ao microframework HelixPHP, fornecendo:
+A extensão PivotPHP Cycle ORM integra o Cycle ORM ao microframework PivotPHP, fornecendo:
 - Registro automático de serviços do ORM no container
 - Suporte a migrations, entidades anotadas, repositórios customizados
 - Health check, métricas e monitoramento
@@ -33,7 +33,7 @@ A extensão HelixPHP Cycle ORM integra o Cycle ORM ao microframework HelixPHP, f
 ## Dependências
 
 - PHP >= 8.1
-- helixphp/core >= 2.1.1
+- pivotphp/core >= 2.1.1
 - cycle/orm >= 2.10
 - cycle/annotated, cycle/migrations, cycle/schema-builder
 
@@ -59,7 +59,7 @@ var/
 Adicione os pacotes ao seu projeto:
 
 ```bash
-composer require helixphp/core-cycle-orm-extension cycle/orm cycle/annotated cycle/migrations
+composer require pivotphp/core-cycle-orm-extension cycle/orm cycle/annotated cycle/migrations
 ```
 
 ## 2. Configuração Básica
@@ -173,7 +173,7 @@ class UserRepository extends Repository
 ## 7. Health Check
 
 ```php
-use Helix\CycleORM\Health\CycleHealthCheck;
+use PivotPHP\Core\CycleORM\Health\CycleHealthCheck;
 
 $result = CycleHealthCheck::check($app);
 if ($result['cycle_orm'] !== 'healthy') {
@@ -184,7 +184,7 @@ if ($result['cycle_orm'] !== 'healthy') {
 ## 8. Monitoramento e Métricas
 
 ```php
-use Helix\CycleORM\Monitoring\MetricsCollector;
+use PivotPHP\Core\CycleORM\Monitoring\MetricsCollector;
 
 MetricsCollector::increment('entities_persisted');
 $metrics = MetricsCollector::getMetrics();
@@ -194,7 +194,7 @@ $metrics = MetricsCollector::getMetrics();
 
 ```php
 // public/index.php
-use Helix\Core\Application;
+use PivotPHP\Core\Core\Application;
 use App\Entities\User;
 use Cycle\ORM\ORMInterface;
 
@@ -215,7 +215,7 @@ $app->run();
 
 ## Ciclo de Vida e Dicas de Debug
 
-- O provider registra `cycle.database`, `cycle.orm`, `cycle.em` no container HelixPHP.
+- O provider registra `cycle.database`, `cycle.orm`, `cycle.em` no container PivotPHP.
 - Use `php artisan cycle schema` e `php artisan cycle migrate` para atualizar o banco.
 - Para debug, ative logs SQL no Cycle ORM ou use o `MetricsCollector` para monitorar queries.
 - Para resetar métricas em testes: `MetricsCollector::reset();`
@@ -230,11 +230,11 @@ $app->run();
 
 ## Links Úteis
 
-- [HelixPHP](https://github.com/HelixPHP/helix-core)
+- [PivotPHP](https://github.com/PivotPHP/helix-core)
 - [Cycle ORM](https://cycle-orm.dev/docs/intro/2.x/en)
 - [Cycle ORM Annotations](https://cycle-orm.dev/docs/annotated/2.x/en)
 - [Cycle ORM Migrations](https://cycle-orm.dev/docs/migrations/2.x/en)
-- [Exemplo de projeto HelixPHP + Cycle ORM](https://github.com/HelixPHP/helix-core-cycle-orm-extension)
+- [Exemplo de projeto PivotPHP + Cycle ORM](https://github.com/PivotPHP/helix-core-cycle-orm-extension)
 
 ---
 

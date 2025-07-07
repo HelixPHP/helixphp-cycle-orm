@@ -8,6 +8,7 @@ if (!function_exists('config')) {
     {
         // Para compatibilidade, usar env como fallback
         $envKey = str_replace('.', '_', strtoupper($key));
+
         return env($envKey, $default);
     }
 }

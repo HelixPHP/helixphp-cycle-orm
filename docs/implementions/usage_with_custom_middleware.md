@@ -3,7 +3,7 @@
 Aprenda a criar middlewares customizados para integração com o Cycle ORM Extension.
 
 ## Passos
-1. Crie uma classe implementando a interface de middleware do HelixPHP.
+1. Crie uma classe implementando a interface de middleware do PivotPHP.
 2. Injete dependências necessárias via construtor.
 3. Implemente a lógica desejada (ex: logging, autenticação, etc).
 

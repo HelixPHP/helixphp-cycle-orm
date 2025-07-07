@@ -3,7 +3,7 @@
 echo "=== Updating composer.json for Production (Packagist) ==="
 echo ""
 
-cd /home/cfernandes/helixphp/helixphp-cycle-orm || exit 1
+cd /home/cfernandes/pivotphp/pivotphp-cycle-orm || exit 1
 
 # Backup current composer.json
 cp composer.json composer.json.local
@@ -11,10 +11,10 @@ cp composer.json composer.json.local
 # Update composer.json to use Packagist version
 cat > composer.json << 'EOF'
 {
-  "name": "helixphp/cycle-orm",
-  "description": "Robust and well-tested Cycle ORM integration for HelixPHP microframework with type safety and comprehensive testing",
+  "name": "pivotphp/cycle-orm",
+  "description": "Robust and well-tested Cycle ORM integration for PivotPHP microframework with type safety and comprehensive testing",
   "keywords": [
-    "helixphp",
+    "pivotphp",
     "cycle-orm",
     "database",
     "orm",
@@ -35,7 +35,7 @@ cat > composer.json << 'EOF'
   ],
   "require": {
     "php": "^8.1",
-    "helixphp/core": "^1.0",
+    "pivotphp/core": "^1.0",
     "cycle/orm": "^2.10",
     "cycle/annotated": "^4.3",
     "cycle/migrations": "^4.2.5",
@@ -96,7 +96,7 @@ echo "✅ composer.json updated to use Packagist dependencies"
 echo ""
 echo "📊 Changes made:"
 echo "  • Removed local path repository"
-echo "  • Changed helixphp/core from @dev to ^1.0"
+echo "  • Changed pivotphp/core from @dev to ^1.0"
 echo "  • Changed minimum-stability from dev to stable"
 echo "  • Backup saved as composer.json.local"
 echo ""

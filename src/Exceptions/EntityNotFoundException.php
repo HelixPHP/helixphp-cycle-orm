@@ -1,6 +1,6 @@
 <?php
 
-namespace Helix\CycleORM\Exceptions;
+namespace PivotPHP\CycleORM\Exceptions;
 
 class EntityNotFoundException extends CycleORMException
 {

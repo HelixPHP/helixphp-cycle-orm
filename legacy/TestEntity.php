@@ -1,6 +1,6 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Fixtures;
+namespace PivotPHP\CycleORM\Tests\Fixtures;
 
 use Cycle\Annotated\Annotation\Column;
 use Cycle\Annotated\Annotation\Entity;

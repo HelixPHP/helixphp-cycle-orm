@@ -1,9 +1,9 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Http;
+namespace PivotPHP\CycleORM\Tests\Http;
 
-use Helix\CycleORM\Http\CycleRequest;
-use Helix\Http\Request;
+use PivotPHP\CycleORM\Http\CycleRequest;
+use PivotPHP\Core\Http\Request;
 use PHPUnit\Framework\TestCase;
 
 class CycleRequestTest extends TestCase

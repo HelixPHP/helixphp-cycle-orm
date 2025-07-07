@@ -1,12 +1,17 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Unit;
+namespace PivotPHP\CycleORM\Tests\Unit;
 
-use Helix\CycleORM\Monitoring\MetricsCollector;
-use Helix\CycleORM\Monitoring\PerformanceProfiler;
-use Helix\CycleORM\Monitoring\QueryLogger;
+use PivotPHP\CycleORM\Monitoring\MetricsCollector;
+use PivotPHP\CycleORM\Monitoring\PerformanceProfiler;
+use PivotPHP\CycleORM\Monitoring\QueryLogger;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class MonitoringUnitTest extends TestCase
 {
     protected function setUp(): void
@@ -126,7 +131,7 @@ class MonitoringUnitTest extends TestCase
     {
         // Record 15 slow queries (limit is 10)
         for ($i = 1; $i <= 15; $i++) {
-            MetricsCollector::recordQueryTime("SELECT $i", 200.0);
+            MetricsCollector::recordQueryTime("SELECT {$i}", 200.0);
         }
 
         $slowQueries = MetricsCollector::getSlowQueries();
@@ -164,7 +169,7 @@ class MonitoringUnitTest extends TestCase
 
         // Log more than the limit (100 queries)
         for ($i = 1; $i <= 150; $i++) {
-            $logger->log("SELECT $i", 10.0);
+            $logger->log("SELECT {$i}", 10.0);
         }
 
         $logs = $logger->getLogs();

@@ -1,12 +1,12 @@
-# Guia de Integração HelixPHP + Cycle ORM
+# Guia de Integração PivotPHP + Cycle ORM
 
-Este guia detalha como integrar corretamente a HelixPHP Cycle ORM Extension em seu projeto.
+Este guia detalha como integrar corretamente a PivotPHP Cycle ORM Extension em seu projeto.
 
 ## 📋 Pré-requisitos
 
 - PHP 8.1 ou superior
 - Composer
-- HelixPHP 2.1.1+
+- PivotPHP 2.1.1+
 - SQLite ou MySQL
 
 ## 🚀 Instalação Rápida
@@ -16,7 +16,7 @@ Este guia detalha como integrar corretamente a HelixPHP Cycle ORM Extension em s
 mkdir meu-projeto && cd meu-projeto
 
 # 2. Instalar dependências
-composer require helixphp/core helixphp/core-cycle-orm-extension
+composer require pivotphp/core pivotphp/core-cycle-orm-extension
 
 # 3. Criar estrutura de diretórios
 mkdir -p public src/{Controllers,Entities,Repositories} database app/Entities bin
@@ -31,8 +31,8 @@ mkdir -p public src/{Controllers,Entities,Repositories} database app/Entities bi
 
 declare(strict_types=1);
 
-use Helix\Core\Application;
-use Helix\CycleORM\CycleServiceProvider;
+use PivotPHP\Core\Core\Application;
+use PivotPHP\Core\CycleORM\CycleServiceProvider;
 use Dotenv\Dotenv;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
@@ -66,7 +66,7 @@ $app->register(new CycleServiceProvider($app));
 // IMPORTANTE: Middleware customizado (solução para o bug do CycleMiddleware)
 $app->use(function ($req, $res, $next) use ($app) {
     $container = $app->getContainer();
-    
+
     if (!$container->has('cycle.orm')) {
         throw new \RuntimeException('Cycle ORM not properly registered');
     }
@@ -138,8 +138,8 @@ CYCLE_PROFILE_QUERIES=true
     "type": "project",
     "require": {
         "php": "^8.1",
-        "helixphp/core": "^2.1.1",
-        "helixphp/core-cycle-orm-extension": "^1.0.2",
+        "pivotphp/core": "^2.1.1",
+        "pivotphp/core-cycle-orm-extension": "^1.0.2",
         "vlucas/phpdotenv": "^5.6"
     },
     "autoload": {
@@ -267,8 +267,8 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Entities\User;
-use Helix\Http\Request;
-use Helix\Http\Response;
+use PivotPHP\Core\Http\Request;
+use PivotPHP\Core\Http\Response;
 
 class UserController
 {
@@ -278,13 +278,13 @@ class UserController
             // Obtém o helper de repositório
             $repositoryHelper = $request->getAttribute('repository');
             $repository = $repositoryHelper(User::class);
-            
+
             // Busca todos os usuários
             $users = $repository->findAll();
-            
+
             // Converte para array
             $userData = array_map(fn(User $user) => $user->toArray(), $users);
-            
+
             return (new Response())->json([
                 'success' => true,
                 'data' => $userData,
@@ -302,7 +302,7 @@ class UserController
     {
         try {
             $data = $request->getBody();
-            
+
             // Validação básica
             if (!isset($data['name'], $data['email'], $data['password'])) {
                 return (new Response())->status(400)->json([
@@ -310,14 +310,14 @@ class UserController
                     'error' => 'Name, email and password are required'
                 ]);
             }
-            
+
             // Obtém helpers
             $repositoryHelper = $request->getAttribute('repository');
             $entityManagerHelper = $request->getAttribute('entityManager');
-            
+
             $repository = $repositoryHelper(User::class);
             $entityManager = $entityManagerHelper();
-            
+
             // Verifica se email já existe
             if ($repository->findOne(['email' => $data['email']])) {
                 return (new Response())->status(409)->json([
@@ -325,17 +325,17 @@ class UserController
                     'error' => 'Email already exists'
                 ]);
             }
-            
+
             // Cria novo usuário
             $user = new User();
             $user->setName($data['name']);
             $user->setEmail($data['email']);
             $user->setPassword($data['password']);
-            
+
             // Persiste no banco
             $entityManager->persist($user);
             $entityManager->run();
-            
+
             return (new Response())->status(201)->json([
                 'success' => true,
                 'data' => $user->toArray()
@@ -376,7 +376,7 @@ $app->delete('/api/users/{id}', [$userController, 'destroy']);
 // Health check
 $app->get('/health', function ($req, $res) {
     $hasOrm = $req->hasAttribute('cycle.orm');
-    
+
     return $res->json([
         'status' => 'healthy',
         'cycle_orm' => $hasOrm ? 'connected' : 'disconnected',
@@ -397,11 +397,11 @@ $app->run();
 
 declare(strict_types=1);
 
-use Helix\Core\Application;
-use Helix\CycleORM\CycleServiceProvider;
-use Helix\CycleORM\Commands\SchemaCommand;
-use Helix\CycleORM\Commands\MigrateCommand;
-use Helix\CycleORM\Commands\StatusCommand;
+use PivotPHP\Core\Core\Application;
+use PivotPHP\Core\CycleORM\CycleServiceProvider;
+use PivotPHP\Core\CycleORM\Commands\SchemaCommand;
+use PivotPHP\Core\CycleORM\Commands\MigrateCommand;
+use PivotPHP\Core\CycleORM\Commands\StatusCommand;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -423,17 +423,17 @@ switch ($command) {
         $schemaCommand = new SchemaCommand(['--sync' => true], $container);
         $schemaCommand->handle();
         break;
-        
+
     case 'cycle:migrate':
         $migrateCommand = new MigrateCommand([], $container);
         $migrateCommand->handle();
         break;
-        
+
     case 'cycle:status':
         $statusCommand = new StatusCommand([], $container);
         $statusCommand->handle();
         break;
-        
+
     case 'help':
     default:
         echo "Available commands:\n";
@@ -514,22 +514,22 @@ public function bulkOperation(Request $request): Response
 {
     $emHelper = $request->getAttribute('entityManager');
     $em = $emHelper();
-    
+
     try {
         $em->getTransaction()->begin();
-        
+
         // Operações múltiplas
         foreach ($items as $item) {
             $entity = new Entity();
             // ...
             $em->persist($entity);
         }
-        
+
         $em->run();
         $em->getTransaction()->commit();
-        
+
         return (new Response())->json(['success' => true]);
-        
+
     } catch (\Exception $e) {
         $em->getTransaction()->rollback();
         return (new Response())->status(500)->json(['error' => $e->getMessage()]);
@@ -561,9 +561,9 @@ $app->register(new CycleServiceProvider($app));
 
 ## 📚 Recursos Adicionais
 
-- [Documentação do HelixPHP](https://github.com/helixphp/core)
+- [Documentação do PivotPHP](https://github.com/pivotphp/core)
 - [Documentação do Cycle ORM](https://cycle-orm.dev)
-- [Exemplos de código](https://github.com/helixphp/core-cycle-orm-extension/tree/main/examples)
+- [Exemplos de código](https://github.com/pivotphp/core-cycle-orm-extension/tree/main/examples)
 
 ## 🤝 Suporte
 
@@ -571,4 +571,4 @@ Se encontrar problemas:
 
 1. Verifique os logs em `storage/logs/`
 2. Ative o debug: `APP_DEBUG=true`
-3. Abra uma issue no [GitHub](https://github.com/helixphp/core-cycle-orm-extension/issues)
+3. Abra uma issue no [GitHub](https://github.com/pivotphp/core-cycle-orm-extension/issues)

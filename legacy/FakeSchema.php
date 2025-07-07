@@ -1,5 +1,5 @@
 <?php
-namespace Helix\CycleORM\Tests\Repository;
+namespace PivotPHP\CycleORM\Tests\Repository;
 
 use Cycle\ORM\SchemaInterface;
 

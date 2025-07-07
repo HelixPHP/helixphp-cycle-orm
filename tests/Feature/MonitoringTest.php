@@ -1,12 +1,19 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Feature;
+namespace PivotPHP\CycleORM\Tests\Feature;
 
-use Helix\CycleORM\Tests\TestCase;
-use Helix\CycleORM\Monitoring\MetricsCollector;
-use Helix\CycleORM\Monitoring\PerformanceProfiler;
-use Helix\CycleORM\Monitoring\QueryLogger;
+use PivotPHP\Core\Core\Application;
+use PivotPHP\CycleORM\CycleServiceProvider;
+use PivotPHP\CycleORM\Monitoring\MetricsCollector;
+use PivotPHP\CycleORM\Monitoring\PerformanceProfiler;
+use PivotPHP\CycleORM\Monitoring\QueryLogger;
+use PivotPHP\CycleORM\Tests\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class MonitoringTest extends TestCase
 {
     protected function setUp(): void
@@ -68,7 +75,7 @@ class MonitoringTest extends TestCase
     {
         // Record 15 slow queries (limit is 10)
         for ($i = 1; $i <= 15; $i++) {
-            MetricsCollector::recordQueryTime("SELECT $i", 200.0);
+            MetricsCollector::recordQueryTime("SELECT {$i}", 200.0);
         }
 
         $slowQueries = MetricsCollector::getSlowQueries();
@@ -198,7 +205,7 @@ class MonitoringTest extends TestCase
 
         // Log more than the limit (100 queries)
         for ($i = 1; $i <= 150; $i++) {
-            $logger->log("SELECT $i", 10.0);
+            $logger->log("SELECT {$i}", 10.0);
         }
 
         $logs = $logger->getLogs();
@@ -231,8 +238,8 @@ class MonitoringTest extends TestCase
         $_ENV['CYCLE_PROFILE_QUERIES'] = '1';
 
         // Setup monitoring services manually
-        $this->app->getContainer()->bind('cycle.query_logger', fn() => new QueryLogger());
-        $this->app->getContainer()->bind('cycle.profiler', fn() => new PerformanceProfiler());
+        $this->app->getContainer()->bind('cycle.query_logger', fn () => new QueryLogger());
+        $this->app->getContainer()->bind('cycle.profiler', fn () => new PerformanceProfiler());
 
         $container = $this->app->getContainer();
 
@@ -262,7 +269,7 @@ class MonitoringTest extends TestCase
 
         // Create new provider for production environment
         $prodApp = $this->createApplication();
-        $prodProvider = new \Helix\CycleORM\CycleServiceProvider($prodApp);
+        $prodProvider = new CycleServiceProvider($prodApp);
         $prodProvider->boot();
 
         $container = $prodApp->getContainer();
@@ -277,19 +284,19 @@ class MonitoringTest extends TestCase
         $_ENV['APP_DEBUG'] = '1';
     }
 
-    private function createApplication(): \Helix\Core\Application
+    private function createApplication(): Application
     {
-        $app = new \Helix\Core\Application();
+        $app = new Application();
         $container = $app->getContainer();
 
         $container->bind(
             'config',
             function () {
-                return new class () {
+                return new class() {
                     public function get(string $key, mixed $default = null): mixed
                     {
                         return match ($key) {
-                            'app.debug' => $_ENV['APP_DEBUG'] === '1',
+                            'app.debug' => '1' === $_ENV['APP_DEBUG'],
                             'app.env' => $_ENV['APP_ENV'] ?? 'testing',
                             default => $default
                         };

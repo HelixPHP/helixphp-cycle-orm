@@ -1,6 +1,6 @@
 <?php
 
-namespace Helix\CycleORM\Commands;
+namespace PivotPHP\CycleORM\Commands;
 
 /**
  * Command base que funciona independente do sistema de console.

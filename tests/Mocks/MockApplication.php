@@ -1,8 +1,8 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Mocks;
+namespace PivotPHP\CycleORM\Tests\Mocks;
 
-use Helix\Core\Application;
+use PivotPHP\Core\Core\Application;
 
 class MockApplication extends Application
 {
@@ -17,7 +17,7 @@ class MockApplication extends Application
         $this->mockContainer->bind(
             'config',
             function () {
-                return new class () {
+                return new class() {
                     public function get(string $key, mixed $default = null): mixed
                     {
                         return match ($key) {

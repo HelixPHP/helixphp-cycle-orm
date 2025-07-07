@@ -1,6 +1,6 @@
 # Tratamento de Erros na Aplicação
 
-O HelixPHP Cycle ORM Extension utiliza exceptions customizadas para sinalizar erros de domínio e infraestrutura, permitindo respostas padronizadas e logs detalhados.
+O PivotPHP Cycle ORM Extension utiliza exceptions customizadas para sinalizar erros de domínio e infraestrutura, permitindo respostas padronizadas e logs detalhados.
 
 ## Visão Geral
 O tratamento de erros é centralizado, facilitando a manutenção, auditoria e integração com sistemas de monitoramento.

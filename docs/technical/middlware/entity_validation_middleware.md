@@ -1,6 +1,6 @@
 # EntityValidationMiddleware
 
-O `EntityValidationMiddleware` adiciona validação automática de entidades no pipeline do HelixPHP, garantindo integridade dos dados antes de persistir no banco.
+O `EntityValidationMiddleware` adiciona validação automática de entidades no pipeline do PivotPHP, garantindo integridade dos dados antes de persistir no banco.
 
 ## Visão Geral
 Esse middleware utiliza reflexão para validar tipos e campos obrigatórios das entidades, reduzindo erros de persistência e facilitando debugging.

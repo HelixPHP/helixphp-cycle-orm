@@ -22,4 +22,4 @@ php bin/console make:entity User
 - Versione as entidades junto com o código-fonte.
 
 ## Integração
-O `EntityCommand` pode ser utilizado em pipelines de scaffolding e automação de projetos HelixPHP.
+O `EntityCommand` pode ser utilizado em pipelines de scaffolding e automação de projetos PivotPHP.

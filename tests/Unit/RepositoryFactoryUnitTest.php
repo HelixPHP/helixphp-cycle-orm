@@ -1,16 +1,22 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Unit;
+namespace PivotPHP\CycleORM\Tests\Unit;
 
-use Helix\CycleORM\RepositoryFactory;
-use Helix\CycleORM\Tests\Entities\User;
 use Cycle\ORM\ORMInterface;
 use Cycle\ORM\RepositoryInterface;
+use PivotPHP\CycleORM\RepositoryFactory;
+use PivotPHP\CycleORM\Tests\Entities\User;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class RepositoryFactoryUnitTest extends TestCase
 {
     private RepositoryFactory $factory;
+
     private ORMInterface $mockOrm;
 
     protected function setUp(): void
@@ -29,7 +35,8 @@ class RepositoryFactoryUnitTest extends TestCase
             ->expects($this->once())
             ->method('getRepository')
             ->with(User::class)
-            ->willReturn($mockRepo);
+            ->willReturn($mockRepo)
+        ;
 
         $result = $this->factory->getRepository(User::class);
 
@@ -44,7 +51,8 @@ class RepositoryFactoryUnitTest extends TestCase
             ->expects($this->once()) // Should only be called once due to caching
             ->method('getRepository')
             ->with(User::class)
-            ->willReturn($mockRepo);
+            ->willReturn($mockRepo)
+        ;
 
         // First call
         $result1 = $this->factory->getRepository(User::class);
@@ -64,7 +72,8 @@ class RepositoryFactoryUnitTest extends TestCase
             ->expects($this->exactly(2)) // Should be called twice after cache clear
             ->method('getRepository')
             ->with(User::class)
-            ->willReturnOnConsecutiveCalls($mockRepo1, $mockRepo2);
+            ->willReturnOnConsecutiveCalls($mockRepo1, $mockRepo2)
+        ;
 
         // First call
         $result1 = $this->factory->getRepository(User::class);
@@ -99,7 +108,8 @@ class RepositoryFactoryUnitTest extends TestCase
 
         $this->mockOrm
             ->method('getRepository')
-            ->willReturn($mockRepo);
+            ->willReturn($mockRepo)
+        ;
 
         // Access some repositories
         $this->factory->getRepository(User::class);
@@ -116,15 +126,17 @@ class RepositoryFactoryUnitTest extends TestCase
     public function testRegisterCustomRepositoryWithValidClass(): void
     {
         // Use a real class that implements RepositoryInterface for this test
-        $validRepoClass = new class implements RepositoryInterface {
+        $validRepoClass = new class() implements RepositoryInterface {
             public function findByPK(mixed $id): ?object
             {
                 return null;
             }
+
             public function findOne(array $scope = [], array $orderBy = []): ?object
             {
                 return null;
             }
+
             public function findAll(array $scope = [], array $orderBy = []): iterable
             {
                 return [];
@@ -165,7 +177,8 @@ class RepositoryFactoryUnitTest extends TestCase
             ->expects($this->once())
             ->method('getRepository')
             ->with($user)
-            ->willReturn($mockRepo);
+            ->willReturn($mockRepo)
+        ;
 
         $result = $this->factory->getRepository($user);
 

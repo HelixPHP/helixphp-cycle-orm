@@ -1,18 +1,21 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Integration;
+namespace PivotPHP\CycleORM\Tests\Integration;
 
-use Helix\CycleORM\Tests\TestCase;
-use Helix\CycleORM\Tests\Entities\User;
-use Helix\CycleORM\Tests\Entities\Post;
-use Helix\CycleORM\Http\CycleRequest;
-use Helix\Http\Request;
-use Helix\Http\Response;
+use PivotPHP\CycleORM\Http\CycleRequest;
+use PivotPHP\CycleORM\Tests\Entities\Post;
+use PivotPHP\CycleORM\Tests\Entities\User;
+use PivotPHP\CycleORM\Tests\TestCase;
+use PivotPHP\Core\Http\Request;
 
 /**
  * @group integration
+ *
+ * @internal
+ *
+ * @coversNothing
  */
-class HelixIntegrationTest extends TestCase
+class PivotIntegrationTest extends TestCase
 {
     public function testFullApplicationLifecycle(): void
     {
@@ -89,7 +92,7 @@ class HelixIntegrationTest extends TestCase
         // Create test data
         $userId = $this->createUser('Test User', 'test@example.com');
         for ($i = 1; $i <= 25; $i++) {
-            $this->createPost("Post $i", "Content $i", $userId);
+            $this->createPost("Post {$i}", "Content {$i}", $userId);
         }
 
         $request = $this->createMock(Request::class);
@@ -197,7 +200,7 @@ class HelixIntegrationTest extends TestCase
     public function testCommandRegistration(): void
     {
         // Test in CLI mode
-        if (php_sapi_name() === 'cli') {
+        if ('cli' === php_sapi_name()) {
             $this->provider->boot();
 
             $commands = $this->app->getContainer()->get('cycle.commands');

@@ -1,26 +1,29 @@
 <?php
 
-namespace Helix\CycleORM\Tests;
+namespace PivotPHP\CycleORM\Tests;
 
-use Helix\CycleORM\CycleServiceProvider;
-use Cycle\Database\DatabaseManager;
 use Cycle\Database\Config\DatabaseConfig;
 use Cycle\Database\Config\SQLite\FileConnectionConfig;
 use Cycle\Database\Config\SQLiteDriverConfig;
+use Cycle\Database\DatabaseManager;
 use Cycle\ORM\EntityManager;
-use Cycle\ORM\ORM;
 use Cycle\ORM\Factory;
+use Cycle\ORM\Mapper\Mapper;
+use Cycle\ORM\ORM;
 use Cycle\ORM\Schema;
-use Helix\CycleORM\Tests\Support\TestApplication;
-use Helix\CycleORM\Tests\Entities\User;
-use Helix\CycleORM\Tests\Entities\Post;
+use PivotPHP\CycleORM\Tests\Entities\Post;
+use PivotPHP\CycleORM\Tests\Entities\User;
+use PivotPHP\CycleORM\Tests\Support\TestApplication;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
     protected TestApplication $app;
+
     protected DatabaseManager $dbal;
+
     protected ORM $orm;
+
     protected EntityManager $em;
 
     protected function setUp(): void
@@ -44,6 +47,39 @@ abstract class TestCase extends BaseTestCase
         parent::tearDown();
     }
 
+    /**
+     * Create a test user.
+     */
+    protected function createUser(string $name = 'Test User', string $email = 'test@example.com'): int
+    {
+        $database = $this->dbal->database();
+
+        return $database->table('users')->insertGetId(
+            [
+                'name' => $name,
+                'email' => $email,
+                'createdAt' => new \DateTimeImmutable(),
+            ]
+        );
+    }
+
+    /**
+     * Create a test post.
+     */
+    protected function createPost(string $title = 'Test Post', string $content = 'Test content', int $userId = 1): int
+    {
+        $database = $this->dbal->database();
+
+        return $database->table('posts')->insertGetId(
+            [
+                'title' => $title,
+                'content' => $content,
+                'userId' => $userId,
+                'createdAt' => new \DateTimeImmutable(),
+            ]
+        );
+    }
+
     private function createApplication(): TestApplication
     {
         return new TestApplication();
@@ -62,13 +98,13 @@ abstract class TestCase extends BaseTestCase
                     'default' => new SQLiteDriverConfig(
                         connection: new FileConnectionConfig(database: ':memory:'),
                         queryCache: false
-                    )
-                ]
+                    ),
+                ],
             ]
         );
 
         $this->dbal = new DatabaseManager($config);
-        $this->app->getContainer()->bind('cycle.database', fn() => $this->dbal);
+        $this->app->getContainer()->bind('cycle.database', fn () => $this->dbal);
     }
 
     private function setupORM(): void
@@ -81,7 +117,7 @@ abstract class TestCase extends BaseTestCase
             [
                 User::class => [
                     Schema::ROLE => 'user',
-                    Schema::MAPPER => \Cycle\ORM\Mapper\Mapper::class,
+                    Schema::MAPPER => Mapper::class,
                     Schema::DATABASE => 'default',
                     Schema::TABLE => 'users',
                     Schema::PRIMARY_KEY => 'id',
@@ -89,17 +125,17 @@ abstract class TestCase extends BaseTestCase
                         'id' => 'id',
                         'name' => 'name',
                         'email' => 'email',
-                        'createdAt' => 'createdAt'
+                        'createdAt' => 'createdAt',
                     ],
                     Schema::TYPECAST => [
                         'id' => 'int',
-                        'createdAt' => 'datetime'
+                        'createdAt' => 'datetime',
                     ],
-                    Schema::RELATIONS => []
+                    Schema::RELATIONS => [],
                 ],
                 Post::class => [
                     Schema::ROLE => 'post',
-                    Schema::MAPPER => \Cycle\ORM\Mapper\Mapper::class,
+                    Schema::MAPPER => Mapper::class,
                     Schema::DATABASE => 'default',
                     Schema::TABLE => 'posts',
                     Schema::PRIMARY_KEY => 'id',
@@ -108,23 +144,23 @@ abstract class TestCase extends BaseTestCase
                         'title' => 'title',
                         'content' => 'content',
                         'userId' => 'userId',
-                        'createdAt' => 'createdAt'
+                        'createdAt' => 'createdAt',
                     ],
                     Schema::TYPECAST => [
                         'id' => 'int',
                         'userId' => 'int',
-                        'createdAt' => 'datetime'
+                        'createdAt' => 'datetime',
                     ],
-                    Schema::RELATIONS => []
-                ]
+                    Schema::RELATIONS => [],
+                ],
             ]
         );
 
         $this->orm = new ORM($factory, $schema);
         $this->em = new EntityManager($this->orm);
 
-        $this->app->getContainer()->bind('cycle.orm', fn() => $this->orm);
-        $this->app->getContainer()->bind('cycle.em', fn() => $this->em);
+        $this->app->getContainer()->bind('cycle.orm', fn () => $this->orm);
+        $this->app->getContainer()->bind('cycle.em', fn () => $this->em);
 
         // Create tables for test entities
         $this->createTables();
@@ -160,36 +196,5 @@ abstract class TestCase extends BaseTestCase
             $database->table('posts')->delete();
             $database->table('users')->delete();
         }
-    }
-
-    /**
-     * Create a test user
-     */
-    protected function createUser(string $name = 'Test User', string $email = 'test@example.com'): int
-    {
-        $database = $this->dbal->database();
-        return $database->table('users')->insertGetId(
-            [
-                'name' => $name,
-                'email' => $email,
-                'createdAt' => new \DateTimeImmutable()
-            ]
-        );
-    }
-
-    /**
-     * Create a test post
-     */
-    protected function createPost(string $title = 'Test Post', string $content = 'Test content', int $userId = 1): int
-    {
-        $database = $this->dbal->database();
-        return $database->table('posts')->insertGetId(
-            [
-                'title' => $title,
-                'content' => $content,
-                'userId' => $userId,
-                'createdAt' => new \DateTimeImmutable()
-            ]
-        );
     }
 }

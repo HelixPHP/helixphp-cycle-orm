@@ -1,16 +1,22 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Feature;
+namespace PivotPHP\CycleORM\Tests\Feature;
 
-use Helix\CycleORM\Tests\TestCase;
-use Helix\CycleORM\Tests\Entities\User;
-use Helix\CycleORM\Tests\Entities\Post;
-use Helix\CycleORM\Http\CycleRequest;
-use Helix\Http\Request;
+use PivotPHP\CycleORM\Http\CycleRequest;
+use PivotPHP\CycleORM\Tests\Entities\Post;
+use PivotPHP\CycleORM\Tests\Entities\User;
+use PivotPHP\CycleORM\Tests\TestCase;
+use PivotPHP\Core\Http\Request;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class CycleRequestTest extends TestCase
 {
     private CycleRequest $cycleRequest;
+
     private Request $originalRequest;
 
     protected function setUp(): void
@@ -32,7 +38,8 @@ class CycleRequestTest extends TestCase
         $this->originalRequest
             ->expects($this->once())
             ->method('getMethod')
-            ->willReturn('POST');
+            ->willReturn('POST')
+        ;
 
         // Call should be forwarded to original request
         $result = $this->cycleRequest->getMethod();
@@ -90,7 +97,7 @@ class CycleRequestTest extends TestCase
     {
         $userData = [
             'name' => 'Created User',
-            'email' => 'created@example.com'
+            'email' => 'created@example.com',
         ];
 
         $user = $this->cycleRequest->entity(User::class, $userData);
@@ -139,7 +146,7 @@ class CycleRequestTest extends TestCase
 
         // Create multiple posts
         for ($i = 1; $i <= 25; $i++) {
-            $post = new Post("Post $i", "Content for post $i", $user->id);
+            $post = new Post("Post {$i}", "Content for post {$i}", $user->id);
             $this->em->persist($post);
         }
         $this->em->run();
@@ -200,7 +207,6 @@ class CycleRequestTest extends TestCase
         $this->assertFalse($pagination['has_more']);
     }
 
-
     public function testGetOriginalRequest(): void
     {
         $original = $this->cycleRequest->getOriginalRequest();
@@ -212,7 +218,7 @@ class CycleRequestTest extends TestCase
         // Test user property
         $this->assertNull($this->cycleRequest->user);
 
-        $userObject = (object)['id' => 1, 'name' => 'Test User'];
+        $userObject = (object) ['id' => 1, 'name' => 'Test User'];
         $this->cycleRequest->user = $userObject;
         $this->assertSame($userObject, $this->cycleRequest->user);
 

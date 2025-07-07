@@ -1,13 +1,13 @@
-# HelixPHP Cycle ORM Update Status - v1.0.0
+# PivotPHP Cycle ORM Update Status - v1.0.0
 
 ## ✅ Updates Applied
 
-All files have been updated to reflect the HelixPHP branding:
+All files have been updated to reflect the PivotPHP branding:
 
 ### Framework References
-- Updated from "Express PHP" to "HelixPHP"
-- Updated from "Express-PHP" to "HelixPHP"
-- Updated namespace references from `Express\` to `Helix\`
+- Updated from "Express PHP" to "PivotPHP"
+- Updated from "PivotPHP" to "PivotPHP"
+- Updated namespace references from `PivotPHP\Core\` to `Helix\`
 
 ### Documentation Structure
 - Fixed typo: "techinical" → "technical"
@@ -19,9 +19,9 @@ All files have been updated to reflect the HelixPHP branding:
 - Updated README and CHANGELOG
 
 ### Package Information
-- ✅ Package name: `helixphp/cycle-orm`
+- ✅ Package name: `pivotphp/cycle-orm`
 - ✅ Namespace: `Helix\CycleORM\`
-- ✅ Framework dependency: `helixphp/core`
+- ✅ Framework dependency: `pivotphp/core`
 
 ### Files Updated
 - ✅ Documentation (docs/)

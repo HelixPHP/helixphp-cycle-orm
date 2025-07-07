@@ -1,11 +1,16 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Database;
+namespace PivotPHP\CycleORM\Tests\Database;
 
-use Helix\CycleORM\Tests\TestCase;
-use Helix\CycleORM\Tests\Entities\User;
-use Helix\CycleORM\Tests\Entities\Post;
+use PivotPHP\CycleORM\Tests\Entities\Post;
+use PivotPHP\CycleORM\Tests\Entities\User;
+use PivotPHP\CycleORM\Tests\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class DatabaseOperationsTest extends TestCase
 {
     public function testBasicEntityPersistence(): void
@@ -228,7 +233,7 @@ class DatabaseOperationsTest extends TestCase
 
         // Create multiple users
         for ($i = 1; $i <= 10; $i++) {
-            $user = new User("User $i", "user$i@example.com");
+            $user = new User("User {$i}", "user{$i}@example.com");
             $users[] = $user;
             $this->em->persist($user);
         }

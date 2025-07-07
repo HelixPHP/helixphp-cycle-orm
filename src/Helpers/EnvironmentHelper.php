@@ -1,6 +1,6 @@
 <?php
 
-namespace Helix\CycleORM\Helpers;
+namespace PivotPHP\CycleORM\Helpers;
 
 class EnvironmentHelper
 {

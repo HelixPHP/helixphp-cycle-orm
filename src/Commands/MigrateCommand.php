@@ -1,6 +1,6 @@
 <?php
 
-namespace Helix\CycleORM\Commands;
+namespace PivotPHP\CycleORM\Commands;
 
 /**
  * Comando para executar e reverter migrações do Cycle ORM.

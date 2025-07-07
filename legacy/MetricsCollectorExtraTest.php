@@ -1,8 +1,8 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Monitoring;
+namespace PivotPHP\CycleORM\Tests\Monitoring;
 
-use Helix\CycleORM\Monitoring\MetricsCollector;
+use PivotPHP\CycleORM\Monitoring\MetricsCollector;
 use PHPUnit\Framework\TestCase;
 
 class MetricsCollectorExtraTest extends TestCase

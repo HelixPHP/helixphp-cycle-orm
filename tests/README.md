@@ -9,7 +9,7 @@ Esta nova estrutura de testes foi criada para ser mais próxima da realidade e u
 - **`tests/legacy/`** - Testes antigos movidos para preservar o histórico
 - **`tests/Unit/`** - Testes unitários com configuração real do framework
 - **`tests/Feature/`** - Testes de funcionalidades específicas
-- **`tests/Integration/`** - Testes de integração completa com HelixPHP
+- **`tests/Integration/`** - Testes de integração completa com PivotPHP
 - **`tests/Database/`** - Testes específicos de operações de banco de dados
 - **`tests/Entities/`** - Entidades de teste reais
 - **`tests/Mocks/`** - Mocks mínimos necessários
@@ -38,12 +38,12 @@ Os novos testes utilizam:
 1. **Banco SQLite em memória** para testes rápidos e isolados
 2. **Entidades reais** (User, Post) com relacionamentos
 3. **Configuração real** do Cycle ORM
-4. **Integração real** com HelixPHP
+4. **Integração real** com PivotPHP
 5. **Mocks mínimos** apenas onde absolutamente necessário
 
 ### Limitações Atuais
 
-Devido à complexidade da integração entre HelixPHP e Cycle ORM, alguns testes requerem mais trabalho para configuração completa. A versão atual fornece uma base sólida que pode ser expandida.
+Devido à complexidade da integração entre PivotPHP e Cycle ORM, alguns testes requerem mais trabalho para configuração completa. A versão atual fornece uma base sólida que pode ser expandida.
 
 ### Benefícios
 
@@ -57,7 +57,7 @@ Devido à complexidade da integração entre HelixPHP e Cycle ORM, alguns testes
 
 Para completar a implementação dos testes, seria necessário:
 
-1. Resolver compatibilidades entre versões do HelixPHP
+1. Resolver compatibilidades entre versões do PivotPHP
 2. Implementar mocks mais sofisticados se necessário
 3. Adicionar testes de performance
 4. Testes de middleware em contexto real

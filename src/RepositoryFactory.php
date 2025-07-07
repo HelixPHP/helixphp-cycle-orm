@@ -1,6 +1,6 @@
 <?php
 
-namespace Helix\CycleORM;
+namespace PivotPHP\CycleORM;
 
 use Cycle\ORM\ORM;
 use Cycle\ORM\ORMInterface;

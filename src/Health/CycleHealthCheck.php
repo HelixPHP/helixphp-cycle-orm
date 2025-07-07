@@ -1,6 +1,6 @@
 <?php
 
-namespace Helix\CycleORM\Health;
+namespace PivotPHP\CycleORM\Health;
 
 use Psr\Container\ContainerInterface;
 

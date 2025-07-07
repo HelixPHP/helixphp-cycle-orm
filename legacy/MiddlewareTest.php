@@ -1,18 +1,18 @@
 <?php
 
-namespace Helix\CycleORM\Tests;
+namespace PivotPHP\CycleORM\Tests;
 
-use Helix\CycleORM\Middleware\CycleMiddleware;
-use Helix\CycleORM\Middleware\TransactionMiddleware;
+use PivotPHP\CycleORM\Middleware\CycleMiddleware;
+use PivotPHP\CycleORM\Middleware\TransactionMiddleware;
 use Cycle\Database\Config\DatabaseConfig;
 use Cycle\Database\DatabaseManager;
 use Cycle\ORM\EntityManager;
 use Cycle\ORM\Factory;
 use Cycle\ORM\ORM;
 use Cycle\ORM\Schema;
-use Helix\Core\Application;
-use Helix\Http\Request;
-use Helix\Http\Response;
+use PivotPHP\Core\Core\Application;
+use PivotPHP\Core\Http\Request;
+use PivotPHP\Core\Http\Response;
 use PHPUnit\Framework\TestCase;
 
 /**

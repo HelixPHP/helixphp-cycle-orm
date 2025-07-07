@@ -1,8 +1,8 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Mocks;
+namespace PivotPHP\CycleORM\Tests\Mocks;
 
-use Helix\Core\Application;
+use PivotPHP\Core\Core\Application;
 
 class MockApplication extends Application
 {

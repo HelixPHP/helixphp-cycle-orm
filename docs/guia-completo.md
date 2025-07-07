@@ -1,4 +1,4 @@
-# Guia Completo - HelixPHP Cycle ORM Extension
+# Guia Completo - PivotPHP Cycle ORM Extension
 
 Este guia apresenta o uso da extensão desde o básico até implementações avançadas com arquitetura limpa.
 
@@ -15,7 +15,7 @@ Este guia apresenta o uso da extensão desde o básico até implementações ava
 ### 1. Instalar via Composer
 
 ```bash
-composer require helixphp/core-cycle-orm-extension
+composer require pivotphp/core-cycle-orm-extension
 ```
 
 ### 2. Configurar Variáveis de Ambiente
@@ -66,10 +66,10 @@ Crie o arquivo `public/index.php`:
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Helix\Core\Application;
-use Helix\CycleORM\CycleServiceProvider;
+use PivotPHP\Core\Core\Application;
+use PivotPHP\Core\CycleORM\CycleServiceProvider;
 
-// Criar aplicação HelixPHP
+// Criar aplicação PivotPHP
 $app = new Application();
 
 // Configurar variáveis de ambiente
@@ -82,7 +82,7 @@ $app->register(new CycleServiceProvider($app));
 // Criar tabela de usuários (apenas para exemplo)
 $app->get('/setup', function ($req, $res) use ($app) {
     $database = $app->make('cycle.database');
-    
+
     // Criar tabela users
     $database->database()->execute('
         CREATE TABLE IF NOT EXISTS users (
@@ -93,7 +93,7 @@ $app->get('/setup', function ($req, $res) use ($app) {
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ');
-    
+
     return $res->json(['message' => 'Database setup completed']);
 });
 
@@ -111,7 +111,7 @@ $app->get('/api/users', function ($req, $res) use ($app) {
     try {
         $database = $app->make('cycle.database');
         $users = $database->database()->query('SELECT * FROM users')->fetchAll();
-        
+
         return $res->json([
             'status' => 'success',
             'data' => $users
@@ -129,18 +129,18 @@ $app->get('/api/users/:id', function ($req, $res) use ($app) {
     try {
         $database = $app->make('cycle.database');
         $id = $req->params->id;
-        
+
         $user = $database->database()
             ->query('SELECT * FROM users WHERE id = ?', [$id])
             ->fetch();
-        
+
         if (!$user) {
             return $res->json([
                 'status' => 'error',
                 'message' => 'User not found'
             ], 404);
         }
-        
+
         return $res->json([
             'status' => 'success',
             'data' => $user
@@ -158,7 +158,7 @@ $app->post('/api/users', function ($req, $res) use ($app) {
     try {
         $database = $app->make('cycle.database');
         $data = $req->body();
-        
+
         // Validação básica
         if (empty($data->name) || empty($data->email)) {
             return $res->json([
@@ -166,19 +166,19 @@ $app->post('/api/users', function ($req, $res) use ($app) {
                 'message' => 'Name and email are required'
             ], 400);
         }
-        
+
         // Verificar email duplicado
         $exists = $database->database()
             ->query('SELECT id FROM users WHERE email = ?', [$data->email])
             ->fetch();
-            
+
         if ($exists) {
             return $res->json([
                 'status' => 'error',
                 'message' => 'Email already exists'
             ], 409);
         }
-        
+
         // Inserir usuário
         $database->database()->insert('users')->values([
             'name' => $data->name,
@@ -186,14 +186,14 @@ $app->post('/api/users', function ($req, $res) use ($app) {
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s')
         ])->run();
-        
+
         $id = $database->database()->getDriver()->lastInsertID();
-        
+
         // Buscar usuário criado
         $user = $database->database()
             ->query('SELECT * FROM users WHERE id = ?', [$id])
             ->fetch();
-        
+
         return $res->json([
             'status' => 'success',
             'data' => $user
@@ -212,52 +212,52 @@ $app->put('/api/users/:id', function ($req, $res) use ($app) {
         $database = $app->make('cycle.database');
         $id = $req->params->id;
         $data = $req->body();
-        
+
         // Verificar se usuário existe
         $user = $database->database()
             ->query('SELECT * FROM users WHERE id = ?', [$id])
             ->fetch();
-            
+
         if (!$user) {
             return $res->json([
                 'status' => 'error',
                 'message' => 'User not found'
             ], 404);
         }
-        
+
         // Preparar dados para atualização
         $updateData = ['updated_at' => date('Y-m-d H:i:s')];
-        
+
         if (isset($data->name)) {
             $updateData['name'] = $data->name;
         }
-        
+
         if (isset($data->email)) {
             // Verificar email duplicado
             $exists = $database->database()
                 ->query('SELECT id FROM users WHERE email = ? AND id != ?', [$data->email, $id])
                 ->fetch();
-                
+
             if ($exists) {
                 return $res->json([
                     'status' => 'error',
                     'message' => 'Email already exists'
                 ], 409);
             }
-            
+
             $updateData['email'] = $data->email;
         }
-        
+
         // Atualizar usuário
         $database->database()
             ->update('users', $updateData, ['id' => $id])
             ->run();
-        
+
         // Buscar usuário atualizado
         $user = $database->database()
             ->query('SELECT * FROM users WHERE id = ?', [$id])
             ->fetch();
-        
+
         return $res->json([
             'status' => 'success',
             'data' => $user
@@ -275,24 +275,24 @@ $app->delete('/api/users/:id', function ($req, $res) use ($app) {
     try {
         $database = $app->make('cycle.database');
         $id = $req->params->id;
-        
+
         // Verificar se usuário existe
         $user = $database->database()
             ->query('SELECT * FROM users WHERE id = ?', [$id])
             ->fetch();
-            
+
         if (!$user) {
             return $res->json([
                 'status' => 'error',
                 'message' => 'User not found'
             ], 404);
         }
-        
+
         // Deletar usuário
         $database->database()
             ->delete('users', ['id' => $id])
             ->run();
-        
+
         return $res->json([
             'status' => 'success',
             'message' => 'User deleted successfully'
@@ -313,39 +313,39 @@ $app->delete('/api/users/:id', function ($req, $res) use ($app) {
 $app->get('/api/users/search', function ($req, $res) use ($app) {
     $database = $app->make('cycle.database');
     $queryParams = $req->query; // Objeto stdClass com os parâmetros da query
-    
+
     // Construir query dinamicamente
     $query = $database->database()->select()->from('users');
-    
+
     if (!empty($queryParams->name)) {
         $query->where('name', 'LIKE', '%' . $queryParams->name . '%');
     }
-    
+
     if (!empty($queryParams->email)) {
         $query->where('email', 'LIKE', '%' . $queryParams->email . '%');
     }
-    
+
     // Ordenação
     $orderBy = $queryParams->order_by ?? 'id';
     $orderDir = $queryParams->order_dir ?? 'ASC';
     $query->orderBy($orderBy, $orderDir);
-    
+
     // Paginação
     $page = (int)($queryParams->page ?? 1);
     $perPage = (int)($queryParams->per_page ?? 10);
     $offset = ($page - 1) * $perPage;
-    
+
     $query->limit($perPage)->offset($offset);
-    
+
     // Executar query
     $users = $query->fetchAll();
-    
+
     // Contar total de registros
     $total = $database->database()
         ->select()
         ->from('users')
         ->count('id');
-    
+
     return $res->json([
         'status' => 'success',
         'data' => $users,
@@ -376,7 +376,7 @@ class User
     private string $email;
     private \DateTimeInterface $createdAt;
     private \DateTimeInterface $updatedAt;
-    
+
     public function __construct(
         string $name,
         string $email,
@@ -390,51 +390,51 @@ class User
         $this->createdAt = $createdAt ?? new \DateTime();
         $this->updatedAt = $updatedAt ?? new \DateTime();
     }
-    
+
     // Getters
     public function getId(): ?int
     {
         return $this->id;
     }
-    
+
     public function getName(): string
     {
         return $this->name;
     }
-    
+
     public function getEmail(): string
     {
         return $this->email;
     }
-    
+
     public function getCreatedAt(): \DateTimeInterface
     {
         return $this->createdAt;
     }
-    
+
     public function getUpdatedAt(): \DateTimeInterface
     {
         return $this->updatedAt;
     }
-    
+
     // Setters
     public function setName(string $name): void
     {
         $this->name = $name;
         $this->touch();
     }
-    
+
     public function setEmail(string $email): void
     {
         $this->email = $email;
         $this->touch();
     }
-    
+
     private function touch(): void
     {
         $this->updatedAt = new \DateTime();
     }
-    
+
     // Converter para array
     public function toArray(): array
     {
@@ -486,50 +486,50 @@ class UserRepository implements UserRepositoryInterface
     public function __construct(
         private DatabaseInterface $database
     ) {}
-    
+
     public function findById(int $id): ?User
     {
         $result = $this->database
             ->query('SELECT * FROM users WHERE id = ?', [$id])
             ->fetch();
-        
+
         return $result ? $this->mapToEntity($result) : null;
     }
-    
+
     public function findByEmail(string $email): ?User
     {
         $result = $this->database
             ->query('SELECT * FROM users WHERE email = ?', [$email])
             ->fetch();
-        
+
         return $result ? $this->mapToEntity($result) : null;
     }
-    
+
     public function findAll(array $filters = [], int $page = 1, int $perPage = 10): array
     {
         $query = $this->database->select()->from('users');
-        
+
         // Aplicar filtros
         if (!empty($filters['name'])) {
             $query->where('name', 'LIKE', '%' . $filters['name'] . '%');
         }
-        
+
         if (!empty($filters['email'])) {
             $query->where('email', 'LIKE', '%' . $filters['email'] . '%');
         }
-        
+
         // Paginação
         $offset = ($page - 1) * $perPage;
         $query->limit($perPage)->offset($offset);
-        
+
         // Ordenação
         $query->orderBy('id', 'DESC');
-        
+
         $results = $query->fetchAll();
-        
+
         return array_map([$this, 'mapToEntity'], $results);
     }
-    
+
     public function save(User $user): void
     {
         $data = [
@@ -537,7 +537,7 @@ class UserRepository implements UserRepositoryInterface
             'email' => $user->getEmail(),
             'updated_at' => $user->getUpdatedAt()->format('Y-m-d H:i:s'),
         ];
-        
+
         if ($user->getId()) {
             // Atualizar
             $this->database
@@ -546,12 +546,12 @@ class UserRepository implements UserRepositoryInterface
         } else {
             // Inserir
             $data['created_at'] = $user->getCreatedAt()->format('Y-m-d H:i:s');
-            
+
             $this->database
                 ->insert('users')
                 ->values($data)
                 ->run();
-                
+
             // Definir ID no objeto
             $id = $this->database->getDriver()->lastInsertID();
             $reflection = new \ReflectionClass($user);
@@ -560,7 +560,7 @@ class UserRepository implements UserRepositoryInterface
             $property->setValue($user, $id);
         }
     }
-    
+
     public function delete(User $user): void
     {
         if ($user->getId()) {
@@ -569,22 +569,22 @@ class UserRepository implements UserRepositoryInterface
                 ->run();
         }
     }
-    
+
     public function count(array $filters = []): int
     {
         $query = $this->database->select()->from('users');
-        
+
         if (!empty($filters['name'])) {
             $query->where('name', 'LIKE', '%' . $filters['name'] . '%');
         }
-        
+
         if (!empty($filters['email'])) {
             $query->where('email', 'LIKE', '%' . $filters['email'] . '%');
         }
-        
+
         return $query->count('id');
     }
-    
+
     private function mapToEntity(array $data): User
     {
         return new User(
@@ -610,12 +610,12 @@ class Container
 {
     private array $bindings = [];
     private array $instances = [];
-    
+
     public function bind(string $abstract, \Closure $concrete): void
     {
         $this->bindings[$abstract] = $concrete;
     }
-    
+
     public function singleton(string $abstract, \Closure $concrete): void
     {
         $this->bind($abstract, function () use ($abstract, $concrete) {
@@ -625,13 +625,13 @@ class Container
             return $this->instances[$abstract];
         });
     }
-    
+
     public function get(string $abstract)
     {
         if (!isset($this->bindings[$abstract])) {
             throw new \Exception("Binding [{$abstract}] not found");
         }
-        
+
         return $this->bindings[$abstract]($this);
     }
 }
@@ -660,18 +660,18 @@ $app->get('/api/v2/users', function ($req, $res) use ($container) {
     try {
         $repository = $container->get(\App\Repositories\UserRepositoryInterface::class);
         $query = $req->query; // stdClass com parâmetros
-        
+
         // Converter stdClass para array para o repositório
         $filters = [];
         if (isset($query->name)) $filters['name'] = $query->name;
         if (isset($query->email)) $filters['email'] = $query->email;
-        
+
         $page = (int)($query->page ?? 1);
         $perPage = (int)($query->per_page ?? 10);
-        
+
         $users = $repository->findAll($filters, $page, $perPage);
         $total = $repository->count($filters);
-        
+
         return $res->json([
             'status' => 'success',
             'data' => array_map(fn($user) => $user->toArray(), $users),
@@ -694,7 +694,7 @@ $app->post('/api/v2/users', function ($req, $res) use ($container) {
     try {
         $repository = $container->get(\App\Repositories\UserRepositoryInterface::class);
         $data = $req->body();
-        
+
         // Validação
         if (empty($data->name) || empty($data->email)) {
             return $res->json([
@@ -702,7 +702,7 @@ $app->post('/api/v2/users', function ($req, $res) use ($container) {
                 'message' => 'Name and email are required'
             ], 400);
         }
-        
+
         // Verificar email duplicado
         if ($repository->findByEmail($data->email)) {
             return $res->json([
@@ -710,15 +710,15 @@ $app->post('/api/v2/users', function ($req, $res) use ($container) {
                 'message' => 'Email already exists'
             ], 409);
         }
-        
+
         // Criar usuário
         $user = new \App\Entities\User(
             name: $data->name,
             email: $data->email
         );
-        
+
         $repository->save($user);
-        
+
         return $res->json([
             'status' => 'success',
             'data' => $user->toArray()
@@ -787,26 +787,26 @@ use App\Domain\Exceptions\InvalidEmailException;
 final class Email
 {
     private string $value;
-    
+
     public function __construct(string $value)
     {
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
             throw new InvalidEmailException("Invalid email format: {$value}");
         }
-        
+
         $this->value = strtolower($value);
     }
-    
+
     public function getValue(): string
     {
         return $this->value;
     }
-    
+
     public function equals(Email $other): bool
     {
         return $this->value === $other->value;
     }
-    
+
     public function __toString(): string
     {
         return $this->value;
@@ -823,31 +823,31 @@ use App\Domain\Exceptions\InvalidNameException;
 final class Name
 {
     private string $value;
-    
+
     public function __construct(string $value)
     {
         $value = trim($value);
-        
+
         if (empty($value)) {
             throw new InvalidNameException("Name cannot be empty");
         }
-        
+
         if (strlen($value) < 2) {
             throw new InvalidNameException("Name must be at least 2 characters long");
         }
-        
+
         if (strlen($value) > 255) {
             throw new InvalidNameException("Name cannot exceed 255 characters");
         }
-        
+
         $this->value = $value;
     }
-    
+
     public function getValue(): string
     {
         return $this->value;
     }
-    
+
     public function __toString(): string
     {
         return $this->value;
@@ -873,7 +873,7 @@ class User
     private Email $email;
     private \DateTimeImmutable $createdAt;
     private \DateTimeImmutable $updatedAt;
-    
+
     private function __construct(
         Name $name,
         Email $email,
@@ -887,7 +887,7 @@ class User
         $this->createdAt = $createdAt ?? new \DateTimeImmutable();
         $this->updatedAt = $updatedAt ?? new \DateTimeImmutable();
     }
-    
+
     public static function create(string $name, string $email): self
     {
         return new self(
@@ -895,7 +895,7 @@ class User
             new Email($email)
         );
     }
-    
+
     public static function fromPrimitives(
         int $id,
         string $name,
@@ -911,45 +911,45 @@ class User
             new \DateTimeImmutable($updatedAt)
         );
     }
-    
+
     public function updateName(string $name): void
     {
         $this->name = new Name($name);
         $this->updatedAt = new \DateTimeImmutable();
     }
-    
+
     public function updateEmail(string $email): void
     {
         $this->email = new Email($email);
         $this->updatedAt = new \DateTimeImmutable();
     }
-    
+
     // Getters
     public function getId(): ?int
     {
         return $this->id;
     }
-    
+
     public function getName(): Name
     {
         return $this->name;
     }
-    
+
     public function getEmail(): Email
     {
         return $this->email;
     }
-    
+
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }
-    
+
     public function getUpdatedAt(): \DateTimeImmutable
     {
         return $this->updatedAt;
     }
-    
+
     public function toArray(): array
     {
         return [
@@ -977,7 +977,7 @@ final class CreateUserDTO
         public readonly string $name,
         public readonly string $email
     ) {}
-    
+
     public static function fromArray(array $data): self
     {
         return new self(
@@ -1001,7 +1001,7 @@ final class CreateUserUseCase
     public function __construct(
         private UserRepositoryInterface $userRepository
     ) {}
-    
+
     public function execute(CreateUserDTO $dto): User
     {
         // Verificar se email já existe
@@ -1009,13 +1009,13 @@ final class CreateUserUseCase
         if ($existingUser !== null) {
             throw new EmailAlreadyExistsException("Email {$dto->email} already exists");
         }
-        
+
         // Criar usuário (validação acontece nos Value Objects)
         $user = User::create($dto->name, $dto->email);
-        
+
         // Salvar no repositório
         $this->userRepository->save($user);
-        
+
         return $user;
     }
 }
@@ -1032,7 +1032,7 @@ final class ListUsersUseCase
     public function __construct(
         private UserRepositoryInterface $userRepository
     ) {}
-    
+
     public function execute(ListUsersDTO $dto): ListUsersResult
     {
         $users = $this->userRepository->findAll(
@@ -1040,9 +1040,9 @@ final class ListUsersUseCase
             page: $dto->page,
             perPage: $dto->perPage
         );
-        
+
         $total = $this->userRepository->count($dto->filters);
-        
+
         return new ListUsersResult(
             users: $users,
             total: $total,
@@ -1061,8 +1061,8 @@ final class ListUsersUseCase
 
 namespace App\Presentation\Controllers;
 
-use HelixPHP\Express\Request;
-use HelixPHP\Express\Response;
+use PivotPHP\PivotPHP\Core\Request;
+use PivotPHP\PivotPHP\Core\Response;
 use App\Application\UseCases\CreateUser\CreateUserUseCase;
 use App\Application\UseCases\CreateUser\CreateUserDTO;
 use App\Application\UseCases\ListUsers\ListUsersUseCase;
@@ -1074,7 +1074,7 @@ final class UserController
         private CreateUserUseCase $createUserUseCase,
         private ListUsersUseCase $listUsersUseCase
     ) {}
-    
+
     public function index(Request $request): Response
     {
         try {
@@ -1082,15 +1082,15 @@ final class UserController
             $filters = [];
             if (isset($request->query->name)) $filters['name'] = $request->query->name;
             if (isset($request->query->email)) $filters['email'] = $request->query->email;
-            
+
             $dto = new ListUsersDTO(
                 filters: $filters,
                 page: (int)($request->query->page ?? 1),
                 perPage: (int)($request->query->per_page ?? 10)
             );
-            
+
             $result = $this->listUsersUseCase->execute($dto);
-            
+
             return Response::json([
                 'status' => 'success',
                 'data' => array_map(fn($user) => $user->toArray(), $result->users),
@@ -1108,7 +1108,7 @@ final class UserController
             ], 500);
         }
     }
-    
+
     public function store(Request $request): Response
     {
         try {
@@ -1119,7 +1119,7 @@ final class UserController
             ];
             $dto = CreateUserDTO::fromArray($data);
             $user = $this->createUserUseCase->execute($dto);
-            
+
             return Response::json([
                 'status' => 'success',
                 'data' => $user->toArray()
@@ -1196,7 +1196,7 @@ return $container;
 
 ## Recursos Extras
 
-### Métodos Corretos do HelixPHP
+### Métodos Corretos do PivotPHP
 
 **Request:**
 - `$req->params->id` - Parâmetros de rota (não getAttribute)
@@ -1216,7 +1216,7 @@ return $container;
 ### 1. Middleware de Transação
 
 ```php
-use Helix\CycleORM\Middleware\TransactionMiddleware;
+use PivotPHP\Core\CycleORM\Middleware\TransactionMiddleware;
 
 // Aplicar em todas as rotas
 $app->use(new TransactionMiddleware($app));
@@ -1254,7 +1254,7 @@ $_ENV['CYCLE_LOG_QUERIES'] = true;
 $_ENV['CYCLE_PROFILE_QUERIES'] = true;
 
 // Coletar métricas
-use Helix\CycleORM\Monitoring\MetricsCollector;
+use PivotPHP\Core\CycleORM\Monitoring\MetricsCollector;
 
 $app->get('/metrics', function ($req, $res) {
     $metrics = MetricsCollector::getMetrics();
@@ -1265,7 +1265,7 @@ $app->get('/metrics', function ($req, $res) {
 ### 4. Health Check
 
 ```php
-use Helix\CycleORM\Health\HealthCheckMiddleware;
+use PivotPHP\Core\CycleORM\Health\HealthCheckMiddleware;
 
 $app->get('/health', function ($req, $res) {
     return $res->json(['status' => 'ok']);

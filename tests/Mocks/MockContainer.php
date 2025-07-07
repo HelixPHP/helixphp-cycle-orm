@@ -1,12 +1,13 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Mocks;
+namespace PivotPHP\CycleORM\Tests\Mocks;
 
-use Helix\Core\Container;
+use PivotPHP\Core\Core\Container;
 
 class MockContainer extends Container
 {
     private array $bindings = [];
+
     private array $instances = [];
 
     public function __construct()
@@ -17,6 +18,7 @@ class MockContainer extends Container
     public function bind(string $abstract, $concrete = null, bool $singleton = false): self
     {
         $this->bindings[$abstract] = $concrete;
+
         return $this;
     }
 
@@ -38,10 +40,11 @@ class MockContainer extends Container
             }
 
             $this->instances[$id] = $instance;
+
             return $instance;
         }
 
-        throw new \Exception("Service $id not found");
+        throw new \Exception("Service {$id} not found");
     }
 
     public function has(string $id): bool

@@ -1,6 +1,6 @@
 <?php
 
-namespace Helix\CycleORM\Monitoring;
+namespace PivotPHP\CycleORM\Monitoring;
 
 /**
  * Profiler de performance para Cycle ORM.

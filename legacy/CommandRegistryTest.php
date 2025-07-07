@@ -1,9 +1,9 @@
 <?php
 
-namespace Helix\CycleORM\Tests;
+namespace PivotPHP\CycleORM\Tests;
 
-use Helix\CycleORM\Commands\CommandRegistry;
-use Helix\CycleORM\Commands\EntityCommand;
+use PivotPHP\CycleORM\Commands\CommandRegistry;
+use PivotPHP\CycleORM\Commands\EntityCommand;
 use PHPUnit\Framework\TestCase;
 
 /**

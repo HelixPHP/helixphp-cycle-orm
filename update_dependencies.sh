@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "=== Updating HelixPHP Cycle ORM Dependencies ==="
+echo "=== Updating PivotPHP Cycle ORM Dependencies ==="
 echo ""
 
 # Change to the script's directory
@@ -17,7 +17,7 @@ if [ ! -f "composer.json" ]; then
 fi
 
 echo "📋 Current composer.json requires:"
-grep -A1 '"helixphp/core"' composer.json
+grep -A1 '"pivotphp/core"' composer.json
 echo ""
 
 # Remove composer.lock if it exists
@@ -43,7 +43,7 @@ else
     echo "❌ Error updating dependencies!"
     echo ""
     echo "💡 Troubleshooting:"
-    echo "  • Check if helixphp/core is published on Packagist"
+    echo "  • Check if pivotphp/core is published on Packagist"
     echo "  • Verify network connectivity"
     echo "  • Try: composer update -vvv for verbose output"
 fi

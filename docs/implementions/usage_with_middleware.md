@@ -1,12 +1,12 @@
 # Guia de Integração com Middleware
 
-Este guia mostra como integrar middlewares do HelixPHP com o Cycle ORM Extension.
+Este guia mostra como integrar middlewares do PivotPHP com o Cycle ORM Extension.
 
 ## O que são Middlewares?
 Middlewares permitem interceptar e manipular requisições e respostas.
 
 ## Como Usar
-1. Registre o middleware no pipeline do HelixPHP:
+1. Registre o middleware no pipeline do PivotPHP:
 ```php
 $app->addMiddleware(CycleMiddleware::class);
 ```

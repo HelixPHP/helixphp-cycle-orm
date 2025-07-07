@@ -1,11 +1,11 @@
 <?php
 
-namespace Helix\CycleORM\Middleware;
+namespace PivotPHP\CycleORM\Middleware;
 
-use Helix\Core\Application;
-use Helix\Http\Request;
-use Helix\Http\Response;
-use Helix\CycleORM\Http\CycleRequest;
+use PivotPHP\Core\Core\Application;
+use PivotPHP\CycleORM\Http\CycleRequest;
+use PivotPHP\Core\Http\Request;
+use PivotPHP\Core\Http\Response;
 
 class TransactionMiddleware
 {
@@ -17,12 +17,11 @@ class TransactionMiddleware
     }
 
     /**
-     * Compatível com padrão callable do Express-PHP.
+     * Compatível com padrão callable do PivotPHP.
      *
-     * @param Request|CycleRequest $req
-     * @param callable(Request, Response):void $next função next do Express-PHP
+     * @param callable(Request, Response):void $next função next do PivotPHP
      */
-    public function __invoke(Request|CycleRequest $req, Response $res, callable $next): void
+    public function __invoke(CycleRequest|Request $req, Response $res, callable $next): void
     {
         $this->handle($req, $res, $next);
     }
@@ -30,9 +29,9 @@ class TransactionMiddleware
     /**
      * Middleware de transação para Cycle ORM.
      *
-     * @param callable(Request, Response):void $next função next do Express-PHP, recebe Request e Response
+     * @param callable(Request, Response):void $next função next do PivotPHP, recebe Request e Response
      */
-    public function handle(Request|CycleRequest $req, Response $res, callable $next): void
+    public function handle(CycleRequest|Request $req, Response $res, callable $next): void
     {
         // Use sempre o container PSR-11 para buscar serviços
         if (method_exists($this->app, 'getContainer')) {
@@ -86,7 +85,7 @@ class TransactionMiddleware
         }
     }
 
-    private function getRouteInfo(Request|CycleRequest $req): string
+    private function getRouteInfo(CycleRequest|Request $req): string
     {
         $method = property_exists($req, 'method')
             && (is_string($req->method) || is_numeric($req->method))

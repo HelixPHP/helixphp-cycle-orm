@@ -1,4 +1,4 @@
-# Contribuindo com o HelixPHP Cycle ORM Extension
+# Contribuindo com o PivotPHP Cycle ORM Extension
 
 Obrigado por considerar contribuir com este projeto!
 

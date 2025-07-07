@@ -1,8 +1,8 @@
 <?php
 
-namespace Helix\CycleORM\Commands;
+namespace PivotPHP\CycleORM\Commands;
 
-use Helix\CycleORM\Health\CycleHealthCheck;
+use PivotPHP\CycleORM\Health\CycleHealthCheck;
 
 class StatusCommand extends BaseCommand
 {

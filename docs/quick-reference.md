@@ -1,9 +1,9 @@
-# Referência Rápida - HelixPHP Cycle ORM Extension
+# Referência Rápida - PivotPHP Cycle ORM Extension
 
 ## Instalação e Configuração
 
 ```bash
-composer require helixphp/core-cycle-orm-extension
+composer require pivotphp/core-cycle-orm-extension
 ```
 
 ```php
@@ -11,8 +11,8 @@ composer require helixphp/core-cycle-orm-extension
 chdir(dirname(__DIR__)); // IMPORTANTE!
 require 'vendor/autoload.php';
 
-use Helix\CycleORM\CycleServiceProvider;
-use Helix\CycleORM\Middleware\CycleMiddleware;
+use PivotPHP\Core\CycleORM\CycleServiceProvider;
+use PivotPHP\Core\CycleORM\Middleware\CycleMiddleware;
 
 $app = new Helix\Core\Application();
 
@@ -46,12 +46,12 @@ $app->get('/exemplo', function ($req, $res) {
     $db = $req->getContainer()->get('cycle.database');
     $orm = $req->getContainer()->get('cycle.orm');
     $em = $req->getContainer()->get('cycle.em');
-    
+
     // Métodos de conveniência
     $repo = $req->repository(User::class);
     $user = $req->entity(User::class, ['name' => 'João']);
     $page = $req->paginate(User::class, 20, 1);
-    
+
     // Propriedades diretas
     $orm = $req->orm;
     $em = $req->em;
@@ -116,14 +116,14 @@ class UserRepository
     public function __construct(
         private DatabaseInterface $database
     ) {}
-    
+
     public function findAll(): array
     {
         return $this->database->database()
             ->query('SELECT * FROM users')
             ->fetchAll();
     }
-    
+
     public function findById(int $id): ?array
     {
         return $this->database->database()
@@ -171,7 +171,7 @@ $_ENV['CYCLE_LOG_QUERIES'] = true;
 $_ENV['CYCLE_PROFILE_QUERIES'] = true;
 
 // Coletar métricas
-use Helix\CycleORM\Monitoring\MetricsCollector;
+use PivotPHP\Core\CycleORM\Monitoring\MetricsCollector;
 
 $metrics = MetricsCollector::getMetrics();
 // ['queries' => 10, 'time' => 0.125, 'cache_hits' => 5]
@@ -225,9 +225,9 @@ $app->use(new CycleMiddleware($app)); // ✓
 chdir(dirname(__DIR__));
 require 'vendor/autoload.php';
 
-use Helix\CycleORM\CycleServiceProvider;
-use Helix\CycleORM\Middleware\CycleMiddleware;
-use Helix\Core\Application;
+use PivotPHP\Core\CycleORM\CycleServiceProvider;
+use PivotPHP\Core\CycleORM\Middleware\CycleMiddleware;
+use PivotPHP\Core\Core\Application;
 
 $app = new Application();
 
@@ -247,12 +247,12 @@ $app->get('/api/users', function ($req, $res) {
 $app->post('/api/users', function ($req, $res) {
     $db = $req->getContainer()->get('cycle.database');
     $data = $req->body;
-    
+
     $db->database()->execute(
         'INSERT INTO users (name, email) VALUES (?, ?)',
         [$data->name, $data->email]
     );
-    
+
     return $res->json(['message' => 'Created'], 201);
 });
 

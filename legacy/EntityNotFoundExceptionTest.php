@@ -1,8 +1,8 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Exceptions;
+namespace PivotPHP\CycleORM\Tests\Exceptions;
 
-use Helix\CycleORM\Exceptions\EntityNotFoundException;
+use PivotPHP\CycleORM\Exceptions\EntityNotFoundException;
 use PHPUnit\Framework\TestCase;
 
 class EntityNotFoundExceptionTest extends TestCase

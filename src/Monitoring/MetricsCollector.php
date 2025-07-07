@@ -1,6 +1,6 @@
 <?php
 
-namespace Helix\CycleORM\Monitoring;
+namespace PivotPHP\CycleORM\Monitoring;
 
 /**
  * Coletor de métricas para Cycle ORM.

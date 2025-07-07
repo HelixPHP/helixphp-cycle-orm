@@ -1,8 +1,8 @@
 {
-  "name": "helixphp/cycle-orm",
-  "description": "Robust and well-tested Cycle ORM integration for HelixPHP microframework with type safety and comprehensive testing",
+  "name": "pivotphp/cycle-orm",
+  "description": "Robust and well-tested Cycle ORM integration for PivotPHP microframework with type safety and comprehensive testing",
   "keywords": [
-    "helixphp",
+    "pivotphp",
     "cycle-orm",
     "database",
     "orm",
@@ -23,7 +23,7 @@
   ],
   "require": {
     "php": "^8.1",
-    "helixphp/core": "^1.0",
+    "pivotphp/core": "^1.0",
     "cycle/orm": "^2.10",
     "cycle/annotated": "^4.3",
     "cycle/migrations": "^4.2.5",

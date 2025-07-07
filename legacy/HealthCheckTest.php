@@ -1,8 +1,8 @@
 <?php
 
-namespace Helix\CycleORM\Tests;
+namespace PivotPHP\CycleORM\Tests;
 
-use Helix\CycleORM\Health\CycleHealthCheck;
+use PivotPHP\CycleORM\Health\CycleHealthCheck;
 use Cycle\Database\Config\DriverConfig;
 use Cycle\Database\DatabaseInterface;
 use Cycle\Database\Driver\CompilerInterface;
@@ -18,7 +18,7 @@ use Cycle\Database\Query\UpdateQuery;
 use Cycle\Database\StatementInterface;
 use Cycle\Database\TableInterface;
 use Cycle\ORM\SchemaInterface;
-use Helix\Core\Application;
+use PivotPHP\Core\Core\Application;
 use PHPUnit\Framework\TestCase;
 
 /**

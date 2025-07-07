@@ -1,13 +1,18 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Feature;
+namespace PivotPHP\CycleORM\Tests\Feature;
 
-use Helix\CycleORM\Tests\TestCase;
-use Helix\CycleORM\Tests\Entities\User;
-use Helix\CycleORM\Tests\Entities\Post;
-use Helix\CycleORM\RepositoryFactory;
 use Cycle\ORM\RepositoryInterface;
+use PivotPHP\CycleORM\RepositoryFactory;
+use PivotPHP\CycleORM\Tests\Entities\Post;
+use PivotPHP\CycleORM\Tests\Entities\User;
+use PivotPHP\CycleORM\Tests\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class RepositoryFactoryTest extends TestCase
 {
     private RepositoryFactory $factory;
@@ -16,7 +21,7 @@ class RepositoryFactoryTest extends TestCase
     {
         parent::setUp();
         $this->factory = new RepositoryFactory($this->orm);
-        $this->app->getContainer()->bind('cycle.repository', fn() => $this->factory);
+        $this->app->getContainer()->bind('cycle.repository', fn () => $this->factory);
     }
 
     public function testGetRepositoryReturnsCorrectInstance(): void
@@ -94,15 +99,17 @@ class RepositoryFactoryTest extends TestCase
     public function testRegisterCustomRepositoryWithValidClass(): void
     {
         // For this test, we'll use a mock repository class
-        $customRepoClass = new class implements RepositoryInterface {
+        $customRepoClass = new class() implements RepositoryInterface {
             public function findByPK(mixed $id): ?object
             {
                 return null;
             }
+
             public function findOne(array $scope = [], array $orderBy = []): ?object
             {
                 return null;
             }
+
             public function findAll(array $scope = [], array $orderBy = []): iterable
             {
                 return [];

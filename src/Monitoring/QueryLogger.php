@@ -1,6 +1,6 @@
 <?php
 
-namespace Helix\CycleORM\Monitoring;
+namespace PivotPHP\CycleORM\Monitoring;
 
 /**
  * Logger de queries para Cycle ORM.
@@ -70,6 +70,7 @@ class QueryLogger
 
     /**
      * Limpar logs (alias para compatibilidade com versões anteriores).
+     *
      * @deprecated Use clearLogs() instead
      */
     public function clear(): void

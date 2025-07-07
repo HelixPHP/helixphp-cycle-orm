@@ -1,9 +1,9 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Monitoring;
+namespace PivotPHP\CycleORM\Tests\Monitoring;
 
-use Helix\CycleORM\Monitoring\MetricsCollector;
-use Helix\CycleORM\Monitoring\PerformanceProfiler;
+use PivotPHP\CycleORM\Monitoring\MetricsCollector;
+use PivotPHP\CycleORM\Monitoring\PerformanceProfiler;
 use PHPUnit\Framework\TestCase;
 
 class IntegrationTest extends TestCase

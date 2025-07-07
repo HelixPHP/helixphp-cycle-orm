@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Script de instalação da Express-PHP Cycle ORM Extension
+ * Script de instalação da PivotPHP Cycle ORM Extension
  * Configura o ambiente e cria arquivos necessários
  */
 
@@ -38,7 +38,7 @@ class ExpressCycleInstaller
   private function printHeader(): void
   {
     echo "\n";
-    echo "🚀 Express-PHP Cycle ORM Extension Installer\n";
+    echo "🚀 PivotPHP Cycle ORM Extension Installer\n";
     echo "=============================================\n\n";
   }
 
@@ -61,14 +61,14 @@ class ExpressCycleInstaller
       echo "  ✅ Extension {$ext} (OK)\n";
     }
 
-    // Verificar se é um projeto Express-PHP
+    // Verificar se é um projeto PivotPHP
     $composerFile = $this->projectRoot . '/composer.json';
     if (file_exists($composerFile)) {
       $composer = json_decode(file_get_contents($composerFile), true);
       if (isset($composer['require']['cafernandes/express-php'])) {
-        echo "  ✅ Express-PHP project detected (OK)\n";
+        echo "  ✅ PivotPHP project detected (OK)\n";
       } else {
-        echo "  ⚠️  Express-PHP not detected in composer.json\n";
+        echo "  ⚠️  PivotPHP not detected in composer.json\n";
       }
     }
 

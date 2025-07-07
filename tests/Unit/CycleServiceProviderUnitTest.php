@@ -1,11 +1,15 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Unit;
+namespace PivotPHP\CycleORM\Tests\Unit;
 
-use Helix\CycleORM\CycleServiceProvider;
-use Helix\CycleORM\Tests\Support\TestApplication;
+use PivotPHP\CycleORM\CycleServiceProvider;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class CycleServiceProviderUnitTest extends TestCase
 {
     public function testServiceProviderCanBeInstantiated(): void
@@ -40,8 +44,8 @@ class CycleServiceProviderUnitTest extends TestCase
         $this->assertTrue($reflection->hasMethod('__construct'));
 
         // Test that the class extends the Express ServiceProvider
-        $this->assertTrue($reflection->getParentClass() !== false);
-        $this->assertEquals('Helix\Providers\ServiceProvider', $reflection->getParentClass()->getName());
+        $this->assertTrue(false !== $reflection->getParentClass());
+        $this->assertEquals('PivotPHP\Core\Providers\ServiceProvider', $reflection->getParentClass()->getName());
     }
 
     public function testHelperFunctionsWork(): void

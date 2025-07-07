@@ -1,9 +1,9 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Integration;
+namespace PivotPHP\CycleORM\Tests\Integration;
 
-use Helix\CycleORM\Health\CycleHealthCheck;
-use Helix\CycleORM\Tests\Fixtures\TestEntity;
+use PivotPHP\CycleORM\Health\CycleHealthCheck;
+use PivotPHP\CycleORM\Tests\Fixtures\TestEntity;
 use Cycle\Database\Config\DriverConfig;
 use Cycle\Database\DatabaseInterface;
 use Cycle\Database\DatabaseProviderInterface;
@@ -29,7 +29,7 @@ use Cycle\ORM\Mapper\Mapper;
 use Cycle\ORM\ORM;
 use Cycle\ORM\Schema;
 use Cycle\ORM\SchemaInterface;
-use Helix\Core\Application;
+use PivotPHP\Core\Core\Application;
 use PHPUnit\Framework\TestCase;
 
 /**

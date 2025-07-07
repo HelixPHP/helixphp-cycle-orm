@@ -1,8 +1,8 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Monitoring;
+namespace PivotPHP\CycleORM\Tests\Monitoring;
 
-use Helix\CycleORM\Monitoring\QueryLogger;
+use PivotPHP\CycleORM\Monitoring\QueryLogger;
 use PHPUnit\Framework\TestCase;
 
 class QueryLoggerTest extends TestCase

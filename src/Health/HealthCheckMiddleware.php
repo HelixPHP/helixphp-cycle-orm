@@ -1,10 +1,10 @@
 <?php
 
-namespace Helix\CycleORM\Health;
+namespace PivotPHP\CycleORM\Health;
 
-use Helix\Core\Application;
-use Helix\Http\Request;
-use Helix\Http\Response;
+use PivotPHP\Core\Core\Application;
+use PivotPHP\Core\Http\Request;
+use PivotPHP\Core\Http\Response;
 
 /**
  * Middleware para expor endpoint de health check.
@@ -20,7 +20,7 @@ class HealthCheckMiddleware
 
     public function handle(Request $req, Response $res, callable $next): void
     {
-        // Compatível com Express-PHP: prioriza getPathInfo(), depois path, depois pathCallable
+        // Compatível com PivotPHP: prioriza getPathInfo(), depois path, depois pathCallable
         if (method_exists($req, 'getPathInfo') && is_callable([$req, 'getPathInfo'])) {
             $path = $req->getPathInfo();
         } elseif (property_exists($req, 'path')) {
@@ -56,6 +56,7 @@ class HealthCheckMiddleware
         $res->status($statusCode)
             ->header('Content-Type', 'application/json')
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-            ->json($health);
+            ->json($health)
+        ;
     }
 }

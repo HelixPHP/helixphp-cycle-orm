@@ -1,17 +1,17 @@
 <?php
 
-namespace Helix\CycleORM\Tests;
+namespace PivotPHP\CycleORM\Tests;
 
-use Helix\CycleORM\Commands\CommandRegistry;
-use Helix\CycleORM\Commands\EntityCommand;
-use Helix\CycleORM\Commands\SchemaCommand;
+use PivotPHP\CycleORM\Commands\CommandRegistry;
+use PivotPHP\CycleORM\Commands\EntityCommand;
+use PivotPHP\CycleORM\Commands\SchemaCommand;
 use Cycle\Database\Config\DatabaseConfig;
 use Cycle\Database\DatabaseManager;
 use Cycle\ORM\Factory;
 use Cycle\ORM\Schema;
 use Cycle\Schema\Compiler;
 use Cycle\Schema\Registry;
-use Helix\Core\Application;
+use PivotPHP\Core\Core\Application;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -96,7 +96,7 @@ class CommandsTest extends TestCase
                 return $this->schema;
             }
         };
-        // Application HelixPHP real
+        // Application PivotPHP real
         $app = new Application();
         $container = $app->getContainer();
         $container->bind('cycle.orm', fn () => $orm);

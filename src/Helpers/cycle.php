@@ -1,7 +1,7 @@
 <?php
 
-use Helix\CycleORM\Http\CycleRequest;
-use Helix\Http\Request;
+use PivotPHP\CycleORM\Http\CycleRequest;
+use PivotPHP\Core\Http\Request;
 
 /**
  * Helper para garantir que temos um CycleRequest.

@@ -1,12 +1,12 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Support;
+namespace PivotPHP\CycleORM\Tests\Support;
 
-use Helix\CycleORM\Tests\Mocks\MockContainer;
+use PivotPHP\CycleORM\Tests\Mocks\MockContainer;
 
 /**
- * Simple test application that mimics Helix\Core\Application interface
- * without complex inheritance issues
+ * Simple test application that mimics PivotPHP\Core\Application interface
+ * without complex inheritance issues.
  */
 class TestApplication
 {
@@ -39,7 +39,7 @@ class TestApplication
         $this->container->bind(
             'config',
             function () {
-                return new class () {
+                return new class() {
                     public function get(string $key, mixed $default = null): mixed
                     {
                         return match ($key) {

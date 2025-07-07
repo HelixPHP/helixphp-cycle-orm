@@ -1,6 +1,6 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Integration;
+namespace PivotPHP\CycleORM\Tests\Integration;
 
 use Cycle\Database\StatementInterface;
 

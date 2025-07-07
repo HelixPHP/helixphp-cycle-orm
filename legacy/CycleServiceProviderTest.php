@@ -1,11 +1,11 @@
 <?php
 
-namespace Helix\CycleORM\Tests;
+namespace PivotPHP\CycleORM\Tests;
 
-use Helix\CycleORM\CycleServiceProvider;
-use Helix\CycleORM\Middleware\CycleMiddleware;
-use Helix\Core\Application;
-use Helix\Routing\Router;
+use PivotPHP\CycleORM\CycleServiceProvider;
+use PivotPHP\CycleORM\Middleware\CycleMiddleware;
+use PivotPHP\Core\Core\Application;
+use PivotPHP\Core\Routing\Router;
 use PHPUnit\Framework\TestCase;
 
 /**

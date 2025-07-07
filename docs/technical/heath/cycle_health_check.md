@@ -11,7 +11,7 @@ Realiza checks automáticos de serviços essenciais, conexão com banco, integri
 
 ## Exemplo de Uso
 ```php
-use Helix\CycleORM\Health\CycleHealthCheck;
+use PivotPHP\Core\CycleORM\Health\CycleHealthCheck;
 
 $status = CycleHealthCheck::check($app);
 ```

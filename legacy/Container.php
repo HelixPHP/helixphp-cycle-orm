@@ -1,6 +1,6 @@
 <?php
 
-namespace Helix\Core;
+namespace PivotPHP\Core\Core;
 
 class Container
 {

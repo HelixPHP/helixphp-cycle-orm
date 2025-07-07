@@ -1,4 +1,4 @@
-# Métodos Corretos do HelixPHP
+# Métodos Corretos do PivotPHP
 
 ## Request
 
@@ -51,10 +51,10 @@ $app->post('/users', function ($req, $res) {
     $data = $req->body();
     $name = $data->name;
     $email = $data->email;
-    
+
     // Ou usando input()
     $name = $req->input('name', 'Anonymous');
-    
+
     return $res->json(['created' => true], 201);
 });
 

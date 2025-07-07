@@ -1,5 +1,5 @@
 <?php
-namespace Helix\CycleORM\Tests\Repository\Fakes;
+namespace PivotPHP\CycleORM\Tests\Repository\Fakes;
 
 use Cycle\ORM\FactoryInterface;
 use Cycle\ORM\SchemaInterface;

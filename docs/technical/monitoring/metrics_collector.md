@@ -1,6 +1,6 @@
 # MetricsCollector
 
-O `MetricsCollector` é responsável por coletar e expor métricas detalhadas de uso e performance do Cycle ORM, facilitando o monitoramento e a análise de gargalos em aplicações HelixPHP.
+O `MetricsCollector` é responsável por coletar e expor métricas detalhadas de uso e performance do Cycle ORM, facilitando o monitoramento e a análise de gargalos em aplicações PivotPHP.
 
 ## Visão Geral
 O coletor centraliza estatísticas como número de queries executadas, tempo total de execução, entidades persistidas, cache hits/misses e queries lentas, permitindo integração com sistemas de observabilidade e tuning de performance.
@@ -27,7 +27,7 @@ O coletor centraliza estatísticas como número de queries executadas, tempo tot
 
 ## Exemplo de Uso
 ```php
-use Helix\CycleORM\Monitoring\MetricsCollector;
+use PivotPHP\Core\CycleORM\Monitoring\MetricsCollector;
 
 MetricsCollector::increment('entities_persisted');
 MetricsCollector::recordQueryTime('SELECT * FROM users', 120.5);

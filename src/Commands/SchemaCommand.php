@@ -1,6 +1,6 @@
 <?php
 
-namespace Helix\CycleORM\Commands;
+namespace PivotPHP\CycleORM\Commands;
 
 use Cycle\Migrations\Migrator;
 use Cycle\ORM\ORMInterface;
@@ -137,7 +137,7 @@ class SchemaCommand extends BaseCommand
     }
 
     /**
-     * Obtém um serviço do container, com fallback para métodos Express-PHP e PSR-11.
+     * Obtém um serviço do container, com fallback para métodos PivotPHP e PSR-11.
      *
      * @param string            $service       nome do serviço
      * @param null|class-string $expectedClass classe esperada para validação

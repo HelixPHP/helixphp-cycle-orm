@@ -1,8 +1,8 @@
 <?php
 
-namespace Helix\CycleORM\Tests\Exceptions;
+namespace PivotPHP\CycleORM\Tests\Exceptions;
 
-use Helix\CycleORM\Exceptions\CycleORMException;
+use PivotPHP\CycleORM\Exceptions\CycleORMException;
 use PHPUnit\Framework\TestCase;
 
 class CycleORMExceptionTest extends TestCase

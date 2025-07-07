@@ -1,17 +1,17 @@
 <?php
 
-namespace Helix\CycleORM\Middleware;
+namespace PivotPHP\CycleORM\Middleware;
 
-use Helix\CycleORM\Http\CycleRequest;
-use Helix\Http\Request;
-use Helix\Http\Response;
+use PivotPHP\CycleORM\Http\CycleRequest;
+use PivotPHP\Core\Http\Request;
+use PivotPHP\Core\Http\Response;
 
 class EntityValidationMiddleware
 {
     /**
      * Middleware de validação de entidade.
      *
-     * @param callable(CycleRequest|Request, Response):void $next função next do Express-PHP,
+     * @param callable(CycleRequest|Request, Response):void $next função next do PivotPHP,
      *                                                            recebe Request ou CycleRequest e Response
      */
     public function handle(Request $req, Response $res, callable $next): void

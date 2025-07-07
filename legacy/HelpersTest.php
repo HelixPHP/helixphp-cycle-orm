@@ -1,10 +1,10 @@
 <?php
 
-namespace Helix\CycleORM\Tests;
+namespace PivotPHP\CycleORM\Tests;
 
-use Helix\CycleORM\Helpers\CycleHelpers;
-use Helix\CycleORM\Helpers\EnvironmentHelper;
-use Helix\CycleORM\Tests\Fixtures\TestEntity;
+use PivotPHP\CycleORM\Helpers\CycleHelpers;
+use PivotPHP\CycleORM\Helpers\EnvironmentHelper;
+use PivotPHP\CycleORM\Tests\Fixtures\TestEntity;
 use Cycle\Database\Config\DatabaseConfig;
 use Cycle\Database\Config\SQLite\MemoryConnectionConfig;
 use Cycle\Database\Config\SQLiteDriverConfig;
