@@ -7,15 +7,9 @@ parameters:
         - tests
     bootstrapFiles:
         - vendor/autoload.php
-    ignoreErrors:
-        - '#Parameter \#1 of callable .* expects Helix\\Http\\Request, .* given#'
 
     # PivotPHP specific ignores
     universalObjectCratesClasses:
-        - Helix\Http\Request
-        - Helix\Http\Response
-        - Helix\Core\Application
-
-    # Stub files for better type inference
-    # stubFiles:
-    #     - ../pivotphp-core/src/Http/Request.php
+        - PivotPHP\Core\Http\Request
+        - PivotPHP\Core\Http\Response
+        - PivotPHP\Core\Core\Application

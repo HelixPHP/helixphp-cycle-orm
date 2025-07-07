@@ -38,8 +38,7 @@ class CycleRequestTest extends TestCase
         $this->originalRequest
             ->expects($this->once())
             ->method('getMethod')
-            ->willReturn('POST')
-        ;
+            ->willReturn('POST');
 
         // Call should be forwarded to original request
         $result = $this->cycleRequest->getMethod();

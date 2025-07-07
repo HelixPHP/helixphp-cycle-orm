@@ -20,16 +20,8 @@ class HealthCheckMiddleware
 
     public function handle(Request $req, Response $res, callable $next): void
     {
-        // Compatível com PivotPHP: prioriza getPathInfo(), depois path, depois pathCallable
-        if (method_exists($req, 'getPathInfo') && is_callable([$req, 'getPathInfo'])) {
-            $path = $req->getPathInfo();
-        } elseif (property_exists($req, 'path')) {
-            $path = $req->path;
-        } elseif (property_exists($req, 'pathCallable')) {
-            $path = $req->pathCallable;
-        } else {
-            $path = null;
-        }
+        // Use the public method getPathCallable() to get the actual request path
+        $path = $req->getPathCallable();
 
         // Verificar se é uma requisição de health check
         if ('/health/cycle' === $path || '/health' === $path) {
@@ -43,7 +35,7 @@ class HealthCheckMiddleware
 
     private function handleHealthCheck(Request $req, Response $res): void
     {
-        $detailed = (is_array($req->query) && isset($req->query['detailed'])) ? $req->query['detailed'] : false;
+        $detailed = $req->get('detailed', false);
 
         if ($detailed) {
             $health = CycleHealthCheck::detailedCheck($this->app);
@@ -56,7 +48,6 @@ class HealthCheckMiddleware
         $res->status($statusCode)
             ->header('Content-Type', 'application/json')
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-            ->json($health)
-        ;
+            ->json($health);
     }
 }

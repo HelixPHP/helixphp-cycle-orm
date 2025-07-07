@@ -99,7 +99,7 @@ class RepositoryFactoryTest extends TestCase
     public function testRegisterCustomRepositoryWithValidClass(): void
     {
         // For this test, we'll use a mock repository class
-        $customRepoClass = new class() implements RepositoryInterface {
+        $customRepoClass = new class () implements RepositoryInterface {
             public function findByPK(mixed $id): ?object
             {
                 return null;

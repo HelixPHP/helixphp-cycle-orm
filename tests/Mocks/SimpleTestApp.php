@@ -14,7 +14,7 @@ class SimpleTestApp
         $this->container->bind(
             'config',
             function () {
-                return new class() {
+                return new class () {
                     public function get(string $key, mixed $default = null): mixed
                     {
                         return match ($key) {

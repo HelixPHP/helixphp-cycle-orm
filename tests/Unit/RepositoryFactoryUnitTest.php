@@ -35,8 +35,7 @@ class RepositoryFactoryUnitTest extends TestCase
             ->expects($this->once())
             ->method('getRepository')
             ->with(User::class)
-            ->willReturn($mockRepo)
-        ;
+            ->willReturn($mockRepo);
 
         $result = $this->factory->getRepository(User::class);
 
@@ -51,8 +50,7 @@ class RepositoryFactoryUnitTest extends TestCase
             ->expects($this->once()) // Should only be called once due to caching
             ->method('getRepository')
             ->with(User::class)
-            ->willReturn($mockRepo)
-        ;
+            ->willReturn($mockRepo);
 
         // First call
         $result1 = $this->factory->getRepository(User::class);
@@ -72,8 +70,7 @@ class RepositoryFactoryUnitTest extends TestCase
             ->expects($this->exactly(2)) // Should be called twice after cache clear
             ->method('getRepository')
             ->with(User::class)
-            ->willReturnOnConsecutiveCalls($mockRepo1, $mockRepo2)
-        ;
+            ->willReturnOnConsecutiveCalls($mockRepo1, $mockRepo2);
 
         // First call
         $result1 = $this->factory->getRepository(User::class);
@@ -108,8 +105,7 @@ class RepositoryFactoryUnitTest extends TestCase
 
         $this->mockOrm
             ->method('getRepository')
-            ->willReturn($mockRepo)
-        ;
+            ->willReturn($mockRepo);
 
         // Access some repositories
         $this->factory->getRepository(User::class);
@@ -126,7 +122,7 @@ class RepositoryFactoryUnitTest extends TestCase
     public function testRegisterCustomRepositoryWithValidClass(): void
     {
         // Use a real class that implements RepositoryInterface for this test
-        $validRepoClass = new class() implements RepositoryInterface {
+        $validRepoClass = new class () implements RepositoryInterface {
             public function findByPK(mixed $id): ?object
             {
                 return null;
@@ -177,8 +173,7 @@ class RepositoryFactoryUnitTest extends TestCase
             ->expects($this->once())
             ->method('getRepository')
             ->with($user)
-            ->willReturn($mockRepo)
-        ;
+            ->willReturn($mockRepo);
 
         $result = $this->factory->getRepository($user);
 

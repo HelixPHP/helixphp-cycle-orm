@@ -84,8 +84,7 @@ class CycleHelpers
                     )
                 ) {
                     $query = $query->where($field, '>=', $matches[1])
-                        ->where($field, '<=', $matches[2])
-                    ;
+                        ->where($field, '<=', $matches[2]);
                 } else {
                     $query = $query->where($field, $value);
                 }

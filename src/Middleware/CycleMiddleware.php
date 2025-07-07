@@ -66,7 +66,9 @@ class CycleMiddleware
             $cycleRequest->db = $db;
         }
 
-        // Passa o CycleRequest wrapper para o próximo handler
-        $next($cycleRequest, $res);
+        // Pass the original request to maintain compatibility with the next handler
+        // The CycleRequest wrapper can be accessed through the original request's attributes
+        $req->setAttribute('cycleRequest', $cycleRequest);
+        $next($req, $res);
     }
 }

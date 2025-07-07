@@ -373,7 +373,7 @@ class CycleServiceProvider extends ServiceProvider
             'cycle.migrator',
             function () {
                 // Retorna um migrator básico ou mock para desenvolvimento
-                return new class() {
+                return new class () {
                     /**
                      * @return array{pending: array<int, mixed>, executed: array<int, mixed>}
                      */
