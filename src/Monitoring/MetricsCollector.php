@@ -2,6 +2,8 @@
 
 namespace PivotPHP\CycleORM\Monitoring;
 
+use PivotPHP\CycleORM\Helpers\EnvironmentHelper;
+
 /**
  * Coletor de métricas para Cycle ORM.
  */
@@ -78,13 +80,7 @@ class MetricsCollector
         self::$metrics['queries_failed']++;
 
         // Only log to error_log if not in testing environment
-        $isTestingEnv = (
-            (isset($_ENV['APP_ENV']) && $_ENV['APP_ENV'] === 'testing') ||
-            (isset($_SERVER['APP_ENV']) && $_SERVER['APP_ENV'] === 'testing') ||
-            defined('PHPUNIT_RUNNING')
-        );
-
-        if (!$isTestingEnv) {
+        if (!EnvironmentHelper::isTesting()) {
             error_log('Cycle ORM Query Failed: Query: ' . substr($query, 0, 100));
         }
     }
