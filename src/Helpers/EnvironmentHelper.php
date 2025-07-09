@@ -5,19 +5,24 @@ namespace PivotPHP\CycleORM\Helpers;
 class EnvironmentHelper
 {
     /**
+     * Cache centralizado para todos os métodos de ambiente.
+     *
+     * @var array<string, bool|string>
+     */
+    private static array $cache = [];
+    /**
      * Verifica se o ambiente é produção.
      * Resultado é cached para melhor performance.
      */
     public static function isProduction(): bool
     {
-        static $cachedResult = null;
-        if ($cachedResult !== null) {
-            return $cachedResult;
+        if (isset(self::$cache['isProduction'])) {
+            return (bool) self::$cache['isProduction'];
         }
 
         $env = function_exists('env') ? env('APP_ENV', 'production') : ($_ENV['APP_ENV'] ?? 'production');
-        $cachedResult = in_array($env, ['production', 'prod'], true);
-        return $cachedResult;
+        self::$cache['isProduction'] = in_array($env, ['production', 'prod'], true);
+        return (bool) self::$cache['isProduction'];
     }
 
     /**
@@ -26,14 +31,13 @@ class EnvironmentHelper
      */
     public static function isDevelopment(): bool
     {
-        static $cachedResult = null;
-        if ($cachedResult !== null) {
-            return $cachedResult;
+        if (isset(self::$cache['isDevelopment'])) {
+            return (bool) self::$cache['isDevelopment'];
         }
 
         $env = function_exists('env') ? env('APP_ENV', 'development') : ($_ENV['APP_ENV'] ?? 'development');
-        $cachedResult = in_array($env, ['development', 'dev', 'local'], true);
-        return $cachedResult;
+        self::$cache['isDevelopment'] = in_array($env, ['development', 'dev', 'local'], true);
+        return (bool) self::$cache['isDevelopment'];
     }
 
     /**
@@ -43,9 +47,8 @@ class EnvironmentHelper
      */
     public static function isTesting(): bool
     {
-        static $cachedResult = null;
-        if ($cachedResult !== null) {
-            return $cachedResult;
+        if (isset(self::$cache['isTesting'])) {
+            return (bool) self::$cache['isTesting'];
         }
 
         // Check APP_ENV from multiple sources
@@ -61,17 +64,17 @@ class EnvironmentHelper
 
         foreach ($envSources as $envValue) {
             if (in_array($envValue, ['testing', 'test'], true)) {
-                $cachedResult = true;
-                return $cachedResult;
+                self::$cache['isTesting'] = true;
+                return (bool) self::$cache['isTesting'];
             }
         }
 
         // Check if running under PHPUnit
-        $cachedResult = defined('PHPUNIT_RUNNING') ||
-                       (isset($_ENV['PHPUNIT_RUNNING']) && $_ENV['PHPUNIT_RUNNING']) ||
-                       (isset($_SERVER['PHPUNIT_RUNNING']) && $_SERVER['PHPUNIT_RUNNING']);
+        self::$cache['isTesting'] = defined('PHPUNIT_RUNNING') ||
+                                   (isset($_ENV['PHPUNIT_RUNNING']) && $_ENV['PHPUNIT_RUNNING']) ||
+                                   (isset($_SERVER['PHPUNIT_RUNNING']) && $_SERVER['PHPUNIT_RUNNING']);
 
-        return $cachedResult;
+        return (bool) self::$cache['isTesting'];
     }
 
     /**
@@ -80,14 +83,13 @@ class EnvironmentHelper
      */
     public static function getEnvironment(): string
     {
-        static $cachedResult = null;
-        if ($cachedResult !== null) {
-            return $cachedResult;
+        if (isset(self::$cache['getEnvironment'])) {
+            return (string) self::$cache['getEnvironment'];
         }
 
         $env = function_exists('env') ? env('APP_ENV', 'production') : ($_ENV['APP_ENV'] ?? 'production');
-        $cachedResult = is_string($env) ? $env : 'production';
-        return $cachedResult;
+        self::$cache['getEnvironment'] = is_string($env) ? $env : 'production';
+        return (string) self::$cache['getEnvironment'];
     }
 
     /**
@@ -96,7 +98,6 @@ class EnvironmentHelper
      */
     public static function clearCache(): void
     {
-        // Reset all static caches by calling each method with a flag
-        // This is a simple approach - in production the cache should rarely need clearing
+        self::$cache = [];
     }
 }
