@@ -5,6 +5,67 @@ All notable changes to PivotPHP Cycle ORM will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-07-09
+
+### 🚀 **Performance & Compatibility Update**
+
+This release focuses on performance optimizations, cross-platform compatibility, and code quality improvements following the PivotPHP Core v1.1.0 upgrade.
+
+#### 🔄 **Updated**
+- **PivotPHP Core**: Updated to v1.1.0 with performance improvements for auto stress scenarios
+- **Environment Detection**: Centralized environment detection using `EnvironmentHelper` to reduce code duplication
+- **Caching System**: Implemented static caching for environment methods with 7x performance improvement
+- **Testing Infrastructure**: Clean PHPUnit exit codes (0) for better CI/CD integration
+
+#### 🌐 **Added**
+- **Cross-Platform Support**: Added platform-specific scripts for test coverage
+  - `scripts/test-coverage.sh` for Unix/Linux/macOS
+  - `scripts/test-coverage.bat` for Windows CMD
+  - `scripts/test-coverage.ps1` for PowerShell
+  - `scripts/test-coverage.php` for universal PHP-based execution
+- **Cache Management**: Added `EnvironmentHelper::clearCache()` method for testing scenarios
+- **Performance Benchmarks**: Added benchmark scripts to demonstrate caching benefits
+
+#### 🔧 **Fixed**
+- **CI/CD Compatibility**: Fixed PHPUnit exit codes that were causing CI failures
+- **Log Pollution**: Suppressed test-specific error logs in testing environment
+- **PSR-12 Compliance**: Fixed all code style violations
+- **Cross-Platform Issues**: Resolved Windows compatibility issues with inline environment variables
+
+#### 🏗️ **Refactored**
+- **Environment Helper**: Centralized cache system using single static array
+- **Metrics Collector**: Simplified environment detection using `EnvironmentHelper::isTesting()`
+- **Test Configuration**: Optimized PHPUnit configuration for better performance and compatibility
+- **Code Organization**: Removed duplicate composer files and obsolete scripts
+
+#### 📊 **Performance Improvements**
+- **Environment Detection**: 7x faster performance on subsequent calls with static caching
+- **Test Execution**: Reduced test execution time by eliminating unnecessary coverage overhead
+- **Memory Usage**: Optimized memory usage by reducing redundant environment checks
+
+#### 🧪 **Testing Enhancements**
+- **Clean Exit Codes**: PHPUnit now returns proper exit code 0 for successful test runs
+- **CI-Friendly**: Removed confusing error logs from test output
+- **Coverage Separation**: Coverage generation is now optional and platform-independent
+
+#### 📚 **Documentation**
+- **Cross-Platform Guide**: Updated documentation with platform-specific instructions
+- **Performance Notes**: Added performance improvement documentation
+- **CLI Usage**: Enhanced CLAUDE.md with better development workflow guidance
+
+#### 🔍 **Technical Details**
+- **Compatibility**: Maintains full backward compatibility with existing APIs
+- **Dependencies**: Updated to PivotPHP Core v1.1.0 from Packagist
+- **Testing**: 67 tests passing with 242 assertions
+- **Static Analysis**: PHPStan Level 8 compliance maintained
+- **Code Style**: 100% PSR-12 compliant
+
+#### 🎯 **Benefits**
+- **Faster Development**: Improved environment detection performance
+- **Better CI/CD**: Clean test outputs and exit codes
+- **Cross-Platform**: Works seamlessly on Windows, macOS, and Linux
+- **Production Ready**: Optimized for high-performance production environments
+
 ## [1.0.0] - 2025-07-07
 
 ### 🎉 **Initial Stable Release**
