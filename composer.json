@@ -53,7 +53,7 @@
     "test:feature": "phpunit --testsuite=Feature",
     "test:integration": "phpunit --testsuite=Integration",
     "test:database": "phpunit --testsuite=Database",
-    "test-coverage": "XDEBUG_MODE=coverage phpunit --coverage-html coverage --coverage-clover coverage.xml",
+    "test-coverage": "php scripts/test-coverage.php",
     "phpstan": "phpstan analyse src --level=9",
     "cs:check": "phpcs --standard=phpcs.xml --report=full",
     "cs:check:summary": "phpcs --standard=phpcs.xml --report=summary",

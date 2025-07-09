@@ -266,9 +266,24 @@ composer test:unit
 composer test:feature
 composer test:integration
 
-# Run with coverage
+# Run with coverage (cross-platform)
 composer test-coverage
+
+# Platform-specific alternatives:
+# Unix/Linux/macOS
+./scripts/test-coverage.sh
+# Windows CMD
+scripts\test-coverage.bat
+# PowerShell
+scripts\test-coverage.ps1
 ```
+
+### Cross-Platform Compatibility
+
+The project includes cross-platform scripts for coverage testing:
+- **Primary method**: `composer test-coverage` (works on all platforms)
+- **Alternative scripts**: Platform-specific scripts in `scripts/` directory
+- **Windows support**: Both CMD and PowerShell scripts included
 
 ## 📚 Documentation
 
