@@ -9,6 +9,7 @@
 
 # Testing
 .phpunit.cache/
+coverage/
 coverage-html/
 coverage.xml
 junit.xml
