@@ -2,6 +2,8 @@
 
 namespace PivotPHP\CycleORM\Monitoring;
 
+use PivotPHP\CycleORM\Helpers\EnvironmentHelper;
+
 /**
  * Coletor de métricas para Cycle ORM.
  */
@@ -76,7 +78,11 @@ class MetricsCollector
     public static function recordQueryFailure(string $query): void
     {
         self::$metrics['queries_failed']++;
-        error_log('Cycle ORM Query Failed: Query: ' . substr($query, 0, 100));
+
+        // Only log to error_log if not in testing environment
+        if (!EnvironmentHelper::isTesting()) {
+            error_log('Cycle ORM Query Failed: Query: ' . substr($query, 0, 100));
+        }
     }
 
     /**

@@ -1,12 +1,6 @@
 {
   "name": "pivotphp/cycle-orm",
   "description": "Robust and well-tested Cycle ORM integration for PivotPHP microframework with type safety and comprehensive testing",
-  "repositories": [
-    {
-      "type": "path",
-      "url": "../pivotphp-core"
-    }
-  ],
   "keywords": [
     "pivotphp",
     "cycle-orm",
@@ -29,7 +23,7 @@
   ],
   "require": {
     "php": "^8.1",
-    "pivotphp/core": "*@dev",
+    "pivotphp/core": "^1.1.0",
     "cycle/orm": "^2.10",
     "cycle/annotated": "^4.3",
     "cycle/migrations": "^4.2.5",
@@ -59,7 +53,7 @@
     "test:feature": "phpunit --testsuite=Feature",
     "test:integration": "phpunit --testsuite=Integration",
     "test:database": "phpunit --testsuite=Database",
-    "test-coverage": "phpunit --coverage-html coverage",
+    "test-coverage": "php scripts/test-coverage.php",
     "phpstan": "phpstan analyse src --level=9",
     "cs:check": "phpcs --standard=phpcs.xml --report=full",
     "cs:check:summary": "phpcs --standard=phpcs.xml --report=summary",

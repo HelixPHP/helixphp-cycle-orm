@@ -9,7 +9,6 @@
 - [Implementação Básica](./implementions/usage_basic.md)
 - [Implementação com Middleware](./implementions/usage_with_middleware.md)
 - [Middleware Customizado](./implementions/usage_with_custom_middleware.md)
-- [Padrões Valida Conceito](./examples/valida-conceito-patterns.md)
 
 ## 🔧 Documentação Técnica
 
