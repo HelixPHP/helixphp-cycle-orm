@@ -34,8 +34,8 @@ When developing locally with both pivotphp-core and pivotphp-cycle-orm:
 
 1. Clone both repositories in the same parent directory:
 ```bash
-git clone https://github.com/CAFernandes/pivotphp-core.git
-git clone https://github.com/CAFernandes/pivotphp-cycle-orm.git
+git clone https://github.com/PivotPHP/pivotphp-core.git
+git clone https://github.com/PivotPHP/pivotphp-cycle-orm.git
 ```
 
 2. Install dependencies:
