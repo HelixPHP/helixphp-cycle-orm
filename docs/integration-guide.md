@@ -368,10 +368,10 @@ $app->get('/', function ($req, $res) {
 
 // Rotas de usuários
 $app->get('/api/users', [$userController, 'index']);
-$app->get('/api/users/{id}', [$userController, 'show']);
+$app->get('/api/users/:id', [$userController, 'show']);
 $app->post('/api/users', [$userController, 'store']);
-$app->put('/api/users/{id}', [$userController, 'update']);
-$app->delete('/api/users/{id}', [$userController, 'destroy']);
+$app->put('/api/users/:id', [$userController, 'update']);
+$app->delete('/api/users/:id', [$userController, 'destroy']);
 
 // Health check
 $app->get('/health', function ($req, $res) {
